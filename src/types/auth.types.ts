@@ -17,7 +17,9 @@ export interface User {
   role: string;
 }
 
+/** Coincide con LoginOutput del backend: { accessToken, refreshToken, user }. */
 export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
   user: User;
-  token: string;
 }

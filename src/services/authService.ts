@@ -1,37 +1,22 @@
-import type { LoginCredentials, LoginResponse } from '../types/auth.types';
+import { api } from '../lib/axios';
+import type { ApiResponse } from '../types/api.types';
+import type { LoginCredentials, LoginResponse, User } from '../types/auth.types';
 
 /**
- * Servicio de autenticación.
- * TODO: Reemplazar la simulación con la llamada real usando axios desde lib/.
- *
- * Ejemplo con axios:
- *   import { api } from '../lib/axios';
- *   const { data } = await api.post<LoginResponse>('/auth/login', credentials);
- *   return data;
+ * Servicio de autenticación. Llama al backend real (Node/Express).
+ * Endpoints: POST /auth/login, GET /auth/me.
  */
 export const authService = {
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    // Simulación de delay de red
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Mock: en producción esto vendría de tu backend
-    if (credentials.email && credentials.password.length >= 6) {
-      return {
-        user: {
-          id: '1',
-          email: credentials.email,
-          name: 'María Gutiérrez',
-          role: 'admin',
-        },
-        token: 'mock-jwt-token',
-      };
-    }
-
-    throw new Error('Credenciales inválidas');
+    const { data } = await api.post<ApiResponse<LoginResponse>>('/auth/login', {
+      email: credentials.email,
+      password: credentials.password,
+    });
+    return data.data;
   },
 
-  async loginWithInstitutional(): Promise<LoginResponse> {
-    // Redirección a SSO institucional
-    throw new Error('No implementado todavía');
+  async me(): Promise<User> {
+    const { data } = await api.get<ApiResponse<User>>('/auth/me');
+    return data.data;
   },
 };

@@ -49,6 +49,15 @@ export const LoginForm = () => {
 
           {/* Formulario */}
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+            {errors.general && (
+              <div
+                role="alert"
+                className="rounded-lg border border-error/30 bg-error/5 px-4 py-3 text-sm text-error"
+              >
+                {errors.general}
+              </div>
+            )}
+
             <Input
               label="Correo electrónico"
               type="email"

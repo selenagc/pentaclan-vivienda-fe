@@ -1,9 +1,14 @@
 import { useState } from 'react';
-import { authService } from '../services/authService';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from './useAuth';
 import { isValidEmail } from '../utils/validators';
+import { getApiErrorMessage } from '../lib/axios';
 import type { LoginCredentials, LoginFormErrors } from '../types/auth.types';
 
 export const useLogin = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
   const [credentials, setCredentials] = useState<LoginCredentials>({
     email: '',
     password: '',
@@ -48,16 +53,12 @@ export const useLogin = () => {
     setErrors({});
 
     try {
-      const response = await authService.login(credentials);
-      // TODO: Guardar token y redirigir
-      console.log('Login exitoso:', response);
-      // Ejemplo: localStorage.setItem('token', response.token);
-      // navigate('/dashboard');
+      await login(credentials);
+      navigate('/inicio', { replace: true });
     } catch (error) {
       setErrors({
-        password: 'La contraseña es incorrecta.',
+        general: getApiErrorMessage(error, 'No se pudo iniciar sesión. Verifica tus credenciales.'),
       });
-      console.error(error);
     } finally {
       setIsLoading(false);
     }
