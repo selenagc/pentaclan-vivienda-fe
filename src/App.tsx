@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
 import UsersPage from './pages/UsersPage';
+import GeografiaDemoPage from './pages/GeografiaDemoPage';
 import ModulePlaceholder from './pages/ModulePlaceholder';
 import { ProtectedRoute } from './components/routing/ProtectedRoute';
 import { AppLayout } from './layouts/AppLayout';
@@ -16,6 +17,8 @@ function App() {
         <Route element={<AppLayout />}>
           <Route path="/inicio" element={<HomePage />} />
           <Route path="/usuarios" element={<UsersPage />} />
+          {/* Temporal: banco de pruebas del selector geográfico (PV-17). */}
+          <Route path="/geografia" element={<GeografiaDemoPage />} />
           <Route path="/proyectos" element={<ModulePlaceholder title="Proyectos" />} />
           <Route path="/beneficiarios" element={<ModulePlaceholder title="Beneficiarios" />} />
           <Route path="/reportes" element={<ModulePlaceholder title="Reportes" />} />

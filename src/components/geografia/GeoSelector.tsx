@@ -1,0 +1,183 @@
+import { Select } from '../ui/Select';
+import { useGeografia, type GeoLevel } from '../../hooks/useGeografia';
+import type { GeoSelection, GeoSelectionErrors } from '../../types/geografia.types';
+
+interface GeoSelectorProps {
+  /** Selección actual. El componente es controlado: no guarda estado propio. */
+  value: GeoSelection;
+  /** Recibe la selección completa ya con los reseteos en cascada aplicados. */
+  onChange: (value: GeoSelection) => void;
+  /** Errores de validación por campo, para pintarlos bajo cada select. */
+  errors?: GeoSelectionErrors;
+  /** Deshabilita los tres selects (p. ej. mientras se guarda el formulario). */
+  disabled?: boolean;
+  /** Marca los tres campos como requeridos. */
+  required?: boolean;
+  className?: string;
+}
+
+/** Entidad mínima que renderiza este selector. */
+interface GeoItem {
+  id: number;
+  nombre: string;
+}
+
+interface GeoFieldProps<T extends GeoItem> {
+  label: string;
+  level: GeoLevel<T>;
+  value: number | null;
+  onSelect: (id: number | null) => void;
+  /** `false` mientras no se haya elegido el nivel superior. */
+  hasParent: boolean;
+  /** Placeholder por estado. */
+  placeholders: { waiting: string; ready: string; empty: string };
+  error?: string;
+  disabled?: boolean;
+  required?: boolean;
+}
+
+/**
+ * Un nivel de la cascada. Traduce el estado del nivel (sin padre, cargando,
+ * error, vacío, listo) a un placeholder y al estado deshabilitado del select,
+ * y añade el botón de reintento cuando la carga falló.
+ */
+const GeoField = <T extends GeoItem>({
+  label,
+  level,
+  value,
+  onSelect,
+  hasParent,
+  placeholders,
+  error,
+  disabled,
+  required,
+}: GeoFieldProps<T>) => {
+  const { items, isLoading, error: loadError, isEmpty, retry } = level;
+
+  const placeholder = !hasParent
+    ? placeholders.waiting
+    : isLoading
+      ? 'Cargando…'
+      : loadError
+        ? 'No se pudo cargar'
+        : isEmpty
+          ? placeholders.empty
+          : placeholders.ready;
+
+  // Solo se puede elegir cuando hay padre, la carga terminó bien y hay opciones.
+  const isSelectable = hasParent && !isLoading && !loadError && !isEmpty;
+
+  return (
+    <div>
+      <Select
+        label={label}
+        options={items.map((item) => ({
+          value: String(item.id),
+          label: item.nombre,
+        }))}
+        placeholder={placeholder}
+        // Los ids del catálogo son números y el <select> nativo trabaja con
+        // cadenas: se convierte en ambos sentidos.
+        value={value === null ? '' : String(value)}
+        onChange={(event) => {
+          const raw = event.target.value;
+          onSelect(raw === '' ? null : Number(raw));
+        }}
+        error={error ?? loadError ?? undefined}
+        disabled={disabled || !isSelectable}
+        required={required}
+        aria-busy={isLoading}
+      />
+      {loadError && (
+        <button
+          type="button"
+          onClick={retry}
+          className="mt-1.5 text-xs font-medium text-brand-primary hover:underline"
+        >
+          Reintentar
+        </button>
+      )}
+    </div>
+  );
+};
+
+/**
+ * Selector en cascada Departamento → Provincia → Municipio del catálogo
+ * geográfico de Bolivia (PV-17).
+ *
+ * Es un componente controlado: el formulario que lo usa es dueño de la
+ * selección y la recibe entera en `onChange`, ya con los reseteos aplicados
+ * (cambiar el departamento limpia provincia y municipio; cambiar la provincia
+ * limpia el municipio).
+ *
+ * Los tres ids son opcionales (`null`) por defecto. Si municipio pasa a ser
+ * obligatorio (decisión D1 del ticket), esa validación la impone el formulario
+ * contenedor, no este componente.
+ */
+export const GeoSelector = ({
+  value,
+  onChange,
+  errors,
+  disabled,
+  required,
+  className = '',
+}: GeoSelectorProps) => {
+  const { departamentos, provincias, municipios } = useGeografia(value);
+
+  return (
+    <div className={`grid gap-4 md:grid-cols-3 ${className}`}>
+      <GeoField
+        label="Departamento"
+        level={departamentos}
+        value={value.departamentoId}
+        // Cambiar el departamento invalida los dos niveles inferiores.
+        onSelect={(departamentoId) =>
+          onChange({ departamentoId, provinciaId: null, municipioId: null })
+        }
+        hasParent
+        placeholders={{
+          waiting: 'Selecciona un departamento',
+          ready: 'Selecciona un departamento',
+          empty: 'No hay departamentos',
+        }}
+        error={errors?.departamentoId}
+        disabled={disabled}
+        required={required}
+      />
+
+      <GeoField
+        label="Provincia"
+        level={provincias}
+        value={value.provinciaId}
+        onSelect={(provinciaId) =>
+          onChange({ ...value, provinciaId, municipioId: null })
+        }
+        hasParent={value.departamentoId !== null}
+        placeholders={{
+          waiting: 'Elige primero un departamento',
+          ready: 'Selecciona una provincia',
+          empty: 'Sin provincias',
+        }}
+        error={errors?.provinciaId}
+        disabled={disabled}
+        required={required}
+      />
+
+      <GeoField
+        label="Municipio"
+        level={municipios}
+        value={value.municipioId}
+        onSelect={(municipioId) => onChange({ ...value, municipioId })}
+        hasParent={value.provinciaId !== null}
+        placeholders={{
+          waiting: 'Elige primero una provincia',
+          ready: 'Selecciona un municipio',
+          empty: 'Sin municipios',
+        }}
+        error={errors?.municipioId}
+        disabled={disabled}
+        required={required}
+      />
+    </div>
+  );
+};
