@@ -43,3 +43,28 @@ export function getApiErrorMessage(error: unknown, fallback = 'Ocurrió un error
   if (error instanceof Error) return error.message;
   return fallback;
 }
+
+/**
+ * Extrae los errores por campo de un VALIDATION_ERROR del backend
+ * (`error.details[]` con forma `{ path, message }`) para pintarlos bajo
+ * cada input del formulario. Devuelve un mapa { campo: mensaje }.
+ */
+export function getApiFieldErrors(error: unknown): Record<string, string> {
+  const fieldErrors: Record<string, string> = {};
+
+  if (axios.isAxiosError<ApiErrorResponse>(error)) {
+    const details = error.response?.data?.error?.details;
+    if (Array.isArray(details)) {
+      for (const detail of details) {
+        if (detail && typeof detail === 'object' && 'path' in detail && 'message' in detail) {
+          const { path, message } = detail as { path: unknown; message: unknown };
+          if (typeof path === 'string' && typeof message === 'string') {
+            fieldErrors[path] = message;
+          }
+        }
+      }
+    }
+  }
+
+  return fieldErrors;
+}

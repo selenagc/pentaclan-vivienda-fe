@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
+import UsersPage from './pages/UsersPage';
 import ModulePlaceholder from './pages/ModulePlaceholder';
 import { ProtectedRoute } from './components/routing/ProtectedRoute';
 import { AppLayout } from './layouts/AppLayout';
@@ -14,6 +15,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/inicio" element={<HomePage />} />
+          <Route path="/usuarios" element={<UsersPage />} />
           <Route path="/proyectos" element={<ModulePlaceholder title="Proyectos" />} />
           <Route path="/beneficiarios" element={<ModulePlaceholder title="Beneficiarios" />} />
           <Route path="/reportes" element={<ModulePlaceholder title="Reportes" />} />
