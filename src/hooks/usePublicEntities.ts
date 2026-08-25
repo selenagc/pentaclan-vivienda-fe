@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { entidadService } from '../services/entidadService';
+import { publicEntityService } from '../services/publicEntityService';
 import { getFriendlyErrorMessage } from '../constants/apiErrorMessages';
-import type { EntidadPublica } from '../types/entidad.types';
+import type { PublicEntity } from '../types/publicEntity.types';
 
-export interface UseEntidadesResult {
-  entidades: EntidadPublica[];
+export interface UsePublicEntitiesResult {
+  publicEntities: PublicEntity[];
   isLoading: boolean;
   /** Mensaje ya traducido al español, o `null` si no hubo error. */
   error: string | null;
@@ -24,8 +24,8 @@ export interface UseEntidadesResult {
  * Un catálogo vacío (`data: []`) es un estado legítimo —significa que no se ha
  * sembrado—, no un error: por eso `isEmpty` va aparte de `error`.
  */
-export const useEntidades = (): UseEntidadesResult => {
-  const [entidades, setEntidades] = useState<EntidadPublica[]>([]);
+export const usePublicEntities = (): UsePublicEntitiesResult => {
+  const [publicEntities, setPublicEntities] = useState<PublicEntity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -33,16 +33,16 @@ export const useEntidades = (): UseEntidadesResult => {
   useEffect(() => {
     let cancelled = false;
 
-    entidadService
+    publicEntityService
       .list()
       .then((items) => {
         if (cancelled) return;
-        setEntidades(items);
+        setPublicEntities(items);
         setError(null);
       })
       .catch((err: unknown) => {
         if (cancelled) return;
-        setEntidades([]);
+        setPublicEntities([]);
         setError(getFriendlyErrorMessage(err, 'No se pudieron cargar las entidades públicas.'));
       })
       .finally(() => {
@@ -61,10 +61,10 @@ export const useEntidades = (): UseEntidadesResult => {
   }, []);
 
   return {
-    entidades,
+    publicEntities,
     isLoading,
     error,
     retry,
-    isEmpty: !isLoading && error === null && entidades.length === 0,
+    isEmpty: !isLoading && error === null && publicEntities.length === 0,
   };
 };

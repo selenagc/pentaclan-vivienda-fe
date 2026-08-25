@@ -9,21 +9,21 @@
 
 import type { DataEnvelope } from './api.types';
 
-export interface Departamento {
+export interface Department {
   id: number;
-  nombre: string;
+  name: string;
 }
 
-export interface Provincia {
+export interface Province {
   id: number;
-  nombre: string;
-  departamentoId: number;
+  name: string;
+  departmentId: number;
 }
 
-export interface Municipio {
+export interface Municipality {
   id: number;
-  nombre: string;
-  provinciaId: number;
+  name: string;
+  provinceId: number;
 }
 
 /**
@@ -36,9 +36,9 @@ export type GeoResponse<T> = DataEnvelope<T[]>;
 
 /** Selección de la cascada. `null` = todavía sin elegir. */
 export interface GeoSelection {
-  departamentoId: number | null;
-  provinciaId: number | null;
-  municipioId: number | null;
+  departmentId: number | null;
+  provinceId: number | null;
+  municipalityId: number | null;
 }
 
 /** Errores de validación por campo, para pintarlos bajo cada select. */
@@ -46,7 +46,7 @@ export type GeoSelectionErrors = Partial<Record<keyof GeoSelection, string>>;
 
 /** Selección vacía, punto de partida de un formulario nuevo. */
 export const emptyGeoSelection: GeoSelection = {
-  departamentoId: null,
-  provinciaId: null,
-  municipioId: null,
+  departmentId: null,
+  provinceId: null,
+  municipalityId: null,
 };

@@ -1,12 +1,12 @@
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
-import { useEntidades } from '../../hooks/useEntidades';
-import { entidadLabel, formatNit } from '../../types/entidad.types';
+import { usePublicEntities } from '../../hooks/usePublicEntities';
+import { publicEntityLabel, formatTaxId } from '../../types/publicEntity.types';
 
-interface EntidadSelectorProps {
+interface PublicEntitySelectorProps {
   /** Id de la entidad elegida. `null` = todavía sin elegir. */
   value: number | null;
-  onChange: (entidadPublicaId: number | null) => void;
+  onChange: (publicEntityId: number | null) => void;
   /** Error de validación, para pintarlo bajo el select. */
   error?: string;
   disabled?: boolean;
@@ -17,24 +17,24 @@ interface EntidadSelectorProps {
 /**
  * Selector de entidad pública financiadora.
  *
- * Es un componente controlado: el formulario es dueño del `entidadPublicaId`
+ * Es un componente controlado: el formulario es dueño del `publicEntityId`
  * y es lo único que se persiste. El **NIT es derivado**: se rellena solo con
  * el de la entidad elegida y es de solo lectura, tal como en el mockup.
  *
  * El catálogo hoy tiene una sola entidad (AEVIVIENDA). Se deja como `<select>`
  * igual, para no rehacerlo cuando se cargue el catálogo real.
  */
-export const EntidadSelector = ({
+export const PublicEntitySelector = ({
   value,
   onChange,
   error,
   disabled,
   required,
   className = '',
-}: EntidadSelectorProps) => {
-  const { entidades, isLoading, error: loadError, isEmpty, retry } = useEntidades();
+}: PublicEntitySelectorProps) => {
+  const { publicEntities, isLoading, error: loadError, isEmpty, retry } = usePublicEntities();
 
-  const seleccionada = entidades.find((entidad) => entidad.id === value) ?? null;
+  const selected = publicEntities.find((publicEntity) => publicEntity.id === value) ?? null;
 
   const placeholder = isLoading
     ? 'Cargando…'
@@ -49,9 +49,9 @@ export const EntidadSelector = ({
       <div>
         <Select
           label="Entidad pública financiadora"
-          options={entidades.map((entidad) => ({
-            value: String(entidad.id),
-            label: entidadLabel(entidad),
+          options={publicEntities.map((publicEntity) => ({
+            value: String(publicEntity.id),
+            label: publicEntityLabel(publicEntity),
           }))}
           placeholder={placeholder}
           // Los ids del catálogo son números y el <select> nativo trabaja con
@@ -80,7 +80,7 @@ export const EntidadSelector = ({
       <Input
         label="NIT"
         // Derivado de la entidad, no editable: el backend no lo recibe.
-        value={seleccionada ? formatNit(seleccionada.nit) : ''}
+        value={selected ? formatTaxId(selected.taxId) : ''}
         placeholder="Se completa al elegir la entidad"
         readOnly
         tabIndex={-1}

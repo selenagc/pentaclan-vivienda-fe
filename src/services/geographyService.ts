@@ -1,19 +1,19 @@
 import { api } from '../lib/axios';
-import { DEPARTAMENTOS_KEY, geografiaCache } from '../lib/geografiaCache';
+import { DEPARTMENTS_KEY, geographyCache } from '../lib/geographyCache';
 import type {
-  Departamento,
+  Department,
   GeoResponse,
-  Municipio,
-  Provincia,
-} from '../types/geografia.types';
+  Municipality,
+  Province,
+} from '../types/geography.types';
 
 /**
  * Servicio del catálogo geográfico (PV-16). Solo lectura: el backend no
  * expone POST/PUT/DELETE (un POST cae en el middleware `notFound` y responde
  * 404 "Route not found", no 405).
  *
- * Endpoints: GET /departamentos, GET /departamentos/:id/provincias,
- * GET /provincias/:id/municipios. Todos exigen Bearer y los puede consumir
+ * Endpoints: GET /departments, GET /departments/:id/provinces,
+ * GET /provinces/:id/municipalities. Todos exigen Bearer y los puede consumir
  * cualquier rol. No aceptan paginación ni filtros: lo que se mande se ignora.
  * El orden viene siempre por `nombre` ASC desde el backend.
  *
@@ -21,11 +21,11 @@ import type {
  * `success`, de ahí `GeoResponse<T>` en vez de `ApiResponse<T>`.
  * Todas las respuestas pasan por la caché (ver geografiaCache.ts).
  */
-export const geografiaService = {
+export const geographyService = {
   /** Los 9 departamentos. Una sola petición por sesión. */
-  listDepartamentos(): Promise<Departamento[]> {
-    return geografiaCache.departamentos.get(DEPARTAMENTOS_KEY, async () => {
-      const { data } = await api.get<GeoResponse<Departamento>>('/departamentos');
+  listDepartments(): Promise<Department[]> {
+    return geographyCache.departments.get(DEPARTMENTS_KEY, async () => {
+      const { data } = await api.get<GeoResponse<Department>>('/departments');
       return data.data;
     });
   },
@@ -34,10 +34,10 @@ export const geografiaService = {
    * Provincias de un departamento. Si el departamento no existe el backend
    * devuelve 404 (decisión deliberada), no una lista vacía.
    */
-  listProvincias(departamentoId: number): Promise<Provincia[]> {
-    return geografiaCache.provincias.get(departamentoId, async () => {
-      const { data } = await api.get<GeoResponse<Provincia>>(
-        `/departamentos/${departamentoId}/provincias`,
+  listProvinces(departmentId: number): Promise<Province[]> {
+    return geographyCache.provinces.get(departmentId, async () => {
+      const { data } = await api.get<GeoResponse<Province>>(
+        `/departments/${departmentId}/provinces`,
       );
       return data.data;
     });
@@ -48,10 +48,10 @@ export const geografiaService = {
    * significa "la provincia existe pero no tiene municipios": es un estado
    * vacío, no un error. El 404 sigue significando "la provincia no existe".
    */
-  listMunicipios(provinciaId: number): Promise<Municipio[]> {
-    return geografiaCache.municipios.get(provinciaId, async () => {
-      const { data } = await api.get<GeoResponse<Municipio>>(
-        `/provincias/${provinciaId}/municipios`,
+  listMunicipalities(provinceId: number): Promise<Municipality[]> {
+    return geographyCache.municipalities.get(provinceId, async () => {
+      const { data } = await api.get<GeoResponse<Municipality>>(
+        `/provinces/${provinceId}/municipalities`,
       );
       return data.data;
     });

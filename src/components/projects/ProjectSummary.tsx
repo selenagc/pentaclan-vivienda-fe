@@ -1,53 +1,53 @@
 import type { ReactNode } from 'react';
-import { useGeografia } from '../../hooks/useGeografia';
-import { useEntidades } from '../../hooks/useEntidades';
-import type { GeoSelection } from '../../types/geografia.types';
+import { useGeography } from '../../hooks/useGeography';
+import { usePublicEntities } from '../../hooks/usePublicEntities';
+import type { GeoSelection } from '../../types/geography.types';
 
-interface ResumenProyectoProps {
-  nombre: string;
+interface ProjectSummaryProps {
+  name: string;
   geo: GeoSelection;
-  entidadPublicaId: number | null;
+  publicEntityId: number | null;
 }
 
 const iconClass = 'h-5 w-5';
 
-const IconoProyecto = (
+const ProjectIcon = (
   <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
   </svg>
 );
 
-const IconoUbicacion = (
+const LocationIcon = (
   <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
   </svg>
 );
 
-const IconoEntidad = (
+const PublicEntityIcon = (
   <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l9 4.5H3L12 3zM4.5 21h15M5.25 9.75v9m4.5-9v9m4.5-9v9m4.5-9v9" />
   </svg>
 );
 
-interface FilaProps {
-  icono: ReactNode;
-  etiqueta: string;
-  valor: string | null;
+interface RowProps {
+  icon: ReactNode;
+  label: string;
+  value: string | null;
 }
 
 /** Una fila del resumen. Si no hay valor todavía, se marca en gris. */
-const Fila = ({ icono, etiqueta, valor }: FilaProps) => (
+const Row = ({ icon, label, value }: RowProps) => (
   <div className="flex items-start gap-3">
     <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary">
-      {icono}
+      {icon}
     </span>
     <div className="min-w-0">
-      <p className="text-xs text-gray-500">{etiqueta}</p>
+      <p className="text-xs text-gray-500">{label}</p>
       <p
-        className={`text-sm font-semibold break-words ${valor ? 'text-gray-900' : 'text-gray-400 italic font-normal'}`}
+        className={`text-sm font-semibold break-words ${value ? 'text-gray-900' : 'text-gray-400 italic font-normal'}`}
       >
-        {valor ?? 'Sin definir'}
+        {value ?? 'Sin definir'}
       </p>
     </div>
   </div>
@@ -112,21 +112,21 @@ const Ilustracion = () => (
  * `geografiaService` y `entidadService` deduplican por clave, así que el panel
  * y los selectores comparten la misma respuesta.
  */
-export const ResumenProyecto = ({ nombre, geo, entidadPublicaId }: ResumenProyectoProps) => {
-  const { departamentos, provincias, municipios } = useGeografia(geo);
-  const { entidades } = useEntidades();
+export const ProjectSummary = ({ name, geo, publicEntityId }: ProjectSummaryProps) => {
+  const { departments, provinces, municipalities } = useGeography(geo);
+  const { publicEntities } = usePublicEntities();
 
-  const nombrePorId = (items: { id: number; nombre: string }[], id: number | null) =>
-    id === null ? null : (items.find((item) => item.id === id)?.nombre ?? null);
+  const nameById = (items: { id: number; name: string }[], id: number | null) =>
+    id === null ? null : (items.find((item) => item.id === id)?.name ?? null);
 
-  const departamento = nombrePorId(departamentos.items, geo.departamentoId);
-  const provincia = nombrePorId(provincias.items, geo.provinciaId);
-  const municipio = nombrePorId(municipios.items, geo.municipioId);
+  const department = nameById(departments.items, geo.departmentId);
+  const province = nameById(provinces.items, geo.provinceId);
+  const municipality = nameById(municipalities.items, geo.municipalityId);
 
   // Se muestra lo que haya: "La Paz → Murillo" mientras falte el municipio.
-  const ubicacion = [departamento, provincia, municipio].filter(Boolean).join(' → ') || null;
+  const location = [department, province, municipality].filter(Boolean).join(' → ') || null;
 
-  const entidad = nombrePorId(entidades, entidadPublicaId);
+  const publicEntity = nameById(publicEntities, publicEntityId);
 
   return (
     <aside className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -134,9 +134,9 @@ export const ResumenProyecto = ({ nombre, geo, entidadPublicaId }: ResumenProyec
       <div className="mt-2 mb-6 h-0.5 w-10 rounded bg-brand-primary" />
 
       <div className="space-y-5">
-        <Fila icono={IconoProyecto} etiqueta="Proyecto" valor={nombre.trim() || null} />
-        <Fila icono={IconoUbicacion} etiqueta="Ubicación" valor={ubicacion} />
-        <Fila icono={IconoEntidad} etiqueta="Entidad financiadora" valor={entidad} />
+        <Row icon={ProjectIcon} label="Proyecto" value={name.trim() || null} />
+        <Row icon={LocationIcon} label="Ubicación" value={location} />
+        <Row icon={PublicEntityIcon} label="Entidad financiadora" value={publicEntity} />
       </div>
 
       <div className="mt-6 overflow-hidden rounded-xl border border-gray-100">
