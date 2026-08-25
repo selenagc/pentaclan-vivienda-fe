@@ -7,6 +7,8 @@
  * El `nombre` tampoco es clave: "Cercado" se repite en varios departamentos.
  */
 
+import type { DataEnvelope } from './api.types';
+
 export interface Departamento {
   id: number;
   nombre: string;
@@ -25,13 +27,12 @@ export interface Municipio {
 }
 
 /**
- * Envelope de los endpoints de geografía. A diferencia del resto de la API
- * (`ApiResponse<T>` en api.types.ts), estos responden `{ data }` **sin**
- * `success`, por lo que no se puede reutilizar aquel tipo.
+ * Envoltorio de los endpoints de geografía: responden `{ data }` **sin**
+ * `success`. Es el caso general `DataEnvelope<T[]>` de api.types.ts, que
+ * comparten también entidades públicas y proyectos; el alias se conserva
+ * porque el servicio de geografía lo nombra en cada llamada.
  */
-export interface GeoResponse<T> {
-  data: T[];
-}
+export type GeoResponse<T> = DataEnvelope<T[]>;
 
 /** Selección de la cascada. `null` = todavía sin elegir. */
 export interface GeoSelection {

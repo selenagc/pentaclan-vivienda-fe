@@ -13,8 +13,25 @@ interface GeoSelectorProps {
   disabled?: boolean;
   /** Marca los tres campos como requeridos. */
   required?: boolean;
+  /**
+   * Dibuja una flecha entre nivel y nivel (Departamento → Provincia →
+   * Municipio) para hacer visible el orden de la cascada. Solo se ve a partir
+   * de `md`: en móvil los selects se apilan y la flecha estorbaría.
+   */
+  withArrows?: boolean;
   className?: string;
 }
+
+/** Separador decorativo entre dos niveles de la cascada. */
+const Flecha = () => (
+  <span
+    aria-hidden="true"
+    // `mt-9` lo baja hasta la altura del select, saltándose la etiqueta.
+    className="mt-9 hidden select-none text-gray-400 md:block"
+  >
+    →
+  </span>
+);
 
 /** Entidad mínima que renderiza este selector. */
 interface GeoItem {
@@ -120,12 +137,19 @@ export const GeoSelector = ({
   errors,
   disabled,
   required,
+  withArrows = false,
   className = '',
 }: GeoSelectorProps) => {
   const { departamentos, provincias, municipios } = useGeografia(value);
 
+  // Con flechas la rejilla alterna columna/flecha; sin ellas son tres columnas
+  // iguales. En móvil siempre se apila.
+  const gridClass = withArrows
+    ? 'grid gap-x-3 gap-y-4 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)]'
+    : 'grid gap-4 md:grid-cols-3';
+
   return (
-    <div className={`grid gap-4 md:grid-cols-3 ${className}`}>
+    <div className={`${gridClass} ${className}`}>
       <GeoField
         label="Departamento"
         level={departamentos}
@@ -145,6 +169,8 @@ export const GeoSelector = ({
         required={required}
       />
 
+      {withArrows && <Flecha />}
+
       <GeoField
         label="Provincia"
         level={provincias}
@@ -162,6 +188,8 @@ export const GeoSelector = ({
         disabled={disabled}
         required={required}
       />
+
+      {withArrows && <Flecha />}
 
       <GeoField
         label="Municipio"
