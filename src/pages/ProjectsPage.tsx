@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Table, type Column } from '../components/ui/Table';
+import { Pagination } from '../components/ui/Pagination';
 import { Button } from '../components/ui/Button';
 import { useProjects } from '../hooks/useProjects';
 import { useAuth } from '../hooks/useAuth';
@@ -19,12 +20,13 @@ const formatDate = (iso: string): string =>
  * Listado de proyectos.
  *
  * No hay acción de eliminar: el backend no expone `DELETE /projects/:id`.
- * La paginación, el orden y la búsqueda quedan para su ticket (el backend ya
- * los soporta; ver `ListProyectosParams`).
+ * El orden y la búsqueda quedan para su ticket: `useProjects` ya acepta los
+ * filtros (ver `ProjectFilters`), falta la UI que los controle.
  */
 export const ProjectsPage = () => {
   const navigate = useNavigate();
-  const { projects, isLoading, error } = useProjects();
+  const { projects, meta, page, limit, isLoading, error, goToPage, changeLimit } =
+    useProjects();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
 
@@ -81,13 +83,27 @@ export const ProjectsPage = () => {
           {error}
         </div>
       ) : (
-        <Table
-          columns={columns}
-          data={projects}
-          rowKey="id"
-          isLoading={isLoading}
-          emptyMessage="No hay proyectos registrados."
-        />
+        <>
+          <Table
+            columns={columns}
+            data={projects}
+            rowKey="id"
+            isLoading={isLoading}
+            emptyMessage="No hay proyectos registrados."
+          />
+          {meta && (
+            <Pagination
+              page={page}
+              totalPages={meta.totalPages}
+              total={meta.total}
+              limit={limit}
+              isLoading={isLoading}
+              onPageChange={goToPage}
+              onLimitChange={changeLimit}
+              itemLabel={{ singular: 'proyecto', plural: 'proyectos' }}
+            />
+          )}
+        </>
       )}
     </div>
   );
