@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import Container from '@mui/material/Container';
 import { Sidebar } from '../components/layout/Sidebar';
 import { Topbar } from '../components/layout/Topbar';
 import { navItems } from '../components/layout/navItems';
+import { CONTENT_MAX_WIDTH } from '../components/layout/contentWidth';
 
 /**
  * Plantilla principal del área autenticada: sidebar + topbar + contenido.
@@ -22,9 +24,12 @@ export const AppLayout = () => {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar title={title} onMenuClick={() => setSidebarOpen(true)} />
-        <main className="flex-1 px-4 py-6 sm:px-6">
+        {/* `Container` aporta el ancho máximo, el centrado y el relleno
+            horizontal responsivo (16px, 24px desde `sm`), que es el mismo que
+            tenían las clases `px-4 sm:px-6` que sustituye. */}
+        <Container component="main" maxWidth={CONTENT_MAX_WIDTH} className="flex-1 py-6">
           <Outlet />
-        </main>
+        </Container>
       </div>
     </div>
   );
