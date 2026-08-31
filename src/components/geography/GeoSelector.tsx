@@ -1,3 +1,4 @@
+import MuiButton from '@mui/material/Button';
 import { Select } from '../ui/Select';
 import { useGeography, type GeoLevel } from '../../hooks/useGeography';
 import type { GeoSelection, GeoSelectionErrors } from '../../types/geography.types';
@@ -112,13 +113,9 @@ const GeoField = <T extends GeoItem>({
         aria-busy={isLoading}
       />
       {loadError && (
-        <button
-          type="button"
-          onClick={retry}
-          className="mt-1.5 text-xs font-medium text-brand-primary hover:underline"
-        >
+        <MuiButton size="small" onClick={retry} sx={{ mt: 0.5 }}>
           Reintentar
-        </button>
+        </MuiButton>
       )}
     </div>
   );

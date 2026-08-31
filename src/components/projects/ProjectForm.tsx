@@ -1,4 +1,5 @@
 import type { FormEvent, ReactNode } from 'react';
+import Alert from '@mui/material/Alert';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { GeoSelector } from '../geography/GeoSelector';
@@ -138,12 +139,9 @@ export const ProjectForm = ({
       </div>
 
       {generalError && (
-        <div
-          role="alert"
-          className="mt-6 rounded-lg border border-error/30 bg-error/5 px-4 py-3 text-sm text-error"
-        >
+        <Alert severity="error" sx={{ mt: 3 }}>
           {generalError}
-        </div>
+        </Alert>
       )}
 
       <div className="mt-8 flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 sm:flex-row sm:justify-end">

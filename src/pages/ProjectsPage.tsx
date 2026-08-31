@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Alert from '@mui/material/Alert';
+import MuiButton from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
 import { Table, type Column } from '../components/ui/Table';
 import { Pagination } from '../components/ui/Pagination';
 import { Button } from '../components/ui/Button';
@@ -57,26 +60,20 @@ export const ProjectsPage = () => {
       header: '',
       align: 'right',
       render: (project) => (
-        <div className="flex justify-end gap-1">
-          <button
-            type="button"
-            onClick={() => setViewing(project)}
-            className="rounded-md px-2.5 py-1.5 text-sm font-medium text-brand-primary transition-colors hover:bg-brand-primary/5"
-            aria-label={`Ver ${project.name}`}
-          >
+        <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'flex-end' }}>
+          <MuiButton size="small" onClick={() => setViewing(project)} aria-label={`Ver ${project.name}`}>
             Ver
-          </button>
+          </MuiButton>
           {isAdmin && (
-            <button
-              type="button"
+            <MuiButton
+              size="small"
               onClick={() => setEditing(project)}
-              className="rounded-md px-2.5 py-1.5 text-sm font-medium text-brand-primary transition-colors hover:bg-brand-primary/5"
               aria-label={`Editar ${project.name}`}
             >
               Editar
-            </button>
+            </MuiButton>
           )}
-        </div>
+        </Stack>
       ),
     },
   ];
@@ -98,12 +95,7 @@ export const ProjectsPage = () => {
       </div>
 
       {error ? (
-        <div
-          role="alert"
-          className="rounded-xl border border-error/30 bg-error/5 px-4 py-3 text-sm text-error"
-        >
-          {error}
-        </div>
+        <Alert severity="error">{error}</Alert>
       ) : (
         <>
           <Table

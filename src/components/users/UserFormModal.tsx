@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import Alert from '@mui/material/Alert';
 import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
@@ -158,12 +159,7 @@ export const UserFormModal = ({ open, onClose, onSuccess, user }: UserFormModalP
     >
       <form id="user-form" onSubmit={handleSubmit} className="space-y-4" noValidate>
         {errors.general && (
-          <div
-            role="alert"
-            className="rounded-lg border border-error/30 bg-error/5 px-4 py-3 text-sm text-error"
-          >
-            {errors.general}
-          </div>
+          <Alert severity="error">{errors.general}</Alert>
         )}
 
         <Input

@@ -1,4 +1,9 @@
-import { useEffect, type ReactNode } from 'react';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import IconButton from '@mui/material/IconButton';
+import type { ReactNode } from 'react';
 
 interface ModalProps {
   /** Controla la visibilidad. */
@@ -13,16 +18,31 @@ interface ModalProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
+/**
+ * Anchos en píxeles en lugar de los `maxWidth` de MUI (444/600/900): son los
+ * que ya tenía la aplicación (`max-w-sm/md/lg` de Tailwind) y cambiarlos
+ * ensancharía todos los modales de golpe.
+ */
 const sizeMap = {
-  sm: 'max-w-sm',
-  md: 'max-w-md',
-  lg: 'max-w-lg',
+  sm: 384,
+  md: 448,
+  lg: 512,
 } as const;
 
+const CloseIcon = (
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);
+
 /**
- * Modal genérico y reutilizable: overlay, cierre con Esc / click fuera y
- * bloqueo del scroll del fondo mientras está abierto. Sirve para formularios
- * (crear/editar) y confirmaciones en cualquier módulo.
+ * Modal genérico y reutilizable, sobre el `Dialog` de MUI: overlay, cierre con
+ * Esc / click fuera, bloqueo del scroll del fondo y foco atrapado dentro
+ * mientras está abierto. Sirve para formularios (crear/editar) y
+ * confirmaciones en cualquier módulo.
+ *
+ * El cuerpo tiene scroll propio y la cabecera y el pie quedan fijos, para que
+ * un formulario largo no se salga de la pantalla.
  */
 export const Modal = ({
   open,
@@ -31,75 +51,26 @@ export const Modal = ({
   children,
   footer,
   size = 'md',
-}: ModalProps) => {
-  useEffect(() => {
-    if (!open) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    // Evita que el contenido de fondo se desplace mientras el modal está abierto.
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = '';
-    };
-  }, [open, onClose]);
-
-  if (!open) return null;
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      role="dialog"
-      aria-modal="true"
+}: ModalProps) => (
+  <Dialog
+    open={open}
+    onClose={onClose}
+    fullWidth
+    maxWidth={false}
+    slotProps={{ paper: { sx: { maxWidth: sizeMap[size] } } }}
+  >
+    <DialogTitle
+      component="h2"
+      sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}
     >
-      <div
-        className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      {title}
+      <IconButton onClick={onClose} aria-label="Cerrar" size="small" edge="end">
+        {CloseIcon}
+      </IconButton>
+    </DialogTitle>
 
-      {/* `max-h` + columna: la cabecera y el pie quedan fijos y solo el cuerpo
-          se desplaza cuando el contenido no cabe (p. ej. un formulario largo). */}
-      <div
-        className={`relative flex max-h-[90vh] w-full flex-col ${sizeMap[size]} rounded-xl bg-white shadow-xl`}
-      >
-        <div className="flex flex-shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Cerrar"
-            className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
-          >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
+    <DialogContent dividers>{children}</DialogContent>
 
-        <div className="overflow-y-auto px-6 py-5">{children}</div>
-
-        {footer && (
-          <div className="flex flex-shrink-0 justify-end gap-3 border-t border-gray-200 px-6 py-4">
-            {footer}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+    {footer && <DialogActions>{footer}</DialogActions>}
+  </Dialog>
+);

@@ -1,3 +1,4 @@
+import Alert from '@mui/material/Alert';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { Checkbox } from '../ui/Checkbox';
@@ -50,12 +51,7 @@ export const LoginForm = () => {
           {/* Formulario */}
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             {errors.general && (
-              <div
-                role="alert"
-                className="rounded-lg border border-error/30 bg-error/5 px-4 py-3 text-sm text-error"
-              >
-                {errors.general}
-              </div>
+              <Alert severity="error">{errors.general}</Alert>
             )}
 
             <Input
