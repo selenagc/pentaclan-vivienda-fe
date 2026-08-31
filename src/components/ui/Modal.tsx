@@ -63,10 +63,12 @@ export const Modal = ({
         aria-hidden="true"
       />
 
+      {/* `max-h` + columna: la cabecera y el pie quedan fijos y solo el cuerpo
+          se desplaza cuando el contenido no cabe (p. ej. un formulario largo). */}
       <div
-        className={`relative w-full ${sizeMap[size]} rounded-xl bg-white shadow-xl`}
+        className={`relative flex max-h-[90vh] w-full flex-col ${sizeMap[size]} rounded-xl bg-white shadow-xl`}
       >
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+        <div className="flex flex-shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
           <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
           <button
             type="button"
@@ -90,10 +92,10 @@ export const Modal = ({
           </button>
         </div>
 
-        <div className="px-6 py-5">{children}</div>
+        <div className="overflow-y-auto px-6 py-5">{children}</div>
 
         {footer && (
-          <div className="flex justify-end gap-3 border-t border-gray-200 px-6 py-4">
+          <div className="flex flex-shrink-0 justify-end gap-3 border-t border-gray-200 px-6 py-4">
             {footer}
           </div>
         )}

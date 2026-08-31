@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ProjectForm } from '../components/projects/ProjectForm';
 import { ProjectSummary } from '../components/projects/ProjectSummary';
-import { useCreateProject } from '../hooks/useCreateProject';
+import { useProjectForm } from '../hooks/useProjectForm';
 import { useAuth } from '../hooks/useAuth';
 
 /**
@@ -22,8 +22,10 @@ export const CreateProjectPage = () => {
     navigate('/proyectos');
   }, [navigate]);
 
-  const { values, setField, errors, generalError, isSubmitting, submit } =
-    useCreateProject(handleSuccess);
+  // Sin `project`, el mismo hook que usa el modal de edición crea uno nuevo.
+  const { values, setField, errors, generalError, isSubmitting, submit } = useProjectForm({
+    onSuccess: handleSuccess,
+  });
 
   if (!isAdmin) {
     return (
