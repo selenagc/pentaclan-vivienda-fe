@@ -4,7 +4,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { GeoSelector } from '../geography/GeoSelector';
 import { PublicEntitySelector } from '../public-entities/PublicEntitySelector';
-import { FormSection } from './FormSection';
+import { FormSection } from '../ui/FormSection';
 import type { ProjectFormErrors, ProjectFormValues } from '../../hooks/useProjectForm';
 
 interface ProjectFormProps {
