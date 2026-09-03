@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Table, type Column } from '../components/ui/Table';
+import { Pagination } from '../components/ui/Pagination';
 import { Button } from '../components/ui/Button';
 import { UserFormModal } from '../components/users/UserFormModal';
 import { ConfirmDeleteModal } from '../components/users/ConfirmDeleteModal';
@@ -20,7 +21,8 @@ const PlusIcon = (
  * se muestran a administradores (el backend además las protege con 403).
  */
 export const UsersPage = () => {
-  const { users, isLoading, error, refresh } = useUsers();
+  const { users, meta, page, limit, isLoading, error, refresh, goToPage, changeLimit } =
+    useUsers();
   const { user: currentUser } = useAuth();
   const isAdmin = currentUser?.role === 'admin';
 
@@ -104,13 +106,27 @@ export const UsersPage = () => {
           {error}
         </div>
       ) : (
-        <Table
-          columns={columns}
-          data={users}
-          rowKey="id"
-          isLoading={isLoading}
-          emptyMessage="No hay usuarios registrados."
-        />
+        <>
+          <Table
+            columns={columns}
+            data={users}
+            rowKey="id"
+            isLoading={isLoading}
+            emptyMessage="No hay usuarios registrados."
+          />
+          {meta && (
+            <Pagination
+              page={page}
+              totalPages={meta.totalPages}
+              total={meta.total}
+              limit={limit}
+              isLoading={isLoading}
+              onPageChange={goToPage}
+              onLimitChange={changeLimit}
+              itemLabel={{ singular: 'usuario', plural: 'usuarios' }}
+            />
+          )}
+        </>
       )}
 
       <UserFormModal

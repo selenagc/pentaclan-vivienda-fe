@@ -53,7 +53,9 @@ const alignMap = {
  * estados de carga y vacío) se controla por props para que el mismo componente
  * sirva en Proyectos, Beneficiarios, Reportes, etc.
  *
- * El ordenamiento y la paginación se incorporarán en sus propios tickets.
+ * No pagina por sí misma: los controles viven en `<Pagination>`, que se coloca
+ * debajo y se alimenta de `usePaginatedList`. El ordenamiento se incorporará
+ * en su propio ticket.
  */
 export function Table<T>({
   columns,
