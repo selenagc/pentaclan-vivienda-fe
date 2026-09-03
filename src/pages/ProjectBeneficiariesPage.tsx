@@ -18,8 +18,8 @@ const InfoIcon = (
  * Lo que sí cambia al entrar por aquí es la ficha: solo un beneficiario tiene
  * los dos diagnósticos, social y técnico.
  *
- * Hasta que exista la aprobación —su propio ticket— la lista sale vacía, y el
- * aviso lo explica en vez de dejar al usuario pensando que se perdieron datos.
+ * Las fichas llegan a esta lista al aprobarse desde *Solicitantes*; aquí no se
+ * dan de alta, y por eso el panel no tiene botón de crear.
  */
 export const ProjectBeneficiariesPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -32,15 +32,15 @@ export const ProjectBeneficiariesPage = () => {
         </span>
         <p className="text-sm text-gray-700">
           Un beneficiario es un solicitante cuya ficha fue{' '}
-          <span className="font-semibold">aprobada</span>. Solo aquí se levantan los diagnósticos
-          social y técnico.
+          <span className="font-semibold">aprobada</span> desde la pestaña de solicitantes. Solo
+          aquí se levantan los diagnósticos social y técnico.
         </p>
       </div>
 
       <ApplicationsTable
         projectId={projectId}
         section="beneficiarios"
-        status="approved"
+        statuses={['approved']}
         showStatus={false}
         emptyMessage="Todavía no hay fichas aprobadas en este proyecto."
         itemLabel={{ singular: 'beneficiario', plural: 'beneficiarios' }}

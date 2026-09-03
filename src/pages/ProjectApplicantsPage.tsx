@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { ApplicationsTable } from '../components/applications/ApplicationsTable';
 import { useAuth } from '../hooks/useAuth';
-import { CAN_WRITE_APPLICATIONS } from '../constants/applications';
+import { APPLICANT_STATUSES, CAN_WRITE_APPLICATIONS } from '../constants/applications';
 
 const PlusIcon = (
   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -18,14 +18,15 @@ const PlusIcon = (
  * siempre es *a* un proyecto, y su vivienda tiene que estar en el municipio
  * donde se ejecuta la obra. Entrar por el proyecto deja ese contexto fijado.
  *
- * ⚠️ **Pendiente de backend.** Al aprobarse, una ficha debería salir de esta
- * lista y aparecer solo en *Beneficiarios*, pero `GET /applications` acepta un
- * único `status` y no permite excluir uno: para pedir «todas menos las
- * aprobadas» hace falta que el endpoint admita varios estados (o un
- * `notStatus`). Filtrar aquí las filas ya recibidas no vale, porque el total y
- * las páginas los cuenta el servidor y quedarían descuadrados. Hoy no se nota
- * —ninguna ficha puede estar aprobada todavía—, pero hay que resolverlo antes
- * del ticket de aprobación.
+ * **Las aprobadas no salen aquí**: pasan a *Beneficiarios* y solo se ven allí.
+ * Se consigue pidiendo los otros cuatro estados (`APPLICANT_STATUSES`), no
+ * descartando filas ya recibidas: el `total` y las páginas los cuenta el
+ * servidor y filtrar en el cliente los descuadraría. Es la razón de que
+ * `GET /applications` acepte varios estados.
+ *
+ * Las rechazadas **sí** se quedan en esta lista, con su chip en rojo. No
+ * desaparecen del padrón: poder explicar un rechazo meses después es requisito
+ * de auditoría del programa.
  *
  * El proyecto no se pide aquí: lo carga `ProjectDetailPage` para la tarjeta de
  * cabecera, así que cambiar de pestaña no dispara la misma petición otra vez.
@@ -47,6 +48,7 @@ export const ProjectApplicantsPage = () => {
     <ApplicationsTable
       projectId={projectId}
       section="solicitantes"
+      statuses={APPLICANT_STATUSES}
       emptyMessage="Este proyecto todavía no tiene solicitantes."
       itemLabel={{ singular: 'solicitante', plural: 'solicitantes' }}
       action={

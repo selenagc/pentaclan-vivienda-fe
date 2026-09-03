@@ -21,8 +21,15 @@ interface ApplicationsTableProps {
   projectId: string | undefined;
   /** Pestaña que la muestra: fija la ruta de las fichas y a dónde vuelven. */
   section: ProjectSection;
-  /** Filtra por estado. `approved` es, literalmente, la lista de beneficiarios. */
-  status?: ApplicationStatus;
+  /**
+   * Estados que entran en la lista, en OR. `['approved']` es, literalmente,
+   * la lista de beneficiarios.
+   *
+   * El filtro lo aplica el servidor y no este componente porque el `total` y
+   * las páginas los cuenta él: descartar filas ya recibidas descuadraría el
+   * pie de la tabla.
+   */
+  statuses?: ApplicationStatus[];
   /** Oculta la columna de estado cuando el filtro ya lo fija para todas. */
   showStatus?: boolean;
   emptyMessage: string;
@@ -47,7 +54,7 @@ interface ApplicationsTableProps {
 export const ApplicationsTable = ({
   projectId,
   section,
-  status,
+  statuses,
   showStatus = true,
   emptyMessage,
   itemLabel,
@@ -55,7 +62,7 @@ export const ApplicationsTable = ({
 }: ApplicationsTableProps) => {
   const navigate = useNavigate();
   const { applications, meta, page, limit, isLoading, error, goToPage, changeLimit } =
-    useApplications({ projectId, status });
+    useApplications({ projectId, status: statuses });
 
   // La ficha se abre bajo la pestaña desde la que se entró, para que al volver
   // se caiga en la lista correcta y no siempre en solicitantes.
