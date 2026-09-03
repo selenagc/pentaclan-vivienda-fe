@@ -77,6 +77,9 @@ export const ApplicationFormPage = () => {
   );
   const isEditing = Boolean(applicationId);
   const listPath = `/proyectos/${projectId}/solicitantes`;
+  // Al corregir se vuelve a la ficha, que es de donde se entró; al registrar
+  // no hay ficha todavía, así que se vuelve al padrón.
+  const returnPath = isEditing ? `${listPath}/${applicationId}` : listPath;
 
   const {
     data: project,
@@ -92,12 +95,12 @@ export const ApplicationFormPage = () => {
   } = useResource(applicationService.getById, applicationId, 'No se pudo cargar la ficha.');
 
   const handleDone = useCallback(() => {
-    navigate(listPath);
-  }, [navigate, listPath]);
+    navigate(returnPath);
+  }, [navigate, returnPath]);
 
   const handleCancel = useCallback(() => {
-    navigate(listPath);
-  }, [navigate, listPath]);
+    navigate(returnPath);
+  }, [navigate, returnPath]);
 
   if (!canWrite) {
     return (
