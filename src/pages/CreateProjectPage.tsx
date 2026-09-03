@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ProyectoForm } from '../components/proyectos/ProyectoForm';
-import { ResumenProyecto } from '../components/proyectos/ResumenProyecto';
-import { useCrearProyecto } from '../hooks/useCrearProyecto';
+import { ProjectForm } from '../components/projects/ProjectForm';
+import { ProjectSummary } from '../components/projects/ProjectSummary';
+import { useCreateProject } from '../hooks/useCreateProject';
 import { useAuth } from '../hooks/useAuth';
 
 /**
@@ -13,7 +13,7 @@ import { useAuth } from '../hooks/useAuth';
  * resto), así que a un usuario sin permiso se le explica en vez de dejarle
  * llenar un formulario que va a fallar al enviar.
  */
-export const CrearProyectoPage = () => {
+export const CreateProjectPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
@@ -23,7 +23,7 @@ export const CrearProyectoPage = () => {
   }, [navigate]);
 
   const { values, setField, errors, generalError, isSubmitting, submit } =
-    useCrearProyecto(handleSuccess);
+    useCreateProject(handleSuccess);
 
   if (!isAdmin) {
     return (
@@ -54,7 +54,7 @@ export const CrearProyectoPage = () => {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
-        <ProyectoForm
+        <ProjectForm
           values={values}
           setField={setField}
           errors={errors}
@@ -64,14 +64,14 @@ export const CrearProyectoPage = () => {
           onCancel={() => navigate('/proyectos')}
         />
 
-        <ResumenProyecto
-          nombre={values.nombre}
+        <ProjectSummary
+          name={values.name}
           geo={values.geo}
-          entidadPublicaId={values.entidadPublicaId}
+          publicEntityId={values.publicEntityId}
         />
       </div>
     </div>
   );
 };
 
-export default CrearProyectoPage;
+export default CreateProjectPage;

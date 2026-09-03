@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import { geografiaService } from '../services/geografiaService';
+import { geographyService } from '../services/geographyService';
 import { getFriendlyErrorMessage } from '../constants/apiErrorMessages';
 import type {
-  Departamento,
+  Department,
   GeoSelection,
-  Municipio,
-  Provincia,
-} from '../types/geografia.types';
+  Municipality,
+  Province,
+} from '../types/geography.types';
 
 /** Estado de carga de uno de los tres niveles de la cascada. */
 export interface GeoLevel<T> {
@@ -20,10 +20,10 @@ export interface GeoLevel<T> {
   isEmpty: boolean;
 }
 
-export interface UseGeografiaResult {
-  departamentos: GeoLevel<Departamento>;
-  provincias: GeoLevel<Provincia>;
-  municipios: GeoLevel<Municipio>;
+export interface UseGeographyResult {
+  departments: GeoLevel<Department>;
+  provinces: GeoLevel<Province>;
+  municipalities: GeoLevel<Municipality>;
 }
 
 /**
@@ -119,24 +119,24 @@ const NO_PARENT = 0;
  * Cada nivel se pide una sola vez por padre gracias a la caché del servicio,
  * aunque el hook se monte varias veces.
  */
-export const useGeografia = (selection: GeoSelection): UseGeografiaResult => {
-  const departamentos = useGeoLevel<Departamento>(
+export const useGeography = (selection: GeoSelection): UseGeographyResult => {
+  const departments = useGeoLevel<Department>(
     NO_PARENT,
-    () => geografiaService.listDepartamentos(),
+    () => geographyService.listDepartments(),
     'No se pudieron cargar los departamentos.',
   );
 
-  const provincias = useGeoLevel<Provincia>(
-    selection.departamentoId,
-    (id) => geografiaService.listProvincias(id),
+  const provinces = useGeoLevel<Province>(
+    selection.departmentId,
+    (id) => geographyService.listProvinces(id),
     'No se pudieron cargar las provincias.',
   );
 
-  const municipios = useGeoLevel<Municipio>(
-    selection.provinciaId,
-    (id) => geografiaService.listMunicipios(id),
+  const municipalities = useGeoLevel<Municipality>(
+    selection.provinceId,
+    (id) => geographyService.listMunicipalities(id),
     'No se pudieron cargar los municipios.',
   );
 
-  return { departamentos, provincias, municipios };
+  return { departments, provinces, municipalities };
 };

@@ -1,6 +1,6 @@
 import { Select } from '../ui/Select';
-import { useGeografia, type GeoLevel } from '../../hooks/useGeografia';
-import type { GeoSelection, GeoSelectionErrors } from '../../types/geografia.types';
+import { useGeography, type GeoLevel } from '../../hooks/useGeography';
+import type { GeoSelection, GeoSelectionErrors } from '../../types/geography.types';
 
 interface GeoSelectorProps {
   /** Selección actual. El componente es controlado: no guarda estado propio. */
@@ -36,7 +36,7 @@ const Flecha = () => (
 /** Entidad mínima que renderiza este selector. */
 interface GeoItem {
   id: number;
-  nombre: string;
+  name: string;
 }
 
 interface GeoFieldProps<T extends GeoItem> {
@@ -90,7 +90,7 @@ const GeoField = <T extends GeoItem>({
         label={label}
         options={items.map((item) => ({
           value: String(item.id),
-          label: item.nombre,
+          label: item.name,
         }))}
         placeholder={placeholder}
         // Los ids del catálogo son números y el <select> nativo trabaja con
@@ -140,7 +140,7 @@ export const GeoSelector = ({
   withArrows = false,
   className = '',
 }: GeoSelectorProps) => {
-  const { departamentos, provincias, municipios } = useGeografia(value);
+  const { departments, provinces, municipalities } = useGeography(value);
 
   // Con flechas la rejilla alterna columna/flecha; sin ellas son tres columnas
   // iguales. En móvil siempre se apila.
@@ -152,11 +152,11 @@ export const GeoSelector = ({
     <div className={`${gridClass} ${className}`}>
       <GeoField
         label="Departamento"
-        level={departamentos}
-        value={value.departamentoId}
+        level={departments}
+        value={value.departmentId}
         // Cambiar el departamento invalida los dos niveles inferiores.
-        onSelect={(departamentoId) =>
-          onChange({ departamentoId, provinciaId: null, municipioId: null })
+        onSelect={(departmentId) =>
+          onChange({ departmentId, provinceId: null, municipalityId: null })
         }
         hasParent
         placeholders={{
@@ -164,7 +164,7 @@ export const GeoSelector = ({
           ready: 'Selecciona un departamento',
           empty: 'No hay departamentos',
         }}
-        error={errors?.departamentoId}
+        error={errors?.departmentId}
         disabled={disabled}
         required={required}
       />
@@ -173,18 +173,18 @@ export const GeoSelector = ({
 
       <GeoField
         label="Provincia"
-        level={provincias}
-        value={value.provinciaId}
-        onSelect={(provinciaId) =>
-          onChange({ ...value, provinciaId, municipioId: null })
+        level={provinces}
+        value={value.provinceId}
+        onSelect={(provinceId) =>
+          onChange({ ...value, provinceId, municipalityId: null })
         }
-        hasParent={value.departamentoId !== null}
+        hasParent={value.departmentId !== null}
         placeholders={{
           waiting: 'Elige primero un departamento',
           ready: 'Selecciona una provincia',
           empty: 'Sin provincias',
         }}
-        error={errors?.provinciaId}
+        error={errors?.provinceId}
         disabled={disabled}
         required={required}
       />
@@ -193,16 +193,16 @@ export const GeoSelector = ({
 
       <GeoField
         label="Municipio"
-        level={municipios}
-        value={value.municipioId}
-        onSelect={(municipioId) => onChange({ ...value, municipioId })}
-        hasParent={value.provinciaId !== null}
+        level={municipalities}
+        value={value.municipalityId}
+        onSelect={(municipalityId) => onChange({ ...value, municipalityId })}
+        hasParent={value.provinceId !== null}
         placeholders={{
           waiting: 'Elige primero una provincia',
           ready: 'Selecciona un municipio',
           empty: 'Sin municipios',
         }}
-        error={errors?.municipioId}
+        error={errors?.municipalityId}
         disabled={disabled}
         required={required}
       />

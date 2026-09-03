@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { GeoSelector } from '../components/geografia/GeoSelector';
+import { GeoSelector } from '../components/geography/GeoSelector';
 import { Button } from '../components/ui/Button';
-import { emptyGeoSelection, type GeoSelection } from '../types/geografia.types';
+import { emptyGeoSelection, type GeoSelection } from '../types/geography.types';
 
 /**
  * Banco de pruebas de <GeoSelector />.
@@ -11,18 +11,18 @@ import { emptyGeoSelection, type GeoSelection } from '../types/geografia.types';
  * cuanto haya un formulario real que la consuma, esta página y su ruta
  * `/geografia` se eliminan.
  */
-const GeografiaDemoPage = () => {
+const GeographyDemoPage = () => {
   const [selection, setSelection] = useState<GeoSelection>(emptyGeoSelection);
 
   // Sin nada elegido no hay nada que limpiar.
-  const hasSelection = selection.departamentoId !== null;
+  const hasSelection = selection.departmentId !== null;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-gray-900">Catálogo geográfico</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Selector en cascada Departamento → Provincia → Municipio.
+          Selector en cascada Department → Province → Municipality.
         </p>
       </div>
 
@@ -44,4 +44,4 @@ const GeografiaDemoPage = () => {
   );
 };
 
-export default GeografiaDemoPage;
+export default GeographyDemoPage;
