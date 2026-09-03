@@ -19,6 +19,12 @@ interface GeoSelectorProps {
    * de `md`: en móvil los selects se apilan y la flecha estorbaría.
    */
   withArrows?: boolean;
+  /**
+   * `row` (por defecto) coloca los tres selects en fila a partir de `md`;
+   * `stacked` los apila siempre, para contenedores estrechos como un modal,
+   * donde tres columnas dejarían los nombres largos recortados.
+   */
+  layout?: 'row' | 'stacked';
   className?: string;
 }
 
@@ -138,15 +144,19 @@ export const GeoSelector = ({
   disabled,
   required,
   withArrows = false,
+  layout = 'row',
   className = '',
 }: GeoSelectorProps) => {
   const { departments, provinces, municipalities } = useGeography(value);
 
   // Con flechas la rejilla alterna columna/flecha; sin ellas son tres columnas
-  // iguales. En móvil siempre se apila.
-  const gridClass = withArrows
-    ? 'grid gap-x-3 gap-y-4 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)]'
-    : 'grid gap-4 md:grid-cols-3';
+  // iguales. En móvil siempre se apila, igual que con `layout: 'stacked'`.
+  const gridClass =
+    layout === 'stacked'
+      ? 'grid gap-4'
+      : withArrows
+        ? 'grid gap-x-3 gap-y-4 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)]'
+        : 'grid gap-4 md:grid-cols-3';
 
   return (
     <div className={`${gridClass} ${className}`}>

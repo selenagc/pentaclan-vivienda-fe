@@ -29,6 +29,23 @@ const emptyValues: ProjectFormValues = {
   publicEntityId: null,
 };
 
+/**
+ * Valores iniciales al editar. La cascada se rellena entera desde el propio
+ * proyecto: el backend anida municipio → provincia → departamento en la
+ * respuesta, así que no hace falta consultar el catálogo para saber dónde
+ * está el proyecto.
+ */
+const valuesFromProject = (project: Project): ProjectFormValues => ({
+  name: project.name,
+  contractNo: project.contractNo,
+  geo: {
+    departmentId: project.municipality.department.id,
+    provinceId: project.municipality.province.id,
+    municipalityId: project.municipality.id,
+  },
+  publicEntityId: project.publicEntity.id,
+});
+
 /** Límites del validator del backend, replicados para avisar antes de enviar. */
 const MAX_NAME = 200;
 const MAX_CONTRACT_NO = 50;
@@ -74,21 +91,40 @@ function validar(values: ProjectFormValues): ProjectFormErrors {
   return errors;
 }
 
+export interface UseProjectFormOptions {
+  /** Se invoca con el proyecto ya guardado. */
+  onSuccess: (project: Project) => void;
+  /**
+   * Proyecto a editar. Si se omite, el formulario crea uno nuevo. Lo que
+   * decide el modo es este dato, no una bandera aparte: así no puede quedar
+   * un `mode: 'edit'` sin proyecto que editar.
+   */
+  project?: Project | null;
+}
+
 /**
- * Estado y envío del formulario de creación de proyectos.
+ * Estado y envío del formulario de proyecto, tanto al crear como al editar.
  *
  * Dos cosas que este hook resuelve y que no son evidentes:
  *
  * 1. **Envía exactamente los cuatro campos del contrato.** El backend valida
  *    con `stripUnknown: true`, así que cualquier extra se descartaría en
- *    silencio devolviendo un 201 engañoso.
+ *    silencio devolviendo un 201 engañoso. Al editar es más delicado todavía:
+ *    `id`, `userId`, `createdAt` y `updatedAt` están `forbidden()` y devuelven
+ *    400, así que reenviar el proyecto recibido tal cual no funciona.
  * 2. **Ancla el 409 al campo `contractNo`.** Ese error llega sin `details[]`
  *    y con el texto en inglés ("Nro de contrato already in use"), de modo que
  *    `getApiFieldErrors` no lo asocia a ningún campo: hay que detectarlo por
  *    status. Es el error más probable de esta pantalla.
+ *
+ * No guarda ninguna sincronización con `project`: quien lo usa desde un modal
+ * lo desmonta al cerrarlo (ver `ProjectFormModal`), así que cada apertura
+ * arranca de los datos reales del proyecto.
  */
-export const useCreateProject = (onSuccess: (project: Project) => void) => {
-  const [values, setValues] = useState<ProjectFormValues>(emptyValues);
+export const useProjectForm = ({ onSuccess, project = null }: UseProjectFormOptions) => {
+  const [values, setValues] = useState<ProjectFormValues>(
+    project ? valuesFromProject(project) : emptyValues,
+  );
   const [errors, setErrors] = useState<ProjectFormErrors>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -129,8 +165,12 @@ export const useCreateProject = (onSuccess: (project: Project) => void) => {
         municipalityId: values.geo.municipalityId as number,
       };
 
-      const project = await projectService.create(input);
-      onSuccess(project);
+      // Al editar se manda el mismo cuerpo: el backend acepta un PUT parcial,
+      // pero enviarlo entero evita tener que diferenciar qué cambió.
+      const saved = project
+        ? await projectService.update(project.id, input)
+        : await projectService.create(input);
+      onSuccess(saved);
     } catch (err) {
       const status = axios.isAxiosError(err) ? err.response?.status : undefined;
 
@@ -152,11 +192,16 @@ export const useCreateProject = (onSuccess: (project: Project) => void) => {
         return;
       }
 
-      setGeneralError(getFriendlyErrorMessage(err, 'No se pudo crear el proyecto.'));
+      setGeneralError(
+        getFriendlyErrorMessage(
+          err,
+          project ? 'No se pudo guardar el proyecto.' : 'No se pudo crear el proyecto.',
+        ),
+      );
     } finally {
       setIsSubmitting(false);
     }
-  }, [values, onSuccess]);
+  }, [values, onSuccess, project]);
 
   return { values, setField, errors, generalError, isSubmitting, submit };
 };

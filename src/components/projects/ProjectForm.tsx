@@ -1,10 +1,10 @@
-import type { FormEvent } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { GeoSelector } from '../geography/GeoSelector';
 import { PublicEntitySelector } from '../public-entities/PublicEntitySelector';
 import { FormSection } from './FormSection';
-import type { ProjectFormErrors, ProjectFormValues } from '../../hooks/useCreateProject';
+import type { ProjectFormErrors, ProjectFormValues } from '../../hooks/useProjectForm';
 
 interface ProjectFormProps {
   values: ProjectFormValues;
@@ -15,6 +15,15 @@ interface ProjectFormProps {
   isSubmitting: boolean;
   onSubmit: () => void;
   onCancel: () => void;
+  /** Texto del botón de envío. Por defecto, el de la pantalla de creación. */
+  submitLabel?: string;
+  submitIcon?: ReactNode;
+  /**
+   * `card` (por defecto) se pinta como tarjeta propia, para la pantalla de
+   * creación. `plain` quita el marco y el relleno, porque dentro de un modal
+   * el contenedor ya los aporta y se verían dos tarjetas encajadas.
+   */
+  variant?: 'card' | 'plain';
 }
 
 const CreateIcon = (
@@ -24,10 +33,12 @@ const CreateIcon = (
 );
 
 /**
- * Formulario de creación de proyecto, en las tres secciones del mockup.
+ * Formulario de proyecto, en las tres secciones del mockup. Sirve igual para
+ * crear (pantalla completa) y para editar (modal): lo que cambia son
+ * `submitLabel` y `variant`, porque los campos del contrato son los mismos.
  *
  * Es presentacional: el estado, la validación y el envío viven en
- * `useCrearProyecto`.
+ * `useProjectForm`.
  *
  * ⚠️ Lo que se ve aquí es exactamente lo que el backend guarda. *Descripción*
  * y *Estado del proyecto* aparecían en el mockup pero el módulo de proyectos
@@ -44,6 +55,9 @@ export const ProjectForm = ({
   isSubmitting,
   onSubmit,
   onCancel,
+  submitLabel = 'Crear proyecto',
+  submitIcon = CreateIcon,
+  variant = 'card',
 }: ProjectFormProps) => {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -56,7 +70,11 @@ export const ProjectForm = ({
       // La validación la hacemos nosotros, en español: el navegador se queda
       // al margen para que sus burbujas no se adelanten a nuestros mensajes.
       noValidate
-      className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8"
+      className={
+        variant === 'card'
+          ? 'rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8'
+          : ''
+      }
     >
       <div className="space-y-6">
         <FormSection stepNumber={1} title="Información del proyecto" withDivider={false}>
@@ -100,7 +118,8 @@ export const ProjectForm = ({
             }}
             disabled={isSubmitting}
             required
-            withArrows
+            withArrows={variant === 'card'}
+            layout={variant === 'card' ? 'row' : 'stacked'}
           />
           <p className="mt-3 text-xs text-gray-500">
             Selección en cascada: Departamento → Provincia → Municipio. Se registra el municipio.
@@ -137,8 +156,8 @@ export const ProjectForm = ({
         >
           Cancelar
         </Button>
-        <Button type="submit" fullWidth={false} isLoading={isSubmitting} icon={CreateIcon}>
-          Crear proyecto
+        <Button type="submit" fullWidth={false} isLoading={isSubmitting} icon={submitIcon}>
+          {submitLabel}
         </Button>
       </div>
     </form>
