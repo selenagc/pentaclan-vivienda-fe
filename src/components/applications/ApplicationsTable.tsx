@@ -14,10 +14,13 @@ import {
   type Application,
   type ApplicationStatus,
 } from '../../types/application.types';
+import type { ProjectSection } from './applicationOutlet';
 
 interface ApplicationsTableProps {
   /** Proyecto del que cuelgan las fichas. Viene de la URL. */
   projectId: string | undefined;
+  /** Pestaña que la muestra: fija la ruta de las fichas y a dónde vuelven. */
+  section: ProjectSection;
   /** Filtra por estado. `approved` es, literalmente, la lista de beneficiarios. */
   status?: ApplicationStatus;
   /** Oculta la columna de estado cuando el filtro ya lo fija para todas. */
@@ -43,6 +46,7 @@ interface ApplicationsTableProps {
  */
 export const ApplicationsTable = ({
   projectId,
+  section,
   status,
   showStatus = true,
   emptyMessage,
@@ -53,8 +57,10 @@ export const ApplicationsTable = ({
   const { applications, meta, page, limit, isLoading, error, goToPage, changeLimit } =
     useApplications({ projectId, status });
 
+  // La ficha se abre bajo la pestaña desde la que se entró, para que al volver
+  // se caiga en la lista correcta y no siempre en solicitantes.
   const openDetail = (application: Application) =>
-    navigate(`/proyectos/${projectId}/solicitantes/${application.id}`);
+    navigate(`/proyectos/${projectId}/${section}/${application.id}`);
 
   const columns: Column<Application>[] = [
     {

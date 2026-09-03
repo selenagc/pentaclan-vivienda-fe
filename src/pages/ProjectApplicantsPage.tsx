@@ -13,10 +13,19 @@ const PlusIcon = (
 /**
  * Pestaña *Solicitantes* del proyecto: `/proyectos/:projectId/solicitantes`.
  *
- * Es el padrón completo, en cualquier estado. Cuelga del proyecto y no del
- * menú lateral porque una postulación no existe suelta: siempre es *a* un
- * proyecto, y su vivienda tiene que estar en el municipio donde se ejecuta la
- * obra. Entrar por el proyecto deja ese contexto fijado.
+ * Es el padrón de quienes postularon y todavía no son beneficiarios. Cuelga
+ * del proyecto y no del menú lateral porque una postulación no existe suelta:
+ * siempre es *a* un proyecto, y su vivienda tiene que estar en el municipio
+ * donde se ejecuta la obra. Entrar por el proyecto deja ese contexto fijado.
+ *
+ * ⚠️ **Pendiente de backend.** Al aprobarse, una ficha debería salir de esta
+ * lista y aparecer solo en *Beneficiarios*, pero `GET /applications` acepta un
+ * único `status` y no permite excluir uno: para pedir «todas menos las
+ * aprobadas» hace falta que el endpoint admita varios estados (o un
+ * `notStatus`). Filtrar aquí las filas ya recibidas no vale, porque el total y
+ * las páginas los cuenta el servidor y quedarían descuadrados. Hoy no se nota
+ * —ninguna ficha puede estar aprobada todavía—, pero hay que resolverlo antes
+ * del ticket de aprobación.
  *
  * El proyecto no se pide aquí: lo carga `ProjectDetailPage` para la tarjeta de
  * cabecera, así que cambiar de pestaña no dispara la misma petición otra vez.
@@ -37,6 +46,7 @@ export const ProjectApplicantsPage = () => {
   return (
     <ApplicationsTable
       projectId={projectId}
+      section="solicitantes"
       emptyMessage="Este proyecto todavía no tiene solicitantes."
       itemLabel={{ singular: 'solicitante', plural: 'solicitantes' }}
       action={

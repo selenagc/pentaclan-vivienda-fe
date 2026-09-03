@@ -3,14 +3,27 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
 import Skeleton from '@mui/material/Skeleton';
 import { ApplicationForm } from '../components/applications/ApplicationForm';
+import type { ProjectSection } from '../components/applications/applicationOutlet';
+import { useProjectOutlet } from '../components/projects/projectOutlet';
 import { useApplicationForm } from '../hooks/useApplicationForm';
 import { useResource } from '../hooks/useResource';
 import { useAuth } from '../hooks/useAuth';
-import { projectService } from '../services/projectService';
 import { applicationService } from '../services/applicationService';
 import { CAN_WRITE_APPLICATIONS } from '../constants/applications';
 import type { Application } from '../types/application.types';
 import type { Project } from '../types/project.types';
+
+const BackIcon = (
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+  </svg>
+);
+
+const FormIcon = (
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+  </svg>
+);
 
 interface LoadedFormProps {
   project: Project;
@@ -51,41 +64,50 @@ const LoadedForm = ({ project, application, onDone, onCancel }: LoadedFormProps)
   );
 };
 
+interface ApplicationFormPageProps {
+  /** Pestaña desde la que se abrió: fija a dónde vuelve al guardar o cancelar. */
+  section: ProjectSection;
+}
+
 /**
- * Alta y corrección de un solicitante, en su propia ruta:
+ * Alta y corrección de un solicitante, **dentro** del detalle del proyecto:
  * `/proyectos/:projectId/solicitantes/nuevo` y `.../:applicationId/editar`.
  *
- * En pantalla propia y no en un modal porque el formulario son cuatro bloques
- * —titular, cónyuge, vivienda y presentación— y dentro de un modal quedarían
- * apretados en un móvil, que es donde se captura en campo. De paso, la
- * dirección es enlazable: se puede retomar una ficha a medio revisar.
+ * No saca al usuario del proyecto: se abre como una pantalla dentro de la
+ * contenedora, con la tarjeta del proyecto y sus pestañas todavía arriba y un
+ * *volver* propio. Registrar a alguien no es cambiar de sitio, es hacer algo
+ * dentro del proyecto en el que ya se estaba.
+ *
+ * Sigue siendo el bloque ancho de siempre —titular, cónyuge, vivienda y
+ * presentación— y no un modal: dentro de uno quedarían apretados en un móvil,
+ * que es donde se captura en campo. Y la dirección es enlazable: se puede
+ * retomar una ficha a medio revisar.
+ *
+ * El proyecto llega por el contexto del `<Outlet />`, ya cargado por la
+ * pantalla contenedora, así que este formulario no lo vuelve a pedir.
  *
  * Registrar y corregir es de `admin`, `social_lead` y `technical_lead`; el
  * backend responde 403 al resto, así que a quien no tiene permiso se le
  * explica en vez de dejarle llenar un formulario que va a fallar al enviar.
  */
-export const ApplicationFormPage = () => {
+export const ApplicationFormPage = ({ section }: ApplicationFormPageProps) => {
   const { projectId, applicationId } = useParams<{
     projectId: string;
     applicationId?: string;
   }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { project, isLoadingProject } = useProjectOutlet();
 
   const canWrite = CAN_WRITE_APPLICATIONS.includes(
     user?.role as (typeof CAN_WRITE_APPLICATIONS)[number],
   );
   const isEditing = Boolean(applicationId);
-  const listPath = `/proyectos/${projectId}/solicitantes`;
+  const listPath = `/proyectos/${projectId}/${section}`;
   // Al corregir se vuelve a la ficha, que es de donde se entró; al registrar
   // no hay ficha todavía, así que se vuelve al padrón.
   const returnPath = isEditing ? `${listPath}/${applicationId}` : listPath;
-
-  const {
-    data: project,
-    isLoading: isLoadingProject,
-    error: projectError,
-  } = useResource(projectService.getById, projectId, 'No se pudo cargar el proyecto.');
+  const returnLabel = isEditing ? 'Volver a la ficha' : `Volver a ${section}`;
 
   // `applicationId` es undefined en el alta: el hook no pide nada y no carga.
   const {
@@ -94,59 +116,66 @@ export const ApplicationFormPage = () => {
     error: applicationError,
   } = useResource(applicationService.getById, applicationId, 'No se pudo cargar la ficha.');
 
-  const handleDone = useCallback(() => {
+  const goBack = useCallback(() => {
     navigate(returnPath);
   }, [navigate, returnPath]);
 
-  const handleCancel = useCallback(() => {
-    navigate(returnPath);
-  }, [navigate, returnPath]);
+  const header = (
+    <div className="space-y-3">
+      <Link
+        to={returnPath}
+        className="inline-flex items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-brand-primary"
+      >
+        {BackIcon}
+        {returnLabel}
+      </Link>
+
+      <div className="flex items-center gap-3">
+        <span
+          aria-hidden="true"
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary"
+        >
+          {FormIcon}
+        </span>
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">
+            {isEditing ? 'Corregir ficha del solicitante' : 'Registrar solicitante'}
+          </h2>
+          <p className="text-sm text-gray-500">Titular, cónyuge y vivienda a mejorar.</p>
+        </div>
+      </div>
+    </div>
+  );
 
   if (!canWrite) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-8 text-center">
-        <h2 className="text-lg font-semibold text-gray-900">
-          No tienes permisos para registrar solicitantes
-        </h2>
-        <p className="mt-2 text-sm text-gray-500">
-          Registrar y corregir fichas es trabajo de campo: lo hacen el administrador y los líderes
-          social y técnico.
-        </p>
-        <Link
-          to={listPath}
-          className="mt-4 inline-block text-sm font-medium text-brand-primary hover:underline"
-        >
-          Volver al listado
-        </Link>
+      <div className="space-y-4">
+        {header}
+        <div className="rounded-xl border border-gray-200 bg-white p-8 text-center">
+          <h3 className="text-lg font-semibold text-gray-900">
+            No tienes permisos para registrar solicitantes
+          </h3>
+          <p className="mt-2 text-sm text-gray-500">
+            Registrar y corregir fichas es trabajo de campo: lo hacen el administrador y los
+            líderes social y técnico.
+          </p>
+        </div>
       </div>
     );
   }
 
   // Sin proyecto no hay municipio con el que validar la vivienda, y sin la
-  // ficha no se puede corregir: en ambos casos el formulario no se pinta.
-  const loadError = projectError ?? applicationError;
+  // ficha no se puede corregir: en ambos casos el formulario no se pinta. Un
+  // fallo al cargar el proyecto lo muestra la pantalla contenedora, que ni
+  // siquiera llega a montar esto.
   const isLoading = isLoadingProject || isLoadingApplication;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-          {isEditing ? 'Corregir ficha del solicitante' : 'Registrar solicitante'}
-        </h2>
-        <p className="mt-1 text-sm text-gray-500">
-          {project
-            ? `${project.name} · Nº ${project.contractNo}`
-            : 'Titular, cónyuge y vivienda a mejorar.'}
-        </p>
-      </div>
+    <div className="space-y-4">
+      {header}
 
-      {loadError ? (
-        <>
-          <Alert severity="error">{loadError}</Alert>
-          <Link to={listPath} className="text-sm font-medium text-brand-primary hover:underline">
-            Volver al listado
-          </Link>
-        </>
+      {applicationError ? (
+        <Alert severity="error">{applicationError}</Alert>
       ) : isLoading || !project ? (
         <div className="rounded-xl border border-gray-200 bg-white p-6 sm:p-8">
           <Skeleton variant="text" width="40%" height={32} />
@@ -156,8 +185,8 @@ export const ApplicationFormPage = () => {
         <LoadedForm
           project={project}
           application={application}
-          onDone={handleDone}
-          onCancel={handleCancel}
+          onDone={goBack}
+          onCancel={goBack}
         />
       )}
     </div>

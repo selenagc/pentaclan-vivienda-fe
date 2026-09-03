@@ -7,6 +7,7 @@ import {
   ProjectInfoCardSkeleton,
 } from '../components/projects/ProjectInfoCard';
 import { ProjectFormModal } from '../components/projects/ProjectFormModal';
+import type { ProjectOutletContext } from '../components/projects/projectOutlet';
 import { useResource } from '../hooks/useResource';
 import { useAuth } from '../hooks/useAuth';
 import { projectService } from '../services/projectService';
@@ -20,17 +21,18 @@ const BackIcon = (
 /**
  * Detalle de un proyecto: `/proyectos/:projectId`.
  *
- * Es el marco de todo lo que cuelga del proyecto —la tarjeta con sus datos
- * arriba y una barra de pestañas debajo— y el panel de la pestaña activa se
- * pinta en el `<Outlet />`. Sustituye a los tres botones que tenía cada fila
- * del listado (ver, editar y solicitantes) por uno solo: *Ver* trae aquí.
+ * Es la pantalla contenedora de todo el módulo: la tarjeta con los datos del
+ * proyecto arriba, la barra de pestañas debajo, y en el `<Outlet />` lo que
+ * toque —una lista, una ficha o un formulario—. Nada de eso se lleva al
+ * usuario fuera: registrar un solicitante abre una pantalla *dentro* de esta,
+ * con su propio «volver», y la cabecera sigue diciendo en qué proyecto está.
  *
  * Cada pestaña es una ruta hija, no un `useState`: así la dirección de la
  * pestaña se puede compartir y recargar, el botón *atrás* funciona, y
  * `/proyectos/:id/solicitantes` sigue siendo la misma URL que ya existía.
  *
- * El proyecto se pide **una vez, aquí**. Los paneles solo necesitan el
- * `projectId` de la URL, así que cambiar de pestaña no repite la petición.
+ * El proyecto se pide **una vez, aquí**, y baja por el contexto del `<Outlet />`
+ * a quien lo necesite (el formulario). Cambiar de pestaña no lo repite.
  */
 export const ProjectDetailPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -56,11 +58,13 @@ export const ProjectDetailPage = () => {
     [projectId],
   );
 
+  const outletContext: ProjectOutletContext = { project, isLoadingProject: isLoading };
+
   return (
     <div className="space-y-4">
       <Link
         to="/proyectos"
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-brand-primary"
       >
         {BackIcon}
         Volver a proyectos
@@ -83,7 +87,7 @@ export const ProjectDetailPage = () => {
               `projectId` de la URL, así que la tabla carga en paralelo con la
               tarjeta en vez de después de ella. */}
           <RouteTabs tabs={tabs} ariaLabel="Secciones del proyecto" />
-          <Outlet />
+          <Outlet context={outletContext} />
         </>
       )}
 

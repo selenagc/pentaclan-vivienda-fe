@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
@@ -9,12 +10,47 @@ import ProjectApplicantsPage from './pages/ProjectApplicantsPage';
 import ProjectBeneficiariesPage from './pages/ProjectBeneficiariesPage';
 import ApplicationDetailPage from './pages/ApplicationDetailPage';
 import ApplicationDataPage from './pages/ApplicationDataPage';
+import ApplicationDiagnosisPage from './pages/ApplicationDiagnosisPage';
 import ApplicationFormPage from './pages/ApplicationFormPage';
 import GeographyDemoPage from './pages/GeographyDemoPage';
 import ModulePlaceholder from './pages/ModulePlaceholder';
-import { DiagnosisPlaceholder } from './components/applications/DiagnosisPlaceholder';
 import { ProtectedRoute } from './components/routing/ProtectedRoute';
 import { AppLayout } from './layouts/AppLayout';
+import type { ProjectSection } from './components/applications/applicationOutlet';
+
+/**
+ * Las rutas de una ficha, iguales bajo las dos pestañas que llevan a ella.
+ *
+ * Se repiten a propósito bajo *solicitantes* y bajo *beneficiarios*: son la
+ * misma ficha, pero entrar por una u otra es lo que mantiene marcada la
+ * pestaña de origen y lo que hace que *volver* devuelva a la lista correcta.
+ *
+ * Van con la ruta completa (`solicitantes/:applicationId`) y no anidadas bajo
+ * un `<Route path="solicitantes">` sin `element`: esa ruta intermedia pintaría
+ * un `<Outlet />` propio, y como el contexto del outlet lo fija quien lo
+ * renderiza, el proyecto que `ProjectDetailPage` pasa a sus hijos se perdería
+ * antes de llegar al formulario.
+ *
+ * Los dos diagnósticos se montan siempre, aunque solo un beneficiario los
+ * tenga: la página explica por qué están vacíos en vez de dejar la dirección
+ * rota si alguien la escribe o la tiene guardada.
+ */
+const applicationRoutes = (section: ProjectSection) => (
+  <Fragment key={section}>
+    <Route
+      path={`${section}/:applicationId`}
+      element={<ApplicationDetailPage section={section} />}
+    >
+      <Route index element={<ApplicationDataPage />} />
+      <Route path="diagnostico-social" element={<ApplicationDiagnosisPage kind="social" />} />
+      <Route path="diagnostico-tecnico" element={<ApplicationDiagnosisPage kind="technical" />} />
+    </Route>
+    <Route
+      path={`${section}/:applicationId/editar`}
+      element={<ApplicationFormPage section={section} />}
+    />
+  </Fragment>
+);
 
 function App() {
   return (
@@ -32,59 +68,30 @@ function App() {
           <Route path="/proyectos/nuevo" element={<CreateProjectPage />} />
 
           {/* Detalle del proyecto: la tarjeta con sus datos y una pestaña por
-              cada cosa que cuelga de él. Cada pestaña es una ruta hija para que
-              su dirección se pueda compartir y el botón *atrás* funcione. Las
-              secciones futuras (documentos, seguimiento…) se añaden aquí y en
-              la lista de pestañas de `ProjectDetailPage`. */}
+              cada cosa que cuelga de él. **Todo** lo del proyecto se abre aquí
+              dentro —listas, fichas y formularios—, así que la cabecera y las
+              pestañas nunca desaparecen y siempre se sabe en qué proyecto se
+              está trabajando. */}
           <Route path="/proyectos/:projectId" element={<ProjectDetailPage />}>
             <Route index element={<Navigate to="solicitantes" replace />} />
+
             {/* Los solicitantes cuelgan del proyecto: una postulación siempre
                 es *a* un proyecto, y su vivienda debe estar en el municipio
                 donde se ejecuta la obra. La ruta deja ese contexto fijado. */}
             <Route path="solicitantes" element={<ProjectApplicantsPage />} />
+            {/* `nuevo` gana a `:applicationId` porque el router prioriza los
+                segmentos estáticos sobre los dinámicos. */}
+            <Route
+              path="solicitantes/nuevo"
+              element={<ApplicationFormPage section="solicitantes" />}
+            />
+            {applicationRoutes('solicitantes')}
+
             {/* Beneficiarios no es otro recurso: es este mismo padrón filtrado
-                por estado `approved`. */}
+                por estado `approved`. No se dan de alta aquí, se llega por
+                aprobación. */}
             <Route path="beneficiarios" element={<ProjectBeneficiariesPage />} />
-          </Route>
-
-          {/* El formulario va a pantalla completa, fuera de las pestañas: son
-              cuatro bloques largos y se captura en campo, muchas veces en un
-              móvil. `nuevo` gana a `:applicationId` porque el router prioriza
-              los segmentos estáticos sobre los dinámicos. */}
-          <Route
-            path="/proyectos/:projectId/solicitantes/nuevo"
-            element={<ApplicationFormPage />}
-          />
-          <Route
-            path="/proyectos/:projectId/solicitantes/:applicationId/editar"
-            element={<ApplicationFormPage />}
-          />
-
-          {/* Ficha del solicitante: datos generales y los dos diagnósticos,
-              que hoy solo reservan su sitio. */}
-          <Route
-            path="/proyectos/:projectId/solicitantes/:applicationId"
-            element={<ApplicationDetailPage />}
-          >
-            <Route index element={<ApplicationDataPage />} />
-            <Route
-              path="diagnostico-social"
-              element={
-                <DiagnosisPlaceholder
-                  title="Diagnóstico social"
-                  description="La evaluación socioeconómica del hogar, que levanta el líder social."
-                />
-              }
-            />
-            <Route
-              path="diagnostico-tecnico"
-              element={
-                <DiagnosisPlaceholder
-                  title="Diagnóstico técnico"
-                  description="El estado constructivo de la vivienda, que levanta el líder técnico."
-                />
-              }
-            />
+            {applicationRoutes('beneficiarios')}
           </Route>
 
           <Route path="/beneficiarios" element={<ModulePlaceholder title="Beneficiarios" />} />

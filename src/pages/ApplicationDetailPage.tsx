@@ -7,7 +7,10 @@ import {
   ApplicantInfoCardSkeleton,
 } from '../components/applications/ApplicantInfoCard';
 import { ConfirmDeleteApplicationModal } from '../components/applications/ConfirmDeleteApplicationModal';
-import type { ApplicationOutletContext } from '../components/applications/applicationOutlet';
+import type {
+  ApplicationOutletContext,
+  ProjectSection,
+} from '../components/applications/applicationOutlet';
 import { useResource } from '../hooks/useResource';
 import { useAuth } from '../hooks/useAuth';
 import { applicationService } from '../services/applicationService';
@@ -19,22 +22,32 @@ const BackIcon = (
   </svg>
 );
 
+const SECTION_LABELS: Record<ProjectSection, string> = {
+  solicitantes: 'solicitantes',
+  beneficiarios: 'beneficiarios',
+};
+
+interface ApplicationDetailPageProps {
+  /** Pestaña desde la que se entró: fija a dónde vuelve y cuál queda marcada. */
+  section: ProjectSection;
+}
+
 /**
- * Ficha de un solicitante: `/proyectos/:projectId/solicitantes/:applicationId`.
+ * Ficha de una postulación, dentro del contenedor del proyecto.
  *
- * Repite la estructura del detalle del proyecto —tarjeta de cabecera con las
- * acciones, pestañas debajo— porque es el mismo gesto un nivel más abajo: se
- * entra desde el padrón haciendo clic en la fila.
+ * **Las pestañas dependen del estado.** Un solicitante tiene solo sus datos:
+ * lo que se capturó al registrarlo. Los dos diagnósticos —social y técnico—
+ * son del beneficiario, es decir de la ficha ya aprobada, así que hasta
+ * entonces no se muestran: ofrecerlos antes daría a entender que se pueden
+ * levantar, y el trámite no funciona así.
  *
- * Las pestañas son las tres partes de la evaluación: los datos que se
- * capturaron al registrar y los dos diagnósticos, social y técnico, que se
- * levantan después. Los dos últimos se montan vacíos desde ahora para que el
- * sitio quede reservado y su ticket solo tenga que rellenar el panel.
+ * Con una sola sección tampoco se dibuja la barra de pestañas: una pestaña
+ * suelta no navega a ningún sitio y solo añade ruido.
  *
  * La ficha se pide **una vez, aquí**, y baja a las pestañas por el contexto
  * del `<Outlet />`: cambiar de pestaña no repite la petición.
  */
-export const ApplicationDetailPage = () => {
+export const ApplicationDetailPage = ({ section }: ApplicationDetailPageProps) => {
   const { projectId, applicationId } = useParams<{
     projectId: string;
     applicationId: string;
@@ -47,7 +60,7 @@ export const ApplicationDetailPage = () => {
     user?.role as (typeof CAN_WRITE_APPLICATIONS)[number],
   );
 
-  const listPath = `/proyectos/${projectId}/solicitantes`;
+  const listPath = `/proyectos/${projectId}/${section}`;
   const basePath = `${listPath}/${applicationId}`;
 
   const { data: application, isLoading, error } = useResource(
@@ -58,23 +71,28 @@ export const ApplicationDetailPage = () => {
 
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const isBeneficiary = application?.status === 'approved';
+
   const tabs = useMemo<RouteTab[]>(
-    () => [
-      { label: 'Datos generales', to: basePath },
-      { label: 'Diagnóstico social', to: `${basePath}/diagnostico-social` },
-      { label: 'Diagnóstico técnico', to: `${basePath}/diagnostico-tecnico` },
-    ],
-    [basePath],
+    () =>
+      isBeneficiary
+        ? [
+            { label: 'Datos generales', to: basePath },
+            { label: 'Diagnóstico social', to: `${basePath}/diagnostico-social` },
+            { label: 'Diagnóstico técnico', to: `${basePath}/diagnostico-tecnico` },
+          ]
+        : [],
+    [basePath, isBeneficiary],
   );
 
   return (
     <div className="space-y-4">
       <Link
         to={listPath}
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-brand-primary"
       >
         {BackIcon}
-        Volver a solicitantes
+        Volver a {SECTION_LABELS[section]}
       </Link>
 
       {error ? (
@@ -89,10 +107,11 @@ export const ApplicationDetailPage = () => {
             onDelete={isAdmin ? () => setIsDeleting(true) : undefined}
           />
 
-          {/* Aquí sí se espera a la ficha: los tres paneles la necesitan, y
-              montarlos antes obligaría a cada uno a manejar el caso nulo. */}
-          <RouteTabs tabs={tabs} ariaLabel="Secciones de la ficha" />
-          <Outlet context={{ application } satisfies ApplicationOutletContext} />
+          {tabs.length > 0 && <RouteTabs tabs={tabs} ariaLabel="Secciones de la ficha" />}
+
+          {/* Aquí sí se espera a la ficha: los paneles la necesitan, y montarlos
+              antes obligaría a cada uno a manejar el caso nulo. */}
+          <Outlet context={{ application, section } satisfies ApplicationOutletContext} />
         </>
       )}
 
