@@ -18,9 +18,10 @@ import type { Property } from './property.types';
 /**
  * Estados de la postulación.
  *
- * En PV-30 el backend solo escribe `pending`: no hay endpoint que apruebe ni
- * rechace, eso llega con PV-31. Los cinco valores se declaran desde ahora
- * porque el listado ya acepta filtrar por cualquiera de ellos.
+ * `approved` y `rejected` los escriben `POST /applications/:id/approve` y
+ * `/reject`. `under_review` y `withdrawn` existen en la base pero todavía no
+ * tienen endpoint que los fije: se listan porque el filtro los acepta y una
+ * ficha podría llegar con ellos desde otra vía.
  */
 export type ApplicationStatus =
   | 'pending'
@@ -109,7 +110,11 @@ export interface Application {
   project: ApplicationProject;
   /** Auditoría: nombre del usuario que la registró. No llega su id. */
   userName: string;
-  /** Los tres son nulos mientras nadie decida. Los llena PV-31. */
+  /**
+   * Los tres son nulos mientras nadie decida, y se llenan juntos al aprobar o
+   * rechazar. `rejectionReason` solo viaja con `rejected`: un beneficiario lo
+   * tiene siempre en null.
+   */
   decidedAt: string | null;
   decidedByName: string | null;
   rejectionReason: string | null;
@@ -179,7 +184,8 @@ export interface RegisterApplicationInput {
  *    vivienda distinta va `propertyId`, no `property`.
  *
  * `status` no está: aprobar o rechazar tiene sus propias reglas y su propia
- * auditoría (PV-31), no es una edición de formulario. Enviarlo da 400.
+ * auditoría (`POST /applications/:id/approve` y `/reject`), no es una edición
+ * de formulario. Enviarlo da 400.
  */
 export interface UpdateApplicationInput {
   person?: Partial<PersonInput>;
@@ -187,6 +193,18 @@ export interface UpdateApplicationInput {
   propertyId?: string;
   property?: Partial<PropertyInput>;
   submittedAt?: string;
+}
+
+/**
+ * Cuerpo del POST /applications/:id/reject.
+ *
+ * El motivo es obligatorio y el backend lo exige: un rechazo sin explicación
+ * es una fila que nadie puede justificar seis meses después, que es cuando
+ * llega la auditoría. Aprobar, en cambio, no lleva cuerpo.
+ */
+export interface RejectApplicationInput {
+  /** Máximo 500 caracteres (el largo de la columna). */
+  rejectionReason: string;
 }
 
 /** Query params de GET /applications. */
@@ -200,8 +218,15 @@ export interface ListApplicationsParams {
   /** Busca por nombres, apellidos o número de documento del titular. */
   search?: string;
   projectId?: string;
-  /** `approved` es la lista de beneficiarios del proyecto. */
-  status?: ApplicationStatus;
+  /**
+   * Uno o varios estados, en OR. Ausente no filtra.
+   *
+   * Admite lista porque las dos pestañas del padrón salen de este endpoint:
+   * los beneficiarios son `approved` y los solicitantes son todos los demás.
+   * Esa segunda lista no se puede armar filtrando las filas ya recibidas: el
+   * `total` y las páginas los cuenta el servidor y quedarían descuadrados.
+   */
+  status?: ApplicationStatus | ApplicationStatus[];
   /** Municipio **de la vivienda**, no de la persona. */
   municipalityId?: number;
 }

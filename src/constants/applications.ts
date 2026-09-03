@@ -65,3 +65,36 @@ export const SEX_OPTIONS = (Object.keys(SEX_LABELS) as Sex[]).map((value) => ({
  * ejecuta.
  */
 export const CAN_WRITE_APPLICATIONS = ['admin', 'social_lead', 'technical_lead'] as const;
+
+/**
+ * Quién puede aprobar o rechazar. Deja fuera a los dos líderes **a propósito**:
+ * ellos levantan la ficha en campo y el supervisor la decide. Separar quién
+ * registra de quién aprueba es control interno del programa, no una omisión.
+ */
+export const CAN_DECIDE_APPLICATIONS = ['admin', 'project_supervisor'] as const;
+
+/**
+ * Estados desde los que todavía se puede decidir. El resto son terminales:
+ * volver sobre una decisión pisaría el rastro de quién la tomó, así que el
+ * backend responde 409 y aquí ni se ofrecen los botones.
+ */
+export const DECIDABLE_STATUSES: ApplicationStatus[] = ['pending', 'under_review'];
+
+/**
+ * Lo que muestra la pestaña *Solicitantes*: todo menos los aprobados, que
+ * tienen su propia pestaña.
+ *
+ * Se enumeran los estados en vez de excluir uno porque el endpoint filtra por
+ * inclusión. Y se filtra en el servidor y no aquí porque el `total` y las
+ * páginas los cuenta él: descartar filas ya recibidas descuadraría el pie de
+ * la tabla.
+ */
+export const APPLICANT_STATUSES: ApplicationStatus[] = [
+  'pending',
+  'under_review',
+  'rejected',
+  'withdrawn',
+];
+
+/** Largo de `applications.rejection_reason` en la base. */
+export const REJECTION_REASON_MAX_LENGTH = 500;

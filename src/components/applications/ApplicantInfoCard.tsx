@@ -12,6 +12,18 @@ import {
   type Application,
 } from '../../types/application.types';
 
+const CheckIcon = (
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+  </svg>
+);
+
+const XIcon = (
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);
+
 const EditIcon = (
   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
     <path
@@ -63,6 +75,10 @@ interface ApplicantInfoCardProps {
   onEdit?: () => void;
   /** Abre la baja. Se omite para quien no es admin. */
   onDelete?: () => void;
+  /** Abre la aprobación. Se omite si no puede decidir o la ficha ya se decidió. */
+  onApprove?: () => void;
+  /** Abre el rechazo, con las mismas condiciones que la aprobación. */
+  onReject?: () => void;
 }
 
 /**
@@ -75,9 +91,22 @@ interface ApplicantInfoCardProps {
  *
  * Dar de baja es solo de admin: un líder que se equivoca la pide, no la
  * ejecuta (el backend responde 403 igualmente).
+ *
+ * **Aprobar y rechazar van primero y separados del resto.** No son otra forma
+ * de editar: son la decisión que convierte al solicitante en beneficiario, y
+ * quien las ve no es quien registra —los líderes levantan la ficha, el
+ * supervisor la decide—. El separador vertical marca esa frontera para que
+ * *Aprobar* no se pulse por inercia al ir a *Editar*.
  */
-export const ApplicantInfoCard = ({ application, onEdit, onDelete }: ApplicantInfoCardProps) => {
+export const ApplicantInfoCard = ({
+  application,
+  onEdit,
+  onDelete,
+  onApprove,
+  onReject,
+}: ApplicantInfoCardProps) => {
   const name = personDisplayName(application.person);
+  const canDecide = Boolean(onApprove || onReject);
 
   return (
     <Card>
@@ -105,8 +134,21 @@ export const ApplicantInfoCard = ({ application, onEdit, onDelete }: ApplicantIn
           </div>
         </div>
 
-        {(onEdit || onDelete) && (
-          <div className="flex flex-wrap gap-2">
+        {(onEdit || onDelete || canDecide) && (
+          <div className="flex flex-wrap items-center gap-2">
+            {onApprove && (
+              <Button fullWidth={false} icon={CheckIcon} onClick={onApprove}>
+                Aprobar
+              </Button>
+            )}
+            {onReject && (
+              <Button variant="outline" fullWidth={false} icon={XIcon} onClick={onReject}>
+                Rechazar
+              </Button>
+            )}
+            {canDecide && (onEdit || onDelete) && (
+              <span aria-hidden="true" className="mx-1 hidden h-6 w-px bg-gray-200 sm:block" />
+            )}
             {onEdit && (
               <Button variant="outline" fullWidth={false} icon={EditIcon} onClick={onEdit}>
                 Editar
