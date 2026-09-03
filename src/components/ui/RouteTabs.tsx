@@ -30,7 +30,9 @@ const covers = (pathname: string, to: string): boolean =>
  *
  * Cuando varias pestañas cubren la ruta gana la más específica, que es el caso
  * de una pestaña índice —la ficha del solicitante— conviviendo con sus
- * secciones (`.../diagnostico-social`).
+ * secciones (`.../diagnostico-social`). Que una pestaña siga marcada mientras
+ * se mira una ficha o se llena un formulario es deliberado: son pantallas
+ * *dentro* de ella.
  */
 export const RouteTabs = ({ tabs, ariaLabel }: RouteTabsProps) => {
   const { pathname } = useLocation();
@@ -40,7 +42,7 @@ export const RouteTabs = ({ tabs, ariaLabel }: RouteTabsProps) => {
     .sort((a, b) => b.to.length - a.to.length)[0];
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white px-2">
+    <div className="rounded-xl border border-gray-200 bg-brand-primary/5 px-2">
       {/* `value={false}` cuando ninguna coincide: MUI avisa por consola si el
           valor no corresponde a ninguna pestaña montada. */}
       <Tabs
@@ -48,6 +50,11 @@ export const RouteTabs = ({ tabs, ariaLabel }: RouteTabsProps) => {
         aria-label={ariaLabel}
         variant="scrollable"
         scrollButtons="auto"
+        sx={{
+          '& .MuiTab-root': { fontWeight: 500, color: 'text.secondary' },
+          '& .Mui-selected': { fontWeight: 600 },
+          '& .MuiTabs-indicator': { height: 3, borderRadius: 3 },
+        }}
       >
         {tabs.map((tab) => (
           <Tab key={tab.to} value={tab.to} label={tab.label} component={Link} to={tab.to} />

@@ -78,7 +78,10 @@ export const theme = createTheme({
 
     MuiTableCell: {
       styleOverrides: {
-        head: { fontWeight: 500, color: '#4B5563', backgroundColor: '#F9FAFB' },
+        // Cabecera con un morado muy diluido en vez del gris neutro: da color
+        // a las tablas, que son casi toda la interfaz, sin restar contraste al
+        // texto de las filas.
+        head: { fontWeight: 500, color: '#4B5563', backgroundColor: '#F6F3FB' },
       },
     },
   },

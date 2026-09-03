@@ -22,9 +22,15 @@ const EditIcon = (
   </svg>
 );
 
-/** Marco común de la tarjeta, para que carga y contenido midan lo mismo. */
+/**
+ * Marco común de la tarjeta, para que carga y contenido midan lo mismo.
+ *
+ * Lleva una franja de color a la izquierda en vez del degradado de la tarjeta
+ * del proyecto: se ve dentro de ella, y repetir el mismo bloque de color haría
+ * competir a las dos cabeceras en lugar de dejar clara la jerarquía.
+ */
 const Card = ({ children }: { children: ReactNode }) => (
-  <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+  <section className="overflow-hidden rounded-xl border border-gray-200 border-l-4 border-l-brand-primary bg-white p-5 shadow-sm sm:p-6">
     {children}
   </section>
 );
@@ -32,10 +38,24 @@ const Card = ({ children }: { children: ReactNode }) => (
 /** Esqueleto de la tarjeta mientras se pide la ficha. */
 export const ApplicantInfoCardSkeleton = () => (
   <Card>
-    <Skeleton variant="text" width="40%" height={30} />
-    <Skeleton variant="text" width="30%" />
+    <div className="flex items-center gap-4">
+      <Skeleton variant="circular" width={48} height={48} />
+      <div className="flex-1">
+        <Skeleton variant="text" width="40%" height={28} />
+        <Skeleton variant="text" width="30%" />
+      </div>
+    </div>
   </Card>
 );
+
+/** Iniciales del titular, para el círculo. "Rosa Condori" → "RC". */
+const initials = (name: string): string =>
+  name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word.charAt(0).toUpperCase())
+    .join('');
 
 interface ApplicantInfoCardProps {
   application: Application;
@@ -56,39 +76,50 @@ interface ApplicantInfoCardProps {
  * Dar de baja es solo de admin: un líder que se equivoca la pide, no la
  * ejecuta (el backend responde 403 igualmente).
  */
-export const ApplicantInfoCard = ({ application, onEdit, onDelete }: ApplicantInfoCardProps) => (
-  <Card>
-    <div className="flex flex-wrap items-start justify-between gap-4">
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <h2 className="text-xl font-semibold break-words text-gray-900">
-            {personDisplayName(application.person)}
-          </h2>
-          <Chip
-            size="small"
-            label={APPLICATION_STATUS_LABELS[application.status]}
-            color={APPLICATION_STATUS_COLORS[application.status]}
-          />
-        </div>
-        <p className="mt-0.5 text-sm text-gray-500">
-          CI {fullDocument(application.person)} · {application.project.name}
-        </p>
-      </div>
+export const ApplicantInfoCard = ({ application, onEdit, onDelete }: ApplicantInfoCardProps) => {
+  const name = personDisplayName(application.person);
 
-      {(onEdit || onDelete) && (
-        <div className="flex flex-wrap gap-2">
-          {onEdit && (
-            <Button variant="outline" fullWidth={false} icon={EditIcon} onClick={onEdit}>
-              Editar
-            </Button>
-          )}
-          {onDelete && (
-            <Button variant="danger" fullWidth={false} onClick={onDelete}>
-              Dar de baja
-            </Button>
-          )}
+  return (
+    <Card>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex min-w-0 items-start gap-4">
+          <span
+            aria-hidden="true"
+            className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-primary to-brand-primary-light text-sm font-semibold text-white"
+          >
+            {initials(name)}
+          </span>
+
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-xl font-semibold break-words text-gray-900">{name}</h2>
+              <Chip
+                size="small"
+                label={APPLICATION_STATUS_LABELS[application.status]}
+                color={APPLICATION_STATUS_COLORS[application.status]}
+              />
+            </div>
+            <p className="mt-0.5 text-sm text-gray-500">
+              CI {fullDocument(application.person)} · {application.project.name}
+            </p>
+          </div>
         </div>
-      )}
-    </div>
-  </Card>
-);
+
+        {(onEdit || onDelete) && (
+          <div className="flex flex-wrap gap-2">
+            {onEdit && (
+              <Button variant="outline" fullWidth={false} icon={EditIcon} onClick={onEdit}>
+                Editar
+              </Button>
+            )}
+            {onDelete && (
+              <Button variant="danger" fullWidth={false} onClick={onDelete}>
+                Dar de baja
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+};

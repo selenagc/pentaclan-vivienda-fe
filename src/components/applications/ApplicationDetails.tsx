@@ -43,8 +43,10 @@ const DetailRow = ({ label, value }: DetailRowProps) => (
   </div>
 );
 
+/** Separador de bloque, con una marca de color que lo hace visible al ojear. */
 const SectionTitle = ({ children }: { children: string }) => (
-  <h3 className="pt-4 pb-1 text-xs font-semibold tracking-wide text-gray-500 uppercase">
+  <h3 className="flex items-center gap-2 pt-5 pb-1 text-xs font-semibold tracking-wide text-brand-primary uppercase">
+    <span aria-hidden="true" className="h-3.5 w-1 rounded-full bg-brand-primary" />
     {children}
   </h3>
 );
