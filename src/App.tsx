@@ -18,6 +18,12 @@ import { ProtectedRoute } from './components/routing/ProtectedRoute';
 import { AppLayout } from './layouts/AppLayout';
 import type { ProjectSection } from './components/applications/applicationOutlet';
 
+/** Las dos direcciones de diagnóstico, para montarlas o redirigirlas. */
+const DIAGNOSIS_PATHS = {
+  social: 'diagnostico-social',
+  technical: 'diagnostico-tecnico',
+} as const;
+
 /**
  * Las rutas de una ficha, iguales bajo las dos pestañas que llevan a ella.
  *
@@ -31,9 +37,10 @@ import type { ProjectSection } from './components/applications/applicationOutlet
  * renderiza, el proyecto que `ProjectDetailPage` pasa a sus hijos se perdería
  * antes de llegar al formulario.
  *
- * Los dos diagnósticos se montan siempre, aunque solo un beneficiario los
- * tenga: la página explica por qué están vacíos en vez de dejar la dirección
- * rota si alguien la escribe o la tiene guardada.
+ * Los dos diagnósticos **solo cuelgan de beneficiarios**: son suyos, y un
+ * solicitante no los tiene ni siquiera vacíos. Bajo *solicitantes* esas dos
+ * direcciones no dejan de existir, redirigen a la ficha: una guardada de antes
+ * o escrita a mano cae donde el usuario quería ir, en vez de echarlo al inicio.
  */
 const applicationRoutes = (section: ProjectSection) => (
   <Fragment key={section}>
@@ -42,8 +49,21 @@ const applicationRoutes = (section: ProjectSection) => (
       element={<ApplicationDetailPage section={section} />}
     >
       <Route index element={<ApplicationDataPage />} />
-      <Route path="diagnostico-social" element={<ApplicationDiagnosisPage kind="social" />} />
-      <Route path="diagnostico-tecnico" element={<ApplicationDiagnosisPage kind="technical" />} />
+      {section === 'beneficiarios' ? (
+        <Fragment key="diagnosticos">
+          <Route path={DIAGNOSIS_PATHS.social} element={<ApplicationDiagnosisPage kind="social" />} />
+          <Route
+            path={DIAGNOSIS_PATHS.technical}
+            element={<ApplicationDiagnosisPage kind="technical" />}
+          />
+        </Fragment>
+      ) : (
+        Object.values(DIAGNOSIS_PATHS).map((path) => (
+          // `relative="path"` para que `..` quite un segmento de la URL y no
+          // suba por el árbol de rutas, que llevaría al listado del proyecto.
+          <Route key={path} path={path} element={<Navigate to=".." relative="path" replace />} />
+        ))
+      )}
     </Route>
     <Route
       path={`${section}/:applicationId/editar`}
