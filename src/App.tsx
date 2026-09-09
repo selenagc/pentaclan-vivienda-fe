@@ -84,11 +84,21 @@ function App() {
         <Route element={<AppLayout />}>
           <Route path="/inicio" element={<HomePage />} />
           <Route path="/mis-proyectos" element={<MyProjectsPage />} />
-          <Route path="/usuarios" element={<UsersPage />} />
-          {/* Temporal: banco de pruebas del selector geográfico (PV-17). */}
-          <Route path="/geografia" element={<GeographyDemoPage />} />
-          <Route path="/proyectos" element={<ProjectsPage />} />
-          <Route path="/proyectos/nuevo" element={<CreateProjectPage />} />
+
+          {/* Rutas exclusivas para Administradores */}
+          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+            <Route path="/usuarios" element={<UsersPage />} />
+            <Route path="/geografia" element={<GeographyDemoPage />} />
+            <Route path="/proyectos/nuevo" element={<CreateProjectPage />} />
+            <Route path="/configuracion" element={<ModulePlaceholder title="Configuración" />} />
+          </Route>
+
+          {/* Rutas para Administradores y Supervisores (catálogos y reportes globales) */}
+          <Route element={<ProtectedRoute allowedRoles={['admin', 'project_supervisor']} />}>
+            <Route path="/proyectos" element={<ProjectsPage />} />
+            <Route path="/beneficiarios" element={<ModulePlaceholder title="Beneficiarios" />} />
+            <Route path="/reportes" element={<ModulePlaceholder title="Reportes" />} />
+          </Route>
 
           {/* Detalle del proyecto: la tarjeta con sus datos y una pestaña por
               cada cosa que cuelga de él. **Todo** lo del proyecto se abre aquí
@@ -119,10 +129,6 @@ function App() {
             {/* Equipo asignado al proyecto (administración de evaluadores técnicos y sociales) */}
             <Route path="equipo" element={<ProjectTeamPage />} />
           </Route>
-
-          <Route path="/beneficiarios" element={<ModulePlaceholder title="Beneficiarios" />} />
-          <Route path="/reportes" element={<ModulePlaceholder title="Reportes" />} />
-          <Route path="/configuracion" element={<ModulePlaceholder title="Configuración" />} />
         </Route>
       </Route>
 

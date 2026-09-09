@@ -77,7 +77,22 @@ export const ProjectDetailPage = () => {
       </Link>
 
       {error ? (
-        <Alert severity="error">{error}</Alert>
+        <div className="rounded-2xl border border-red-100 bg-red-50/50 p-6 sm:p-8 text-center space-y-4">
+          <Alert severity="error" className="justify-center">
+            {error}
+          </Alert>
+          <p className="text-xs text-gray-500">
+            Si crees que deberías tener acceso a este proyecto, por favor solicita al administrador que registre tu asignación formal.
+          </p>
+          <div>
+            <Link
+              to={backLink}
+              className="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-brand-primary/90 transition-colors"
+            >
+              {backText}
+            </Link>
+          </div>
+        </div>
       ) : (
         <>
           {isLoading || !project ? (
