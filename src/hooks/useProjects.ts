@@ -1,40 +1,28 @@
-import { useCallback, useEffect, useState } from 'react';
 import { projectService } from '../services/projectService';
-import { getFriendlyErrorMessage } from '../constants/apiErrorMessages';
-import type { Project } from '../types/project.types';
+import { usePaginatedList, type UsePaginatedListResult } from './usePaginatedList';
+import type { ListProjectsParams, Project } from '../types/project.types';
+
+/** Filtros del listado: todo `ListProjectsParams` salvo la paginación. */
+export type ProjectFilters = Omit<ListProjectsParams, 'page' | 'limit'>;
+
+export interface UseProjectsResult extends Omit<UsePaginatedListResult<Project>, 'items'> {
+  projects: Project[];
+}
 
 /**
- * Carga el listado de proyectos y expone su estado.
+ * Carga el listado de proyectos, página a página, y expone su estado.
  *
- * La paginación, el orden y la búsqueda se difieren a su propio ticket: el
- * backend ya los soporta, pero por ahora se pide `limit: 100` (máximo del
- * backend) para mostrar el listado completo, igual que `useUsers`.
+ * La paginación la lleva `usePaginatedList`: aquí solo se le dice qué servicio
+ * llamar y qué mensaje mostrar si falla. Los filtros (`search`, `sortBy`,
+ * `publicEntityId`…) se pasan como argumento y, al cambiar, devuelven el
+ * listado a la primera página.
  */
-export const useProjects = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export const useProjects = (filters: ProjectFilters = {}): UseProjectsResult => {
+  const { items, ...pagination } = usePaginatedList<Project, ProjectFilters>({
+    fetcher: projectService.list,
+    filters,
+    errorMessage: 'No se pudieron cargar los proyectos.',
+  });
 
-  const fetchProjects = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const { data } = await projectService.list({ limit: 100 });
-      setProjects(data);
-    } catch (err) {
-      setError(getFriendlyErrorMessage(err, 'No se pudieron cargar los proyectos.'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    // Carga inicial. `fetchProyectos` activa el estado de carga de forma
-    // síncrona (a propósito, para mostrar el skeleton también al refrescar);
-    // ese reset es seguro aquí, de ahí el disable puntual de la regla.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchProjects();
-  }, [fetchProjects]);
-
-  return { projects, isLoading, error, refresh: fetchProjects };
+  return { projects: items, ...pagination };
 };
