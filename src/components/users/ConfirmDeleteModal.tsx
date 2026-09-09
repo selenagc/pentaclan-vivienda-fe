@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Alert from '@mui/material/Alert';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { userService } from '../../services/userService';
@@ -76,12 +77,9 @@ export const ConfirmDeleteModal = ({
       }
     >
       {error && (
-        <div
-          role="alert"
-          className="mb-4 rounded-lg border border-error/30 bg-error/5 px-4 py-3 text-sm text-error"
-        >
+        <Alert severity="error" sx={{ mb: 2 }}>
           {error}
-        </div>
+        </Alert>
       )}
       <p className="text-sm text-gray-600">
         ¿Seguro que deseas eliminar a{' '}

@@ -1,4 +1,5 @@
 import { Input } from '../ui/Input';
+import MuiButton from '@mui/material/Button';
 import { Select } from '../ui/Select';
 import { usePublicEntities } from '../../hooks/usePublicEntities';
 import { publicEntityLabel, formatTaxId } from '../../types/publicEntity.types';
@@ -67,13 +68,9 @@ export const PublicEntitySelector = ({
           aria-busy={isLoading}
         />
         {loadError && (
-          <button
-            type="button"
-            onClick={retry}
-            className="mt-1.5 text-xs font-medium text-brand-primary hover:underline"
-          >
+          <MuiButton size="small" onClick={retry} sx={{ mt: 0.5 }}>
             Reintentar
-          </button>
+          </MuiButton>
         )}
       </div>
 

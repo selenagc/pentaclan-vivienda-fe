@@ -1,3 +1,11 @@
+import MuiTable from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import Skeleton from '@mui/material/Skeleton';
 import type { ReactNode } from 'react';
 
 /**
@@ -42,16 +50,27 @@ interface TableProps<T> {
   className?: string;
 }
 
-const alignMap = {
-  left: 'text-left',
-  center: 'text-center',
-  right: 'text-right',
-} as const;
+/** Filas de esqueleto mostradas mientras `isLoading` es verdadero. */
+function TableSkeleton<T>({ columns }: { columns: Column<T>[] }) {
+  return (
+    <>
+      {Array.from({ length: 5 }).map((_, rowIndex) => (
+        <TableRow key={rowIndex}>
+          {columns.map((column) => (
+            <TableCell key={column.key}>
+              <Skeleton variant="text" width="60%" />
+            </TableCell>
+          ))}
+        </TableRow>
+      ))}
+    </>
+  );
+}
 
 /**
- * Tabla genérica y reutilizable. La presentación (columnas, render de celdas,
- * estados de carga y vacío) se controla por props para que el mismo componente
- * sirva en Proyectos, Beneficiarios, Reportes, etc.
+ * Tabla genérica y reutilizable, sobre la de MUI. La presentación (columnas,
+ * render de celdas, estados de carga y vacío) se controla por props para que
+ * el mismo componente sirva en Proyectos, Beneficiarios, Reportes, etc.
  *
  * No pagina por sí misma: los controles viven en `<Pagination>`, que se coloca
  * debajo y se alimenta de `usePaginatedList`. El ordenamiento se incorporará
@@ -79,88 +98,53 @@ export function Table<T>({
   };
 
   return (
-    <div
-      className={`overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm ${className}`}
-    >
-      <table className="w-full border-collapse text-sm">
-        <thead>
-          <tr className="border-b border-gray-200 bg-gray-50">
+    <TableContainer component={Paper} variant="outlined" className={className}>
+      <MuiTable size="small">
+        <TableHead>
+          <TableRow>
             {columns.map((column) => (
-              <th
+              <TableCell
                 key={column.key}
-                scope="col"
-                className={`px-4 py-3 font-medium text-gray-600 ${
-                  alignMap[column.align ?? 'left']
-                } ${column.className ?? ''}`}
+                align={column.align ?? 'left'}
+                className={column.className}
               >
                 {column.header}
-              </th>
+              </TableCell>
             ))}
-          </tr>
-        </thead>
+          </TableRow>
+        </TableHead>
 
-        <tbody>
+        <TableBody>
           {isLoading ? (
             <TableSkeleton columns={columns} />
           ) : data.length === 0 ? (
-            <tr>
-              <td
-                colSpan={columns.length}
-                className="px-4 py-12 text-center text-gray-500"
-              >
+            <TableRow>
+              <TableCell colSpan={columns.length} align="center" sx={{ py: 6 }}>
                 {emptyMessage}
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ) : (
-            data.map((row, index) => {
-              const clickable = Boolean(onRowClick);
-              return (
-                <tr
-                  key={resolveRowKey(row, index)}
-                  onClick={onRowClick ? () => onRowClick(row, index) : undefined}
-                  className={`border-b border-gray-100 last:border-0 transition-colors ${
-                    clickable
-                      ? 'cursor-pointer hover:bg-brand-primary/5'
-                      : 'hover:bg-gray-50'
-                  }`}
-                >
-                  {columns.map((column) => (
-                    <td
-                      key={column.key}
-                      className={`px-4 py-3 text-gray-700 ${
-                        alignMap[column.align ?? 'left']
-                      } ${column.className ?? ''}`}
-                    >
-                      {resolveCell(column, row, index)}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })
+            data.map((row, index) => (
+              <TableRow
+                key={resolveRowKey(row, index)}
+                hover
+                onClick={onRowClick ? () => onRowClick(row, index) : undefined}
+                sx={onRowClick ? { cursor: 'pointer' } : undefined}
+              >
+                {columns.map((column) => (
+                  <TableCell
+                    key={column.key}
+                    align={column.align ?? 'left'}
+                    className={column.className}
+                  >
+                    {resolveCell(column, row, index)}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
           )}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-interface TableSkeletonProps<T> {
-  columns: Column<T>[];
-}
-
-/** Filas de esqueleto mostradas mientras `isLoading` es verdadero. */
-function TableSkeleton<T>({ columns }: TableSkeletonProps<T>) {
-  return (
-    <>
-      {Array.from({ length: 5 }).map((_, rowIndex) => (
-        <tr key={rowIndex} className="border-b border-gray-100 last:border-0">
-          {columns.map((column) => (
-            <td key={column.key} className="px-4 py-3">
-              <div className="h-4 w-full max-w-[160px] animate-pulse rounded bg-gray-200" />
-            </td>
-          ))}
-        </tr>
-      ))}
-    </>
+        </TableBody>
+      </MuiTable>
+    </TableContainer>
   );
 }
