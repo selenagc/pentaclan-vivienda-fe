@@ -34,7 +34,7 @@ const Flecha = () => (
   <span
     aria-hidden="true"
     // `mt-9` lo baja hasta la altura del select, saltándose la etiqueta.
-    className="mt-9 hidden select-none text-gray-400 md:block"
+    className="mt-2 hidden select-none text-gray-400 md:block"
   >
     →
   </span>

@@ -79,7 +79,7 @@ export const ProjectForm = ({
     >
       <div className="space-y-6">
         <FormSection stepNumber={1} title="Información del proyecto" withDivider={false}>
-          <div className="space-y-4">
+          <div className="space-y-6">
             <Input
               label="Título del proyecto"
               name="name"
@@ -91,20 +91,22 @@ export const ProjectForm = ({
               required
               disabled={isSubmitting}
             />
-            <Input
-              label="Nº de contrato"
-              name="nroContrato"
-              value={values.contractNo}
-              onChange={(event) => setField('contractNo', event.target.value)}
-              placeholder="Ej. AEV-2026-389"
-              error={errors.contractNo}
-              maxLength={50}
-              required
-              disabled={isSubmitting}
-            />
-            <p className="text-xs text-gray-500">
-              El número de contrato identifica al proyecto y no puede repetirse.
-            </p>
+            <div className="space-y-2">
+              <Input
+                label="Nº de contrato"
+                name="nroContrato"
+                value={values.contractNo}
+                onChange={(event) => setField('contractNo', event.target.value)}
+                placeholder="Ej. AEV-2026-389"
+                error={errors.contractNo}
+                maxLength={50}
+                required
+                disabled={isSubmitting}
+              />
+              <p className="text-xs text-gray-500">
+                El número de contrato identifica al proyecto y no puede repetirse.
+              </p>
+            </div>
           </div>
         </FormSection>
 
