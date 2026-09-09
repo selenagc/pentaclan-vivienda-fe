@@ -4,6 +4,7 @@ import type {
   CreateProjectInput,
   ListProjectsParams,
   Project,
+  ProjectAssignment,
   UpdateProjectInput,
 } from '../types/project.types';
 
@@ -42,5 +43,33 @@ export const projectService = {
   async update(id: string, input: UpdateProjectInput): Promise<Project> {
     const { data } = await api.put<DataEnvelope<Project>>(`/projects/${id}`, input);
     return data.data;
+  },
+
+  /** Proyectos asignados al usuario autenticado (PV-35). */
+  async getMyProjects(): Promise<Project[]> {
+    const { data } = await api.get<{ success?: boolean; data: Project[] }>('/api/me/projects');
+    return data.data;
+  },
+
+  /** Evaluadores asignados a un proyecto (solo admin). */
+  async getAssignments(projectId: string): Promise<ProjectAssignment[]> {
+    const { data } = await api.get<{ success?: boolean; data: ProjectAssignment[] }>(
+      `/api/projects/${projectId}/assignments`,
+    );
+    return data.data;
+  },
+
+  /** Asignar uno o varios evaluadores a un proyecto (solo admin). */
+  async assignUsers(projectId: string, userIds: string[]): Promise<ProjectAssignment[]> {
+    const { data } = await api.post<{ success?: boolean; data: ProjectAssignment[] }>(
+      `/api/projects/${projectId}/assignments`,
+      { userIds },
+    );
+    return data.data;
+  },
+
+  /** Desasignar evaluador de un proyecto (solo admin). */
+  async unassignUser(projectId: string, userId: string): Promise<void> {
+    await api.delete(`/api/projects/${projectId}/assignments/${userId}`);
   },
 };
