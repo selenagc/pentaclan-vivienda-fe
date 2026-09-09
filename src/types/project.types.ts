@@ -79,3 +79,24 @@ export interface ListProjectsParams {
  * aquí porque el módulo de proyectos ya lo importaba por este nombre.
  */
 export { fullLocation } from './geography.types';
+
+/** Usuario asignado al proyecto (técnico o trabajador social). */
+export interface ProjectAssignmentUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
+/** Asignación de evaluador a proyecto (N:M). */
+export interface ProjectAssignment {
+  id: number;
+  userId: string;
+  projectId: string;
+  assignedAt: string;
+  active: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  user?: ProjectAssignmentUser;
+}
+

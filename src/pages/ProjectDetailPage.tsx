@@ -48,26 +48,32 @@ export const ProjectDetailPage = () => {
 
   const [isEditing, setIsEditing] = useState(false);
 
-  // Las pestañas pendientes (documentos, seguimiento…) se añaden a esta lista
-  // y no hace falta tocar nada más aquí: su ruta hija vive en `App.tsx`.
-  const tabs = useMemo<RouteTab[]>(
-    () => [
+  // Las pestañas del proyecto: los evaluadores solo ven Solicitantes y Beneficiarios;
+  // los administradores tienen además la gestión de 'Equipo Asignado'.
+  const tabs = useMemo<RouteTab[]>(() => {
+    const list: RouteTab[] = [
       { label: 'Solicitantes', to: `/proyectos/${projectId}/solicitantes` },
       { label: 'Beneficiarios', to: `/proyectos/${projectId}/beneficiarios` },
-    ],
-    [projectId],
-  );
+    ];
+    if (isAdmin) {
+      list.push({ label: 'Equipo Asignado', to: `/proyectos/${projectId}/equipo` });
+    }
+    return list;
+  }, [projectId, isAdmin]);
+
+  const backLink = isAdmin ? '/proyectos' : '/inicio';
+  const backText = isAdmin ? 'Volver a proyectos' : 'Volver a mis proyectos';
 
   const outletContext: ProjectOutletContext = { project, isLoadingProject: isLoading };
 
   return (
     <div className="space-y-4">
       <Link
-        to="/proyectos"
+        to={backLink}
         className="inline-flex items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-brand-primary"
       >
         {BackIcon}
-        Volver a proyectos
+        {backText}
       </Link>
 
       {error ? (

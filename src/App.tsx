@@ -2,12 +2,14 @@ import { Fragment } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
+import MyProjectsPage from './pages/MyProjectsPage';
 import UsersPage from './pages/UsersPage';
 import ProjectsPage from './pages/ProjectsPage';
 import CreateProjectPage from './pages/CreateProjectPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
 import ProjectApplicantsPage from './pages/ProjectApplicantsPage';
 import ProjectBeneficiariesPage from './pages/ProjectBeneficiariesPage';
+import ProjectTeamPage from './pages/ProjectTeamPage';
 import ApplicationDetailPage from './pages/ApplicationDetailPage';
 import ApplicationDataPage from './pages/ApplicationDataPage';
 import ApplicationDiagnosisPage from './pages/ApplicationDiagnosisPage';
@@ -81,6 +83,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/inicio" element={<HomePage />} />
+          <Route path="/mis-proyectos" element={<MyProjectsPage />} />
           <Route path="/usuarios" element={<UsersPage />} />
           {/* Temporal: banco de pruebas del selector geográfico (PV-17). */}
           <Route path="/geografia" element={<GeographyDemoPage />} />
@@ -112,6 +115,9 @@ function App() {
                 aprobación. */}
             <Route path="beneficiarios" element={<ProjectBeneficiariesPage />} />
             {applicationRoutes('beneficiarios')}
+
+            {/* Equipo asignado al proyecto (administración de evaluadores técnicos y sociales) */}
+            <Route path="equipo" element={<ProjectTeamPage />} />
           </Route>
 
           <Route path="/beneficiarios" element={<ModulePlaceholder title="Beneficiarios" />} />
