@@ -41,10 +41,13 @@ interface ApplicationDiagnosisPageProps {
  * reservar el sitio: su ticket rellenará este panel sin volver a mover la
  * navegación.
  *
- * También cubre el caso de llegar aquí con una ficha que aún no es de un
- * beneficiario —una dirección guardada o escrita a mano—: la barra de pestañas
- * ni siquiera se dibuja para un solicitante, así que en vez de una página rota
- * se explica que los diagnósticos llegan con la aprobación.
+ * Solo se monta bajo *beneficiarios*: bajo *solicitantes* esas direcciones
+ * redirigen a la ficha, porque un solicitante no tiene diagnósticos.
+ *
+ * Aun así se comprueba el estado, porque la sección es solo un prefijo de la
+ * URL: `/beneficiarios/:id` abre cualquier ficha, también una sin aprobar. En
+ * ese caso se explica que los diagnósticos llegan con la aprobación, en vez de
+ * ofrecer un panel que no corresponde.
  */
 export const ApplicationDiagnosisPage = ({ kind }: ApplicationDiagnosisPageProps) => {
   const { application } = useApplicationOutlet();
