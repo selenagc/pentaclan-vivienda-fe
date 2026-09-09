@@ -30,6 +30,8 @@ export const Input = ({
         className="block text-sm font-medium text-gray-700 mb-1.5"
       >
         {label}
+        {/* El asterisco es solo visual; la obligatoriedad la marca `required`. */}
+        {props.required && <span className="text-error"> *</span>}
       </label>
       <div className="relative">
         {icon && (
