@@ -8,7 +8,12 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' 
   label: string;
   icon?: ReactNode;
   error?: string;
-  type?: 'text' | 'email' | 'password';
+  /**
+   * `date` y `number` los añadió el formulario de solicitantes (fecha de
+   * nacimiento y coordenadas). Se listan uno a uno en vez de aceptar cualquier
+   * `string` para que un tipo que la app no ha probado no entre sin querer.
+   */
+  type?: 'text' | 'email' | 'password' | 'date' | 'number';
 }
 
 const EyeIcon = (
@@ -60,6 +65,9 @@ export const Input = ({
   type = 'text',
   id,
   maxLength,
+  min,
+  max,
+  step,
   ...props
 }: InputProps) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -98,10 +106,10 @@ export const Input = ({
             </InputAdornment>
           ) : undefined,
         },
-        // `maxLength` es un atributo del <input>, no del campo de MUI: si se
-        // pasara en la raíz se perdería sin aviso y el límite dejaría de
-        // aplicarse.
-        htmlInput: { maxLength },
+        // Son atributos del <input>, no del campo de MUI: si se pasaran en la
+        // raíz se perderían sin aviso y el límite dejaría de aplicarse. Mismo
+        // motivo para `min`/`max`/`step`, que acotan fechas y coordenadas.
+        htmlInput: { maxLength, min, max, step },
       }}
       {...props}
     />

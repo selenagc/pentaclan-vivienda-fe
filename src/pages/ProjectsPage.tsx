@@ -26,6 +26,10 @@ const PlusIcon = (
  * en el detalle: son datos largos que ensanchaban la tabla y obligaban a
  * desplazarla en pantallas pequeñas.
  *
+ * *Solicitantes* abre el padrón del proyecto (PV-31). Va aquí y no en el menú
+ * lateral porque una postulación no existe suelta: siempre es *a* un proyecto,
+ * y su vivienda tiene que estar en el municipio donde se ejecuta la obra.
+ *
  * No hay acción de eliminar: el backend no expone `DELETE /projects/:id`.
  * El orden y la búsqueda quedan para su ticket: `useProjects` ya acepta los
  * filtros (ver `ProjectFilters`), falta la UI que los controle.
@@ -73,6 +77,15 @@ export const ProjectsPage = () => {
               Editar
             </MuiButton>
           )}
+          {/* Lo ven todos los roles: el supervisor no registra fichas pero sí
+              consulta el padrón del proyecto. */}
+          <MuiButton
+            size="small"
+            onClick={() => navigate(`/proyectos/${project.id}/solicitantes`)}
+            aria-label={`Solicitantes de ${project.name}`}
+          >
+            Solicitantes
+          </MuiButton>
         </Stack>
       ),
     },
