@@ -79,6 +79,15 @@ export const applicationService = {
   },
 
   /**
+   * Preselecciona la postulación: pasa de `pending` a `under_review` (Preseleccionado).
+   * Solo si sigue en `pending`.
+   */
+  async preselect(id: string): Promise<Application> {
+    const { data } = await api.post<DataEnvelope<Application>>(`/applications/${id}/preselect`);
+    return data.data;
+  },
+
+  /**
    * Aprueba la ficha: el solicitante pasa a beneficiario. Solo `admin` y
    * `project_supervisor`; al resto el backend le responde 403.
    *
