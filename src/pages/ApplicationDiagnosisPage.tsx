@@ -5,10 +5,11 @@ import { useAuth } from '../hooks/useAuth';
 import { diagnosticService } from '../services/diagnosticService';
 import { SocialDiagnosisForm } from '../components/diagnostics/SocialDiagnosisForm';
 import { TechnicalDiagnosisForm } from '../components/diagnostics/TechnicalDiagnosisForm';
+import { DiagnosticChangeHistory } from '../components/diagnostics/DiagnosticChangeHistory';
 import type { DiagnosticRecord } from '../types/diagnostic.types';
 
 interface ApplicationDiagnosisPageProps {
-  kind: 'social' | 'technical';
+  kind: 'social' | 'technical' | 'history';
 }
 
 export const ApplicationDiagnosisPage = ({ kind }: ApplicationDiagnosisPageProps) => {
@@ -76,7 +77,9 @@ export const ApplicationDiagnosisPage = ({ kind }: ApplicationDiagnosisPageProps
         </Alert>
       )}
 
-      {kind === 'social' ? (
+      {kind === 'history' ? (
+        <DiagnosticChangeHistory changeHistory={diagnosticRecord?.changeHistory} />
+      ) : kind === 'social' ? (
         <SocialDiagnosisForm
           applicationId={application.id}
           applicationStatus={application.status}
