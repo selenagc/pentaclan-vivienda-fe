@@ -107,9 +107,27 @@ export interface ConstructionElement {
 
 export interface DiagnosticPhoto {
   id?: number;
+  diagnosticRecordId?: string;
+  category?: 'technical' | 'social';
   photoType: string;
+  s3Key?: string;
   url: string;
+  capturedAt?: string;
+  captureLatitude?: number | null;
+  captureLongitude?: number | null;
+  mimeType?: string;
+  fileSizeBytes?: number;
   description?: string | null;
+}
+
+export interface UploadPhotoPayload {
+  file: Blob | File;
+  category: 'technical' | 'social';
+  photoType: string;
+  capturedAt?: Date | string;
+  captureLatitude?: number | null;
+  captureLongitude?: number | null;
+  description?: string;
 }
 
 export interface DiagnosticRecord {
@@ -158,8 +176,8 @@ export interface DiagnosticRecord {
 }
 
 export interface DiagnosticDiffItem {
-  before: any;
-  after: any;
+  before: unknown;
+  after: unknown;
 }
 
 export interface DiagnosticChangeEntry {
