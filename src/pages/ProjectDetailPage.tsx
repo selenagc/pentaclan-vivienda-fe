@@ -47,6 +47,24 @@ export const ProjectDetailPage = () => {
   } = useResource(projectService.getById, projectId, 'No se pudo cargar el proyecto.');
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isDownloadingPptx, setIsDownloadingPptx] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
+  const handleDownloadPresentation = async () => {
+    if (!projectId || isDownloadingPptx) return;
+    setIsDownloadingPptx(true);
+    setDownloadError(null);
+    try {
+      const fallbackName = project?.name
+        ? `presentacion_${project.name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}.pptx`
+        : 'presentacion_proyecto.pptx';
+      await projectService.downloadPresentation(projectId, fallbackName);
+    } catch {
+      setDownloadError('No se pudo generar o descargar la presentación PowerPoint.');
+    } finally {
+      setIsDownloadingPptx(false);
+    }
+  };
 
   // Las pestañas del proyecto: los evaluadores solo ven Solicitantes y Beneficiarios;
   // los administradores tienen además la gestión de 'Equipo Asignado'.
@@ -101,7 +119,15 @@ export const ProjectDetailPage = () => {
             <ProjectInfoCard
               project={project}
               onEdit={isAdmin ? () => setIsEditing(true) : undefined}
+              onDownloadPresentation={handleDownloadPresentation}
+              isDownloadingPresentation={isDownloadingPptx}
             />
+          )}
+
+          {downloadError && (
+            <Alert severity="error" onClose={() => setDownloadError(null)}>
+              {downloadError}
+            </Alert>
           )}
 
           {/* Las pestañas no esperan al proyecto: sus paneles se alimentan del

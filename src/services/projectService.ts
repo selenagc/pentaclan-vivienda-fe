@@ -72,4 +72,32 @@ export const projectService = {
   async unassignUser(projectId: string, userId: string): Promise<void> {
     await api.delete(`/api/projects/${projectId}/assignments/${userId}`);
   },
+
+  /** Genera y descarga la presentación PowerPoint (.pptx) del proyecto con todos sus solicitantes y fotografías. */
+  async downloadPresentation(id: string, fallbackName = 'presentacion_proyecto.pptx'): Promise<void> {
+    const response = await api.get<Blob>(`/projects/${id}/presentation`, {
+      responseType: 'blob',
+    });
+
+    const disposition = response.headers['content-disposition'];
+    let fileName = fallbackName;
+    if (typeof disposition === 'string') {
+      const match = disposition.match(/filename="?([^";]+)"?/i);
+      if (match?.[1]) {
+        fileName = match[1];
+      }
+    }
+
+    const blob = new Blob([response.data], {
+      type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  },
 };
