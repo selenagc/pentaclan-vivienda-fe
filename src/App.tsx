@@ -2,12 +2,14 @@ import { Fragment } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
+import MyProjectsPage from './pages/MyProjectsPage';
 import UsersPage from './pages/UsersPage';
 import ProjectsPage from './pages/ProjectsPage';
 import CreateProjectPage from './pages/CreateProjectPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
 import ProjectApplicantsPage from './pages/ProjectApplicantsPage';
 import ProjectBeneficiariesPage from './pages/ProjectBeneficiariesPage';
+import ProjectTeamPage from './pages/ProjectTeamPage';
 import ApplicationDetailPage from './pages/ApplicationDetailPage';
 import ApplicationDataPage from './pages/ApplicationDataPage';
 import ApplicationDiagnosisPage from './pages/ApplicationDiagnosisPage';
@@ -81,11 +83,22 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/inicio" element={<HomePage />} />
-          <Route path="/usuarios" element={<UsersPage />} />
-          {/* Temporal: banco de pruebas del selector geográfico (PV-17). */}
-          <Route path="/geografia" element={<GeographyDemoPage />} />
-          <Route path="/proyectos" element={<ProjectsPage />} />
-          <Route path="/proyectos/nuevo" element={<CreateProjectPage />} />
+          <Route path="/mis-proyectos" element={<MyProjectsPage />} />
+
+          {/* Rutas exclusivas para Administradores */}
+          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+            <Route path="/usuarios" element={<UsersPage />} />
+            <Route path="/geografia" element={<GeographyDemoPage />} />
+            <Route path="/proyectos/nuevo" element={<CreateProjectPage />} />
+            <Route path="/configuracion" element={<ModulePlaceholder title="Configuración" />} />
+          </Route>
+
+          {/* Rutas para Administradores y Supervisores (catálogos y reportes globales) */}
+          <Route element={<ProtectedRoute allowedRoles={['admin', 'project_supervisor']} />}>
+            <Route path="/proyectos" element={<ProjectsPage />} />
+            <Route path="/beneficiarios" element={<ModulePlaceholder title="Beneficiarios" />} />
+            <Route path="/reportes" element={<ModulePlaceholder title="Reportes" />} />
+          </Route>
 
           {/* Detalle del proyecto: la tarjeta con sus datos y una pestaña por
               cada cosa que cuelga de él. **Todo** lo del proyecto se abre aquí
@@ -112,11 +125,10 @@ function App() {
                 aprobación. */}
             <Route path="beneficiarios" element={<ProjectBeneficiariesPage />} />
             {applicationRoutes('beneficiarios')}
-          </Route>
 
-          <Route path="/beneficiarios" element={<ModulePlaceholder title="Beneficiarios" />} />
-          <Route path="/reportes" element={<ModulePlaceholder title="Reportes" />} />
-          <Route path="/configuracion" element={<ModulePlaceholder title="Configuración" />} />
+            {/* Equipo asignado al proyecto (administración de evaluadores técnicos y sociales) */}
+            <Route path="equipo" element={<ProjectTeamPage />} />
+          </Route>
         </Route>
       </Route>
 

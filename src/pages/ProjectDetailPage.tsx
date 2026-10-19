@@ -48,30 +48,51 @@ export const ProjectDetailPage = () => {
 
   const [isEditing, setIsEditing] = useState(false);
 
-  // Las pestañas pendientes (documentos, seguimiento…) se añaden a esta lista
-  // y no hace falta tocar nada más aquí: su ruta hija vive en `App.tsx`.
-  const tabs = useMemo<RouteTab[]>(
-    () => [
+  // Las pestañas del proyecto: los evaluadores solo ven Solicitantes y Beneficiarios;
+  // los administradores tienen además la gestión de 'Equipo Asignado'.
+  const tabs = useMemo<RouteTab[]>(() => {
+    const list: RouteTab[] = [
       { label: 'Solicitantes', to: `/proyectos/${projectId}/solicitantes` },
       { label: 'Beneficiarios', to: `/proyectos/${projectId}/beneficiarios` },
-    ],
-    [projectId],
-  );
+    ];
+    if (isAdmin) {
+      list.push({ label: 'Equipo Asignado', to: `/proyectos/${projectId}/equipo` });
+    }
+    return list;
+  }, [projectId, isAdmin]);
+
+  const backLink = isAdmin ? '/proyectos' : '/inicio';
+  const backText = isAdmin ? 'Volver a proyectos' : 'Volver a mis proyectos';
 
   const outletContext: ProjectOutletContext = { project, isLoadingProject: isLoading };
 
   return (
     <div className="space-y-4">
       <Link
-        to="/proyectos"
+        to={backLink}
         className="inline-flex items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-brand-primary"
       >
         {BackIcon}
-        Volver a proyectos
+        {backText}
       </Link>
 
       {error ? (
-        <Alert severity="error">{error}</Alert>
+        <div className="rounded-2xl border border-red-100 bg-red-50/50 p-6 sm:p-8 text-center space-y-4">
+          <Alert severity="error" className="justify-center">
+            {error}
+          </Alert>
+          <p className="text-xs text-gray-500">
+            Si crees que deberías tener acceso a este proyecto, por favor solicita al administrador que registre tu asignación formal.
+          </p>
+          <div>
+            <Link
+              to={backLink}
+              className="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-brand-primary/90 transition-colors"
+            >
+              {backText}
+            </Link>
+          </div>
+        </div>
       ) : (
         <>
           {isLoading || !project ? (
