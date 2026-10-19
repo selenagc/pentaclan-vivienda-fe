@@ -17,6 +17,13 @@ export const API_ERROR_MESSAGES: Record<string, string> = {
   RATE_LIMITED: 'Demasiadas peticiones. Espera unos minutos e intenta de nuevo.',
   INTERNAL_ERROR: 'Ocurrió un error en el servidor. Intenta más tarde.',
   NOT_IMPLEMENTED: 'Este módulo todavía no está disponible.',
+
+  // Conflictos del padrón que el operador puede resolver de formas distintas,
+  // y por eso el backend les da código propio en vez de un `CONFLICT` genérico.
+  APPLICATION_ALREADY_DECIDED:
+    'Esta ficha ya fue aprobada o rechazada. Vuelve a cargarla para ver su estado actual.',
+  PROPERTY_ALREADY_BENEFITED:
+    'Esta vivienda ya tiene un beneficiario aprobado en este proyecto. Solo puede haber uno.',
 };
 
 /**

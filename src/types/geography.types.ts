@@ -34,6 +34,25 @@ export interface Municipality {
  */
 export type GeoResponse<T> = DataEnvelope<T[]>;
 
+/**
+ * Municipio resuelto hasta el departamento, tal como lo anida el backend en
+ * proyectos, viviendas y postulaciones. Llega completo para poder mostrar
+ * "Sacaba (Chapare, Cochabamba)" sin volver a consultar el catálogo.
+ *
+ * No lo devuelve `GET /municipalities`, que es el catálogo plano de arriba:
+ * este es el municipio ya anidado dentro de otro recurso.
+ */
+export interface ResolvedMunicipality {
+  id: number;
+  name: string;
+  province: { id: number; name: string };
+  department: { id: number; name: string };
+}
+
+/** "Huacareta (Hernando Siles, Chuquisaca)", para listados y detalles. */
+export const fullLocation = (municipality: ResolvedMunicipality): string =>
+  `${municipality.name} (${municipality.province.name}, ${municipality.department.name})`;
+
 /** Selección de la cascada. `null` = todavía sin elegir. */
 export interface GeoSelection {
   departmentId: number | null;

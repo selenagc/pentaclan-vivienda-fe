@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { Logo } from '../common/Logo';
 import { navItems } from './navItems';
+import { useAuth } from '../../hooks/useAuth';
 
 interface SidebarProps {
   /** En móvil controla si el panel está desplegado. */
@@ -14,6 +15,12 @@ interface SidebarProps {
  * overlay en móvil. La lista de ítems vive en navItems.
  */
 export const Sidebar = ({ open, onClose }: SidebarProps) => {
+  const { user } = useAuth();
+
+  const visibleNavItems = navItems.filter(
+    (item) => !item.roles || (user?.role && item.roles.includes(user.role))
+  );
+
   return (
     <>
       {/* Overlay (solo móvil, cuando está abierto) */}
@@ -37,7 +44,7 @@ export const Sidebar = ({ open, onClose }: SidebarProps) => {
 
         {/* Navegación */}
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

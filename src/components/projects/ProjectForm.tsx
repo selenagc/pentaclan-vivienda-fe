@@ -1,9 +1,10 @@
 import type { FormEvent, ReactNode } from 'react';
+import Alert from '@mui/material/Alert';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { GeoSelector } from '../geography/GeoSelector';
 import { PublicEntitySelector } from '../public-entities/PublicEntitySelector';
-import { FormSection } from './FormSection';
+import { FormSection } from '../ui/FormSection';
 import type { ProjectFormErrors, ProjectFormValues } from '../../hooks/useProjectForm';
 
 interface ProjectFormProps {
@@ -78,7 +79,7 @@ export const ProjectForm = ({
     >
       <div className="space-y-6">
         <FormSection stepNumber={1} title="Información del proyecto" withDivider={false}>
-          <div className="space-y-4">
+          <div className="space-y-6">
             <Input
               label="Título del proyecto"
               name="name"
@@ -90,20 +91,22 @@ export const ProjectForm = ({
               required
               disabled={isSubmitting}
             />
-            <Input
-              label="Nº de contrato"
-              name="nroContrato"
-              value={values.contractNo}
-              onChange={(event) => setField('contractNo', event.target.value)}
-              placeholder="Ej. AEV-2026-389"
-              error={errors.contractNo}
-              maxLength={50}
-              required
-              disabled={isSubmitting}
-            />
-            <p className="text-xs text-gray-500">
-              El número de contrato identifica al proyecto y no puede repetirse.
-            </p>
+            <div className="space-y-2">
+              <Input
+                label="Nº de contrato"
+                name="nroContrato"
+                value={values.contractNo}
+                onChange={(event) => setField('contractNo', event.target.value)}
+                placeholder="Ej. AEV-2026-389"
+                error={errors.contractNo}
+                maxLength={50}
+                required
+                disabled={isSubmitting}
+              />
+              <p className="text-xs text-gray-500">
+                El número de contrato identifica al proyecto y no puede repetirse.
+              </p>
+            </div>
           </div>
         </FormSection>
 
@@ -138,12 +141,9 @@ export const ProjectForm = ({
       </div>
 
       {generalError && (
-        <div
-          role="alert"
-          className="mt-6 rounded-lg border border-error/30 bg-error/5 px-4 py-3 text-sm text-error"
-        >
+        <Alert severity="error" sx={{ mt: 3 }}>
           {generalError}
-        </div>
+        </Alert>
       )}
 
       <div className="mt-8 flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 sm:flex-row sm:justify-end">

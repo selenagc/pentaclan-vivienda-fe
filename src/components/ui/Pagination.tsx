@@ -1,4 +1,8 @@
-import { buildPageItems, ELLIPSIS, PAGE_SIZE_OPTIONS } from '../../utils/pagination';
+import Box from '@mui/material/Box';
+import MuiPagination from '@mui/material/Pagination';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { PAGE_SIZE_OPTIONS } from '../../utils/pagination';
 
 interface PaginationProps {
   /** Página actual (base 1). */
@@ -21,12 +25,21 @@ interface PaginationProps {
   className?: string;
 }
 
-const navButton =
-  'inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-gray-300 px-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40';
+/**
+ * Etiquetas accesibles en español. MUI las genera en inglés ("Go to page 3"),
+ * que es lo que leería el lector de pantalla si no se traducen.
+ */
+const itemAriaLabel = (type: string, page: number | null, selected: boolean): string => {
+  if (type === 'previous') return 'Página anterior';
+  if (type === 'next') return 'Página siguiente';
+  if (type === 'first') return 'Primera página';
+  if (type === 'last') return 'Última página';
+  return selected ? `Página ${page}, actual` : `Ir a la página ${page}`;
+};
 
 /**
  * Controles de paginación reutilizables: resumen de registros, selector de
- * filas por página y navegación numerada.
+ * filas por página y navegación numerada (los saltos con "…" los calcula MUI).
  *
  * Es puramente presentacional (no sabe de qué recurso se trata ni pide datos),
  * así que sirve para cualquier listado; el estado lo lleva `usePaginatedList`.
@@ -49,90 +62,55 @@ export const Pagination = ({
   const firstRow = (page - 1) * limit + 1;
   const lastRow = Math.min(page * limit, total);
   const noun = total === 1 ? itemLabel.singular : itemLabel.plural;
-  const pageItems = buildPageItems(page, totalPages);
 
   return (
-    <div
-      className={`flex flex-col gap-3 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between ${className}`}
+    <Box
+      className={className}
+      sx={{
+        display: 'flex',
+        flexDirection: { xs: 'column', sm: 'row' },
+        alignItems: { sm: 'center' },
+        justifyContent: 'space-between',
+        gap: 2,
+      }}
     >
-      <div className="flex items-center gap-4">
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         {/* `aria-live` avisa al lector de pantalla del cambio de página. */}
-        <p aria-live="polite">
-          Mostrando <span className="font-medium text-gray-900">{firstRow}</span>–
-          <span className="font-medium text-gray-900">{lastRow}</span> de{' '}
-          <span className="font-medium text-gray-900">{total}</span> {noun}
-        </p>
+        <Typography variant="body2" color="text.secondary" aria-live="polite">
+          Mostrando {firstRow}–{lastRow} de {total} {noun}
+        </Typography>
 
         {onLimitChange && (
-          <label className="flex items-center gap-2 whitespace-nowrap">
-            <span className="text-gray-500">Filas</span>
-            <select
-              value={limit}
-              disabled={isLoading}
-              onChange={(event) => onLimitChange(Number(event.target.value))}
-              className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 transition-colors focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/30 disabled:opacity-50"
-            >
-              {limitOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </label>
+          <TextField
+            select
+            size="small"
+            label="Filas"
+            value={limit}
+            disabled={isLoading}
+            onChange={(event) => onLimitChange(Number(event.target.value))}
+            slotProps={{ select: { native: true }, inputLabel: { shrink: true } }}
+            sx={{ width: 96 }}
+          >
+            {limitOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </TextField>
         )}
-      </div>
+      </Box>
 
       {totalPages > 1 && (
-        <nav aria-label="Paginación" className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => onPageChange(page - 1)}
-            disabled={isLoading || page <= 1}
-            aria-label="Página anterior"
-            className={navButton}
-          >
-            ‹
-          </button>
-
-          {pageItems.map((item, index) =>
-            item === ELLIPSIS ? (
-              <span
-                key={`${ELLIPSIS}-${index}`}
-                aria-hidden="true"
-                className="px-1.5 text-gray-400"
-              >
-                …
-              </span>
-            ) : (
-              <button
-                key={item}
-                type="button"
-                onClick={() => onPageChange(item)}
-                disabled={isLoading}
-                aria-label={`Página ${item}`}
-                aria-current={item === page ? 'page' : undefined}
-                className={
-                  item === page
-                    ? 'inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-brand-primary bg-brand-primary px-2.5 text-sm font-medium text-white'
-                    : navButton
-                }
-              >
-                {item}
-              </button>
-            ),
-          )}
-
-          <button
-            type="button"
-            onClick={() => onPageChange(page + 1)}
-            disabled={isLoading || page >= totalPages}
-            aria-label="Página siguiente"
-            className={navButton}
-          >
-            ›
-          </button>
-        </nav>
+        <MuiPagination
+          count={totalPages}
+          page={page}
+          onChange={(_, value) => onPageChange(value)}
+          color="primary"
+          shape="rounded"
+          disabled={isLoading}
+          getItemAriaLabel={itemAriaLabel}
+        />
       )}
-    </div>
+    </Box>
   );
 };

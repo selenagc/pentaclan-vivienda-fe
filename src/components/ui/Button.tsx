@@ -1,6 +1,9 @@
+import MuiButton, { type ButtonProps as MuiButtonProps } from '@mui/material/Button';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+// Se descarta `color`: es el atributo HTML heredado (y sin efecto en <button>),
+// y su tipo `string` chocaría con la paleta tipada de MUI al reenviar props.
+interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'color'> {
   variant?: 'primary' | 'outline' | 'danger';
   isLoading?: boolean;
   children: ReactNode;
@@ -9,42 +12,42 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean;
 }
 
+/** Traducción de las variantes de la app a las de MUI. */
+const variantProps: Record<
+  NonNullable<ButtonProps['variant']>,
+  Pick<MuiButtonProps, 'variant' | 'color'>
+> = {
+  primary: { variant: 'contained', color: 'primary' },
+  outline: { variant: 'outlined', color: 'primary' },
+  danger: { variant: 'contained', color: 'error' },
+};
+
+/**
+ * Botón de la aplicación, sobre el de MUI.
+ *
+ * Conserva su API previa (`variant`, `isLoading`, `icon`) en vez de exponer la
+ * de MUI: así las tres variantes siguen significando lo mismo en toda la app y
+ * cambiar de librería no obliga a repasar cada llamada.
+ */
 export const Button = ({
   variant = 'primary',
   isLoading = false,
   children,
   icon,
-  className = '',
   fullWidth = true,
   disabled,
   ...props
-}: ButtonProps) => {
-  const baseStyles =
-    'flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary disabled:opacity-60 disabled:cursor-not-allowed';
-
-  const variants = {
-    primary:
-      'bg-brand-primary hover:bg-brand-primary-dark text-white shadow-sm hover:shadow-md',
-    outline:
-      'border border-brand-primary/30 hover:border-brand-primary text-brand-primary hover:bg-brand-primary/5 bg-white',
-    danger:
-      'bg-error hover:bg-error/90 text-white shadow-sm hover:shadow-md focus:ring-error',
-  };
-
-  return (
-    <button
-      className={`${baseStyles} ${fullWidth ? 'w-full' : ''} ${variants[variant]} ${className}`}
-      disabled={disabled || isLoading}
-      {...props}
-    >
-      {isLoading ? (
-        <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-      ) : (
-        <>
-          {icon}
-          {children}
-        </>
-      )}
-    </button>
-  );
-};
+}: ButtonProps) => (
+  <MuiButton
+    {...variantProps[variant]}
+    fullWidth={fullWidth}
+    // MUI ya sustituye el icono por el spinner y bloquea el botón mientras
+    // carga, así que no hace falta deshabilitarlo a mano.
+    loading={isLoading}
+    startIcon={icon}
+    disabled={disabled}
+    {...props}
+  >
+    {children}
+  </MuiButton>
+);

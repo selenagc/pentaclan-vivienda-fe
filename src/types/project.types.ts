@@ -6,6 +6,8 @@
  * `contractNo`, obligatorio y único.
  */
 
+import type { ResolvedMunicipality } from './geography.types';
+
 /** Entidad financiadora tal como llega anidada en el proyecto (sin taxId ni acronym). */
 export interface ProjectPublicEntity {
   id: number;
@@ -14,15 +16,10 @@ export interface ProjectPublicEntity {
 
 /**
  * Ubicación del proyecto, resuelta hasta el departamento por el backend.
- * Llega completa para poder mostrar "Huacareta (Hernando Siles, Chuquisaca)"
- * sin volver a consultar el catálogo geográfico.
+ * Es la misma forma que traen la vivienda y la postulación, así que la
+ * definición vive en `geography.types` y aquí solo se le pone nombre local.
  */
-export interface ProjectMunicipality {
-  id: number;
-  name: string;
-  province: { id: number; name: string };
-  department: { id: number; name: string };
-}
+export type ProjectMunicipality = ResolvedMunicipality;
 
 export interface Project {
   id: string;
@@ -77,6 +74,29 @@ export interface ListProjectsParams {
   userId?: string;
 }
 
-/** "Huacareta (Hernando Siles, Chuquisaca)" para el listado. */
-export const fullLocation = (municipality: ProjectMunicipality): string =>
-  `${municipality.name} (${municipality.province.name}, ${municipality.department.name})`;
+/**
+ * "Huacareta (Hernando Siles, Chuquisaca)" para el listado. Se reexporta desde
+ * aquí porque el módulo de proyectos ya lo importaba por este nombre.
+ */
+export { fullLocation } from './geography.types';
+
+/** Usuario asignado al proyecto (técnico o trabajador social). */
+export interface ProjectAssignmentUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
+/** Asignación de evaluador a proyecto (N:M). */
+export interface ProjectAssignment {
+  id: number;
+  userId: string;
+  projectId: string;
+  assignedAt: string;
+  active: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  user?: ProjectAssignmentUser;
+}
+

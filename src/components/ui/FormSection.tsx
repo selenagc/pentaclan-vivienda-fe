@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 interface FormSectionProps {
-  /** Número del paso, tal como se ve en el círculo del mockup. */
+  /** Número del paso, tal como se ve en el círculo. */
   stepNumber: number;
   title: string;
   children: ReactNode;
@@ -10,8 +10,9 @@ interface FormSectionProps {
 }
 
 /**
- * Bloque numerado del formulario de proyecto: círculo con el número, título y
- * contenido. Se repite tres veces (Información, Ubicación, Entidad).
+ * Bloque numerado de un formulario largo: círculo con el número, título y
+ * contenido. Lo usan el formulario de proyecto (Información, Ubicación,
+ * Entidad) y el de solicitante (Titular, Cónyuge, Vivienda, Presentación).
  */
 export const FormSection = ({
   stepNumber,

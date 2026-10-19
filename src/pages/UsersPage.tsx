@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import Alert from '@mui/material/Alert';
+import MuiButton from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
 import { Table, type Column } from '../components/ui/Table';
 import { Pagination } from '../components/ui/Pagination';
 import { Button } from '../components/ui/Button';
@@ -60,24 +63,19 @@ export const UsersPage = () => {
       header: '',
       align: 'right',
       render: (user) => (
-        <div className="flex justify-end gap-1">
-          <button
-            type="button"
-            onClick={() => openEdit(user)}
-            className="rounded-md px-2.5 py-1.5 text-sm font-medium text-brand-primary transition-colors hover:bg-brand-primary/5"
-            aria-label={`Editar ${user.name}`}
-          >
+        <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'flex-end' }}>
+          <MuiButton size="small" onClick={() => openEdit(user)} aria-label={`Editar ${user.name}`}>
             Editar
-          </button>
-          <button
-            type="button"
+          </MuiButton>
+          <MuiButton
+            size="small"
+            color="error"
             onClick={() => setDeleting(user)}
-            className="rounded-md px-2.5 py-1.5 text-sm font-medium text-error transition-colors hover:bg-error/5"
             aria-label={`Eliminar ${user.name}`}
           >
             Eliminar
-          </button>
-        </div>
+          </MuiButton>
+        </Stack>
       ),
     });
   }
@@ -99,12 +97,7 @@ export const UsersPage = () => {
       </div>
 
       {error ? (
-        <div
-          role="alert"
-          className="rounded-xl border border-error/30 bg-error/5 px-4 py-3 text-sm text-error"
-        >
-          {error}
-        </div>
+        <Alert severity="error">{error}</Alert>
       ) : (
         <>
           <Table

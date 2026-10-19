@@ -1,25 +1,27 @@
-import type { InputHTMLAttributes } from 'react';
+import MuiCheckbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import type { ChangeEvent } from 'react';
 
-interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
+/** Props explícitas: la raíz de MUI es un `<label>`, no el `<input>`. */
+interface CheckboxProps {
   label: string;
+  id?: string;
+  name?: string;
+  checked?: boolean;
+  disabled?: boolean;
+  required?: boolean;
+  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
 }
 
+/** Casilla de verificación con su etiqueta, sobre la de MUI. */
 export const Checkbox = ({ label, id, ...props }: CheckboxProps) => {
   const inputId = id || props.name || label.toLowerCase().replace(/\s+/g, '-');
 
   return (
-    <label htmlFor={inputId} className="inline-flex items-center cursor-pointer select-none">
-      <input
-        id={inputId}
-        type="checkbox"
-        className="
-          w-4 h-4 rounded border-gray-300 text-brand-primary
-          focus:ring-brand-primary/30 focus:ring-2 focus:ring-offset-0
-          cursor-pointer
-        "
-        {...props}
-      />
-      <span className="ml-2 text-sm text-gray-700">{label}</span>
-    </label>
+    <FormControlLabel
+      control={<MuiCheckbox id={inputId} size="small" {...props} />}
+      label={label}
+      slotProps={{ typography: { variant: 'body2' } }}
+    />
   );
 };

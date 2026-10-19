@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Tokens de Tailwind. Los colores de marca están duplicados en src/theme.ts,
+   que es de donde los lee MUI: los dos motores resuelven su tema por separado.
+   Si cambias uno, cambia el otro. */
 @theme {
   --color-brand-primary: #6B21A8;
   --color-brand-primary-dark: #581C87;
