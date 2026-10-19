@@ -8,7 +8,7 @@ import type { ApplicationStatus, DocumentIssuedIn, Sex } from '../types/applicat
 
 export const APPLICATION_STATUS_LABELS: Record<ApplicationStatus, string> = {
   pending: 'Pendiente',
-  under_review: 'En revisión',
+  under_review: 'Preseleccionado',
   approved: 'Aprobada',
   rejected: 'Rechazada',
   withdrawn: 'Retirada',
@@ -65,6 +65,22 @@ export const SEX_OPTIONS = (Object.keys(SEX_LABELS) as Sex[]).map((value) => ({
  * ejecuta.
  */
 export const CAN_WRITE_APPLICATIONS = ['admin', 'social_lead', 'technical_lead'] as const;
+
+/**
+ * Quién puede preseleccionar una postulación (pasar a 'under_review').
+ * Los evaluadores de campo (líderes social y técnico), supervisor y admin.
+ */
+export const CAN_PRESELECT_APPLICATIONS = [
+  'admin',
+  'project_supervisor',
+  'social_lead',
+  'technical_lead',
+] as const;
+
+/**
+ * Estados desde los que se puede preseleccionar. Solo 'pending'.
+ */
+export const PRESELECTABLE_STATUSES: ApplicationStatus[] = ['pending'];
 
 /**
  * Quién puede aprobar o rechazar. Deja fuera a los dos líderes **a propósito**:

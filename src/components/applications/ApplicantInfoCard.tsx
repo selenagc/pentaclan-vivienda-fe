@@ -34,6 +34,12 @@ const EditIcon = (
   </svg>
 );
 
+const PreselectIcon = (
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+  </svg>
+);
+
 /**
  * Marco común de la tarjeta, para que carga y contenido midan lo mismo.
  *
@@ -75,6 +81,8 @@ interface ApplicantInfoCardProps {
   onEdit?: () => void;
   /** Abre la baja. Se omite para quien no es admin. */
   onDelete?: () => void;
+  /** Abre la preselección. Se omite si la ficha no está pendiente o el rol no puede preseleccionar. */
+  onPreselect?: () => void;
   /** Abre la aprobación. Se omite si no puede decidir o la ficha ya se decidió. */
   onApprove?: () => void;
   /** Abre el rechazo, con las mismas condiciones que la aprobación. */
@@ -102,11 +110,13 @@ export const ApplicantInfoCard = ({
   application,
   onEdit,
   onDelete,
+  onPreselect,
   onApprove,
   onReject,
 }: ApplicantInfoCardProps) => {
   const name = personDisplayName(application.person);
   const canDecide = Boolean(onApprove || onReject);
+  const hasActions = Boolean(onEdit || onDelete || onPreselect || canDecide);
 
   return (
     <Card>
@@ -134,8 +144,13 @@ export const ApplicantInfoCard = ({
           </div>
         </div>
 
-        {(onEdit || onDelete || canDecide) && (
+        {hasActions && (
           <div className="flex flex-wrap items-center gap-2">
+            {onPreselect && (
+              <Button variant="outline" fullWidth={false} icon={PreselectIcon} onClick={onPreselect}>
+                Preseleccionar
+              </Button>
+            )}
             {onApprove && (
               <Button fullWidth={false} icon={CheckIcon} onClick={onApprove}>
                 Aprobar
@@ -146,7 +161,7 @@ export const ApplicantInfoCard = ({
                 Rechazar
               </Button>
             )}
-            {canDecide && (onEdit || onDelete) && (
+            {(canDecide || onPreselect) && (onEdit || onDelete) && (
               <span aria-hidden="true" className="mx-1 hidden h-6 w-px bg-gray-200 sm:block" />
             )}
             {onEdit && (

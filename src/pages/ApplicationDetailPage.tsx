@@ -7,6 +7,7 @@ import {
   ApplicantInfoCardSkeleton,
 } from '../components/applications/ApplicantInfoCard';
 import { ConfirmDeleteApplicationModal } from '../components/applications/ConfirmDeleteApplicationModal';
+import { ConfirmPreselectApplicationModal } from '../components/applications/ConfirmPreselectApplicationModal';
 import { ConfirmApproveApplicationModal } from '../components/applications/ConfirmApproveApplicationModal';
 import { RejectApplicationModal } from '../components/applications/RejectApplicationModal';
 import type {
@@ -18,6 +19,7 @@ import { useAuth } from '../hooks/useAuth';
 import { applicationService } from '../services/applicationService';
 import {
   CAN_DECIDE_APPLICATIONS,
+  CAN_PRESELECT_APPLICATIONS,
   CAN_WRITE_APPLICATIONS,
   DECIDABLE_STATUSES,
 } from '../constants/applications';
@@ -82,10 +84,17 @@ export const ApplicationDetailPage = ({ section }: ApplicationDetailPageProps) =
   );
 
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isPreselecting, setIsPreselecting] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
 
   const isBeneficiary = application?.status === 'approved';
+
+  // Preseleccionar necesita el rol y que la ficha siga en estado 'pending'.
+  const canPreselect =
+    CAN_PRESELECT_APPLICATIONS.includes(
+      user?.role as (typeof CAN_PRESELECT_APPLICATIONS)[number],
+    ) && application?.status === 'pending';
 
   // Decidir necesita el rol **y** que la ficha siga abierta: sobre una ya
   // decidida el backend responde 409, así que ofrecer el botón sería prometer
@@ -126,6 +135,7 @@ export const ApplicationDetailPage = ({ section }: ApplicationDetailPageProps) =
             application={application}
             onEdit={canWrite ? () => navigate(`${basePath}/editar`) : undefined}
             onDelete={isAdmin ? () => setIsDeleting(true) : undefined}
+            onPreselect={canPreselect ? () => setIsPreselecting(true) : undefined}
             onApprove={canDecide ? () => setIsApproving(true) : undefined}
             onReject={canDecide ? () => setIsRejecting(true) : undefined}
           />
@@ -137,6 +147,15 @@ export const ApplicationDetailPage = ({ section }: ApplicationDetailPageProps) =
           <Outlet context={{ application, section } satisfies ApplicationOutletContext} />
         </>
       )}
+
+      <ConfirmPreselectApplicationModal
+        open={isPreselecting}
+        onClose={() => setIsPreselecting(false)}
+        onSuccess={() => {
+          refresh();
+        }}
+        application={application}
+      />
 
       <ConfirmApproveApplicationModal
         open={isApproving}
