@@ -46,6 +46,8 @@ interface TableProps<T> {
   emptyMessage?: ReactNode;
   /** Callback al hacer clic en una fila (la vuelve interactiva). */
   onRowClick?: (row: T, index: number) => void;
+  /** Clases extra por fila (p. ej. para alternar colores por grupo). */
+  rowClassName?: (row: T, index: number) => string;
   /** Clases extra para el contenedor externo. */
   className?: string;
 }
@@ -83,6 +85,7 @@ export function Table<T>({
   isLoading = false,
   emptyMessage = 'No hay datos para mostrar.',
   onRowClick,
+  rowClassName,
   className = '',
 }: TableProps<T>) {
   const resolveRowKey = (row: T, index: number): string | number =>
@@ -128,6 +131,7 @@ export function Table<T>({
               <TableRow
                 key={resolveRowKey(row, index)}
                 hover
+                className={rowClassName ? rowClassName(row, index) : undefined}
                 onClick={onRowClick ? () => onRowClick(row, index) : undefined}
                 sx={onRowClick ? { cursor: 'pointer' } : undefined}
               >
