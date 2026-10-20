@@ -21,25 +21,22 @@ interface TechnicalDiagnosisFormProps {
 }
 
 const ABC_STANDARD_OPTIONS = [
-  { value: 'Cumple con estándares ABC', label: 'Cumple con estándares ABC' },
-  { value: 'No cumple con estándares ABC', label: 'No cumple con estándares ABC' },
-  { value: 'En trámite / Parcial', label: 'En trámite / Parcial' },
-  { value: 'No aplica', label: 'No aplica' },
+  { value: 'DENTRO DE LOS 50 mts DEL EJE DE VIA', label: 'DENTRO DE LOS 50 mts DEL EJE DE VIA' },
+  { value: 'FUERA DE LOS 50 mts DEL EJE DE VIA', label: 'FUERA DE LOS 50 mts DEL EJE DE VIA' },
 ];
 
 const ACCESSIBILITY_OPTIONS = [
-  { value: 'Vía asfaltada / Pavimento', label: 'Vía asfaltada / Pavimento' },
-  { value: 'Camino ripiado vehicular', label: 'Camino ripiado vehicular' },
-  { value: 'Camino de tierra vehicular', label: 'Camino de tierra vehicular' },
-  { value: 'Acceso solo peatonal / Gradas', label: 'Acceso solo peatonal / Gradas' },
-  { value: 'Sendero rural', label: 'Sendero rural' },
+  { value: 'CARRETERA ASFALTADA', label: 'CARRETERA ASFALTADA' },
+  { value: 'CARRETERA DE TIERRA', label: 'CARRETERA DE TIERRA' },
+  { value: 'CAMINO VECINAL', label: 'CAMINO VECINAL' },
+  { value: 'SIN ACCESO VEHICULAR', label: 'SIN ACCESO VEHICULAR' },
 ];
 
 const LAND_CONDITION_OPTIONS = [
-  { value: 'Firme y estable', label: 'Firme y estable' },
-  { value: 'Sujeto a inundación', label: 'Sujeto a inundación' },
-  { value: 'Riesgo de deslizamiento / Geológico', label: 'Riesgo de deslizamiento / Geológico' },
-  { value: 'Relleno o suelo blando', label: 'Relleno o suelo blando' },
+  { value: 'SECO', label: 'SECO' },
+  { value: 'CON HUMEDAD', label: 'CON HUMEDAD' },
+  { value: 'INUNDABLE', label: 'INUNDABLE' },
+  { value: 'INESTABLE', label: 'INESTABLE' },
 ];
 
 const WATER_ACCESS_OPTIONS = [
@@ -422,50 +419,60 @@ export const TechnicalDiagnosisForm = ({
       </div>
 
       {/* 1. Terreno y Accesibilidad */}
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
+      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs">
         <FormSection stepNumber={1} title="Terreno y Accesibilidad" withDivider={false}>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Input
-              label="Pendiente del Terreno (%)"
-              type="number"
-              value={slopePercentage ?? ''}
-              onChange={(e) =>
-                setSlopePercentage(e.target.value === '' ? null : Number(e.target.value))
-              }
-              disabled={!canEdit || isSubmitting}
-              placeholder="Ej. 5"
-            />
-            <Input
-              label="Minutos de Caminata / Acceso Peatonal"
-              type="number"
-              value={pedestrianMinutes ?? ''}
-              onChange={(e) =>
-                setPedestrianMinutes(e.target.value === '' ? null : Number(e.target.value))
-              }
-              disabled={!canEdit || isSubmitting}
-              placeholder="Minutos a pie"
-            />
-            <Select
-              label="Estándar Vial (Norma ABC)"
-              value={abcStandard}
-              onChange={(e) => setAbcStandard(e.target.value)}
-              options={ABC_STANDARD_OPTIONS}
-              disabled={!canEdit || isSubmitting}
-            />
-            <Select
-              label="Tipo de Accesibilidad"
-              value={accessibilityType}
-              onChange={(e) => setAccessibilityType(e.target.value)}
-              options={ACCESSIBILITY_OPTIONS}
-              disabled={!canEdit || isSubmitting}
-            />
-            <Select
-              label="Condición / Estabilidad del Terreno"
-              value={landCondition}
-              onChange={(e) => setLandCondition(e.target.value)}
-              options={LAND_CONDITION_OPTIONS}
-              disabled={!canEdit || isSubmitting}
-            />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-6 lg:grid-cols-12">
+            <div className="col-span-1 sm:col-span-2 lg:col-span-2">
+              <Input
+                label="Pendiente (%)"
+                type="number"
+                value={slopePercentage ?? ''}
+                onChange={(e) =>
+                  setSlopePercentage(e.target.value === '' ? null : Number(e.target.value))
+                }
+                disabled={!canEdit || isSubmitting}
+                placeholder="Ej. 5"
+              />
+            </div>
+            <div className="col-span-1 sm:col-span-2 lg:col-span-2">
+              <Input
+                label="Caminata (min)"
+                type="number"
+                value={pedestrianMinutes ?? ''}
+                onChange={(e) =>
+                  setPedestrianMinutes(e.target.value === '' ? null : Number(e.target.value))
+                }
+                disabled={!canEdit || isSubmitting}
+                placeholder="Minutos"
+              />
+            </div>
+            <div className="col-span-2 sm:col-span-2 lg:col-span-3">
+              <Select
+                label="Norma ABC"
+                value={abcStandard}
+                onChange={(e) => setAbcStandard(e.target.value)}
+                options={ABC_STANDARD_OPTIONS}
+                disabled={!canEdit || isSubmitting}
+              />
+            </div>
+            <div className="col-span-2 sm:col-span-3 lg:col-span-3">
+              <Select
+                label="Tipo de Accesibilidad"
+                value={accessibilityType}
+                onChange={(e) => setAccessibilityType(e.target.value)}
+                options={ACCESSIBILITY_OPTIONS}
+                disabled={!canEdit || isSubmitting}
+              />
+            </div>
+            <div className="col-span-2 sm:col-span-3 lg:col-span-2">
+              <Select
+                label="Condición del Terreno"
+                value={landCondition}
+                onChange={(e) => setLandCondition(e.target.value)}
+                options={LAND_CONDITION_OPTIONS}
+                disabled={!canEdit || isSubmitting}
+              />
+            </div>
           </div>
         </FormSection>
       </div>
