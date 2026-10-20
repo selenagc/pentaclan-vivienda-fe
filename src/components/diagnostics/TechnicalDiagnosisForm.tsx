@@ -81,11 +81,158 @@ const TENURE_STATUS_OPTIONS = [
   { value: 'OTRO', label: 'OTRO' },
 ];
 
+const USAGE_TYPE_OPTIONS = [
+  { value: '', label: '-- Seleccione --' },
+  { value: 'DORMITORIO', label: 'DORMITORIO' },
+  { value: 'COCINA', label: 'COCINA' },
+  { value: 'GALERIA', label: 'GALERIA' },
+  { value: 'DEPOSITO', label: 'DEPOSITO' },
+  { value: 'USO COMBINADO', label: 'USO COMBINADO' },
+  { value: 'TIENDA', label: 'TIENDA' },
+  { value: 'PLANTAS', label: 'PLANTAS' },
+  { value: 'DIVISIONES INT.', label: 'DIVISIONES INT.' },
+];
+
 const MATERIAL_STATE_OPTIONS = [
-  { value: 'Bueno', label: 'Bueno' },
-  { value: 'Regular', label: 'Regular' },
-  { value: 'Malo', label: 'Malo' },
-  { value: 'Inexistente', label: 'Inexistente' },
+  { value: 'MAL ESTADO', label: 'MAL ESTADO' },
+  { value: 'REGULAR ESTADO', label: 'REGULAR ESTADO' },
+  { value: 'BUEN ESTADO', label: 'BUEN ESTADO' },
+];
+
+interface ComponentConfig {
+  title: string;
+  materialField: keyof ConstructionElement;
+  stateField: keyof ConstructionElement;
+  options: { value: string; label: string }[];
+  hasNoTiene: boolean;
+}
+
+const CONSTRUCTION_COMPONENT_CONFIGS: ComponentConfig[] = [
+  {
+    title: 'CIMIENTOS',
+    materialField: 'foundationMaterial',
+    stateField: 'foundationState',
+    hasNoTiene: true,
+    options: [
+      { value: 'NO TIENE', label: 'NO TIENE' },
+      { value: 'PIEDRA Y BARRO', label: 'PIEDRA Y BARRO' },
+      { value: 'H°C°', label: 'H°C°' },
+      { value: 'OTRO', label: 'OTRO' },
+    ],
+  },
+  {
+    title: 'MUROS',
+    materialField: 'wallsMaterial',
+    stateField: 'wallsState',
+    hasNoTiene: false,
+    options: [
+      { value: 'TAPIAL', label: 'TAPIAL' },
+      { value: 'ADOBE', label: 'ADOBE' },
+      { value: 'LADRILLO', label: 'LADRILLO' },
+      { value: 'OTRO', label: 'OTRO' },
+    ],
+  },
+  {
+    title: 'TECHOS',
+    materialField: 'roofMaterial',
+    stateField: 'roofState',
+    hasNoTiene: false,
+    options: [
+      { value: 'PAJA', label: 'PAJA' },
+      { value: 'CALAMINA', label: 'CALAMINA' },
+      { value: 'FIBROCEMENTO', label: 'FIBROCEMENTO' },
+      { value: 'OTRO', label: 'OTRO' },
+    ],
+  },
+  {
+    title: 'REVOQUE EXT.',
+    materialField: 'exteriorPlasterMaterial',
+    stateField: 'exteriorPlasterState',
+    hasNoTiene: true,
+    options: [
+      { value: 'NO TIENE', label: 'NO TIENE' },
+      { value: 'BARRO', label: 'BARRO' },
+      { value: 'YESO', label: 'YESO' },
+      { value: 'CEMENTO', label: 'CEMENTO' },
+      { value: 'OTRO', label: 'OTRO' },
+    ],
+  },
+  {
+    title: 'REVOQUE INT.',
+    materialField: 'interiorPlasterMaterial',
+    stateField: 'interiorPlasterState',
+    hasNoTiene: true,
+    options: [
+      { value: 'NO TIENE', label: 'NO TIENE' },
+      { value: 'BARRO', label: 'BARRO' },
+      { value: 'YESO', label: 'YESO' },
+      { value: 'CEMENTO', label: 'CEMENTO' },
+      { value: 'OTRO', label: 'OTRO' },
+    ],
+  },
+  {
+    title: 'REV. EN CIELO',
+    materialField: 'ceilingPlasterMaterial',
+    stateField: 'ceilingPlasterState',
+    hasNoTiene: true,
+    options: [
+      { value: 'NO TIENE', label: 'NO TIENE' },
+      { value: 'TELA', label: 'TELA' },
+      { value: 'YESO', label: 'YESO' },
+      { value: 'PLAFON', label: 'PLAFON' },
+      { value: 'OTRO', label: 'OTRO' },
+    ],
+  },
+  {
+    title: 'PISOS',
+    materialField: 'floorsMaterial',
+    stateField: 'floorsState',
+    hasNoTiene: false,
+    options: [
+      { value: 'TIERRA', label: 'TIERRA' },
+      { value: 'CEMENTO', label: 'CEMENTO' },
+      { value: 'TABLON', label: 'TABLON' },
+      { value: 'MACHIMBRE', label: 'MACHIMBRE' },
+      { value: 'CERAMICA', label: 'CERAMICA' },
+      { value: 'LAD. ADOBITO', label: 'LAD. ADOBITO' },
+    ],
+  },
+  {
+    title: 'PUERTAS',
+    materialField: 'doorsMaterial',
+    stateField: 'doorsState',
+    hasNoTiene: true,
+    options: [
+      { value: 'NO TIENE', label: 'NO TIENE' },
+      { value: 'IMPROVISADA', label: 'IMPROVISADA' },
+      { value: 'LATON', label: 'LATON' },
+      { value: 'MADERA', label: 'MADERA' },
+      { value: 'METALICA', label: 'METALICA' },
+    ],
+  },
+  {
+    title: 'VENTANAS',
+    materialField: 'windowsMaterial',
+    stateField: 'windowsState',
+    hasNoTiene: true,
+    options: [
+      { value: 'NO TIENE', label: 'NO TIENE' },
+      { value: 'IMPROVISADA', label: 'IMPROVISADA' },
+      { value: 'MADERA', label: 'MADERA' },
+      { value: 'METALICA', label: 'METALICA' },
+    ],
+  },
+  {
+    title: 'INST. ELÉCTRICA',
+    materialField: 'electricalInstallation',
+    stateField: 'electricalInstallationState',
+    hasNoTiene: true,
+    options: [
+      { value: 'NO TIENE', label: 'NO TIENE' },
+      { value: 'INST. PRECARIA', label: 'INST. PRECARIA' },
+      { value: 'TIENE', label: 'TIENE' },
+    ],
+  },
 ];
 
 const PHOTO_TYPE_OPTIONS = [
@@ -167,28 +314,28 @@ export const TechnicalDiagnosisForm = ({
       : [
           {
             constructionNumber: 1,
-            usageType: 'Dormitorio principal',
-            foundationMaterial: 'Piedra con barro',
-            foundationState: 'Regular',
-            wallsMaterial: 'Adobe',
-            wallsState: 'Regular',
-            roofMaterial: 'Calamina',
-            roofState: 'Regular',
-            exteriorPlasterMaterial: 'Barro',
-            exteriorPlasterState: 'Malo',
-            interiorPlasterMaterial: 'Yeso',
-            interiorPlasterState: 'Regular',
-            ceilingPlasterMaterial: 'Sin cielo raso',
-            ceilingPlasterState: 'Inexistente',
-            floorsMaterial: 'Tierra',
-            floorsState: 'Malo',
-            doorsMaterial: 'Madera rústica',
-            doorsState: 'Regular',
-            windowsMaterial: 'Fierro / Sin vidrio',
-            windowsState: 'Regular',
-            electricalInstallation: 'Visible / Precaria',
-            electricalInstallationState: 'Malo',
-            canBeImproved: 1,
+            usageType: '',
+            foundationMaterial: '',
+            foundationState: '',
+            wallsMaterial: '',
+            wallsState: '',
+            roofMaterial: '',
+            roofState: '',
+            exteriorPlasterMaterial: '',
+            exteriorPlasterState: '',
+            interiorPlasterMaterial: '',
+            interiorPlasterState: '',
+            ceilingPlasterMaterial: '',
+            ceilingPlasterState: '',
+            floorsMaterial: '',
+            floorsState: '',
+            doorsMaterial: '',
+            doorsState: '',
+            windowsMaterial: '',
+            windowsState: '',
+            electricalInstallation: '',
+            electricalInstallationState: '',
+            canBeImproved: 0,
             cannotBeImproved: 0,
             noImprovementNeeded: 0,
             observations: '',
@@ -233,28 +380,28 @@ export const TechnicalDiagnosisForm = ({
       ...prev,
       {
         constructionNumber: prev.length + 1,
-        usageType: 'Nuevo ambiente',
+        usageType: '',
         foundationMaterial: '',
-        foundationState: 'Regular',
+        foundationState: '',
         wallsMaterial: '',
-        wallsState: 'Regular',
+        wallsState: '',
         roofMaterial: '',
-        roofState: 'Regular',
+        roofState: '',
         exteriorPlasterMaterial: '',
-        exteriorPlasterState: 'Regular',
+        exteriorPlasterState: '',
         interiorPlasterMaterial: '',
-        interiorPlasterState: 'Regular',
+        interiorPlasterState: '',
         ceilingPlasterMaterial: '',
-        ceilingPlasterState: 'Regular',
+        ceilingPlasterState: '',
         floorsMaterial: '',
-        floorsState: 'Regular',
+        floorsState: '',
         doorsMaterial: '',
-        doorsState: 'Regular',
+        doorsState: '',
         windowsMaterial: '',
-        windowsState: 'Regular',
+        windowsState: '',
         electricalInstallation: '',
-        electricalInstallationState: 'Regular',
-        canBeImproved: 1,
+        electricalInstallationState: '',
+        canBeImproved: 0,
         cannotBeImproved: 0,
         noImprovementNeeded: 0,
         observations: '',
@@ -417,7 +564,7 @@ export const TechnicalDiagnosisForm = ({
       <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs">
         <FormSection stepNumber={1} title="Terreno y Accesibilidad" withDivider={false}>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-6 lg:grid-cols-12">
-            <div className="col-span-1 sm:col-span-2 lg:col-span-2">
+            <div className="col-span-1 rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs sm:col-span-2 lg:col-span-2 [&_.MuiOutlinedInput-root]:bg-white/90">
               <Input
                 label="Pendiente (%)"
                 type="number"
@@ -429,7 +576,7 @@ export const TechnicalDiagnosisForm = ({
                 placeholder="Ej. 5"
               />
             </div>
-            <div className="col-span-1 sm:col-span-2 lg:col-span-2">
+            <div className="col-span-1 rounded-xl border border-sky-200 bg-sky-100/70 p-3 shadow-2xs sm:col-span-2 lg:col-span-2 [&_.MuiOutlinedInput-root]:bg-white/90">
               <Input
                 label="Caminata (min)"
                 type="number"
@@ -441,7 +588,7 @@ export const TechnicalDiagnosisForm = ({
                 placeholder="Minutos"
               />
             </div>
-            <div className="col-span-2 sm:col-span-2 lg:col-span-3">
+            <div className="col-span-2 rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs sm:col-span-2 lg:col-span-3 [&_.MuiOutlinedInput-root]:bg-white/90">
               <Select
                 label="Norma ABC"
                 value={abcStandard}
@@ -450,7 +597,7 @@ export const TechnicalDiagnosisForm = ({
                 disabled={!canEdit || isSubmitting}
               />
             </div>
-            <div className="col-span-2 sm:col-span-3 lg:col-span-3">
+            <div className="col-span-2 rounded-xl border border-sky-200 bg-sky-100/70 p-3 shadow-2xs sm:col-span-3 lg:col-span-3 [&_.MuiOutlinedInput-root]:bg-white/90">
               <Select
                 label="Tipo de Accesibilidad"
                 value={accessibilityType}
@@ -459,7 +606,7 @@ export const TechnicalDiagnosisForm = ({
                 disabled={!canEdit || isSubmitting}
               />
             </div>
-            <div className="col-span-2 sm:col-span-3 lg:col-span-2">
+            <div className="col-span-2 rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs sm:col-span-3 lg:col-span-2 [&_.MuiOutlinedInput-root]:bg-white/90">
               <Select
                 label="Condición del Terreno"
                 value={landCondition}
@@ -477,8 +624,8 @@ export const TechnicalDiagnosisForm = ({
         <FormSection stepNumber={2} title="Servicios Básicos e Higiene">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12">
             {/* Agua */}
-            <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-3 lg:col-span-2">
-              <h4 className="mb-2 text-[11px] font-bold tracking-wide text-brand-primary uppercase">
+            <div className="rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs lg:col-span-2 [&_.MuiOutlinedInput-root]:bg-white/90">
+              <h4 className="mb-2 text-[11px] font-bold tracking-wide text-purple-900 uppercase">
                 Agua Potable
               </h4>
               <Select
@@ -491,8 +638,8 @@ export const TechnicalDiagnosisForm = ({
             </div>
 
             {/* Electricidad */}
-            <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-3 lg:col-span-2">
-              <h4 className="mb-2 text-[11px] font-bold tracking-wide text-brand-primary uppercase">
+            <div className="rounded-xl border border-sky-200 bg-sky-100/70 p-3 shadow-2xs lg:col-span-2 [&_.MuiOutlinedInput-root]:bg-white/90">
+              <h4 className="mb-2 text-[11px] font-bold tracking-wide text-sky-900 uppercase">
                 Energía Eléctrica
               </h4>
               <Select
@@ -505,8 +652,8 @@ export const TechnicalDiagnosisForm = ({
             </div>
 
             {/* Recuadro de Baño */}
-            <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-3 lg:col-span-4">
-              <h4 className="mb-2 text-[11px] font-bold tracking-wide text-brand-primary uppercase">
+            <div className="rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs lg:col-span-4 [&_.MuiOutlinedInput-root]:bg-white/90">
+              <h4 className="mb-2 text-[11px] font-bold tracking-wide text-purple-900 uppercase">
                 Baño / Servicio Sanitario
               </h4>
               <Select
@@ -523,7 +670,7 @@ export const TechnicalDiagnosisForm = ({
                 options={BATHROOM_TYPE_OPTIONS}
                 disabled={!canEdit || isSubmitting}
               />
-              <div className="mt-2.5 flex flex-wrap items-center gap-4 rounded-lg border border-gray-200 bg-white px-3 py-2">
+              <div className="mt-2.5 flex flex-wrap items-center gap-4 rounded-lg border border-purple-200/80 bg-white/90 px-3 py-2">
                 {(() => {
                   const canChooseBathroomUsage =
                     Boolean(bathroomType) && bathroomType !== 'NO TIENE';
@@ -576,8 +723,8 @@ export const TechnicalDiagnosisForm = ({
             </div>
 
             {/* Recuadro de Cocina */}
-            <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-3 lg:col-span-4">
-              <h4 className="mb-2 text-[11px] font-bold tracking-wide text-brand-primary uppercase">
+            <div className="rounded-xl border border-sky-200 bg-sky-100/70 p-3 shadow-2xs lg:col-span-4 [&_.MuiOutlinedInput-root]:bg-white/90">
+              <h4 className="mb-2 text-[11px] font-bold tracking-wide text-sky-900 uppercase">
                 Cocina
               </h4>
               <Select
@@ -600,7 +747,7 @@ export const TechnicalDiagnosisForm = ({
                 options={KITCHEN_TYPE_OPTIONS}
                 disabled={!canEdit || isSubmitting}
               />
-              <div className="mt-2.5 flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2">
+              <div className="mt-2.5 flex flex-wrap items-center gap-3 rounded-lg border border-sky-200/80 bg-white/90 px-3 py-2">
                 {(() => {
                   const hasKitchen = Boolean(kitchenType) && kitchenType !== 'NO TIENE';
                   const hasNoKitchen = kitchenType === 'NO TIENE';
@@ -675,7 +822,7 @@ export const TechnicalDiagnosisForm = ({
       <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs">
         <FormSection stepNumber={3} title="Tipología y Régimen de Tenencia">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12">
-            <div className="lg:col-span-3">
+            <div className="rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs lg:col-span-3 [&_.MuiOutlinedInput-root]:bg-white/90">
               <Select
                 label="Tipología de Habitabilidad"
                 value={housingTypology}
@@ -684,7 +831,7 @@ export const TechnicalDiagnosisForm = ({
                 disabled={!canEdit || isSubmitting}
               />
             </div>
-            <div className="lg:col-span-4">
+            <div className="rounded-xl border border-sky-200 bg-sky-100/70 p-3 shadow-2xs lg:col-span-4 [&_.MuiOutlinedInput-root]:bg-white/90">
               <Select
                 label="Característica de Ocupación de la Vivienda"
                 value={tenureStatus}
@@ -693,7 +840,7 @@ export const TechnicalDiagnosisForm = ({
                 disabled={!canEdit || isSubmitting}
               />
             </div>
-            <div className="sm:col-span-2 lg:col-span-5">
+            <div className="rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs sm:col-span-2 lg:col-span-5 [&_.MuiOutlinedInput-root]:bg-white/90">
               <Input
                 label="Observaciones sobre la Tenencia y Vivienda"
                 value={housingObs}
@@ -707,22 +854,38 @@ export const TechnicalDiagnosisForm = ({
       </div>
 
       {/* 4. Componentes Constructivos */}
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
+      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs">
         <FormSection stepNumber={4} title="Componentes y Materiales Constructivos">
-          <p className="mb-4 text-sm text-gray-500">
-            Evalúe cada uno de los bloques o ambientes de la vivienda existente.
-          </p>
-
-          <div className="space-y-6">
+          <div className="space-y-5">
             {elements.map((el, index) => (
               <div
                 key={index}
-                className="relative rounded-xl border border-gray-200 bg-gray-50/40 p-5 transition-colors hover:border-gray-300"
+                className="relative rounded-xl border border-gray-200 bg-gray-50/50 p-4 transition-colors hover:border-gray-300"
               >
-                <div className="mb-4 flex items-center justify-between border-b border-gray-200 pb-3">
-                  <h4 className="text-sm font-bold text-gray-900">
-                    Construcción / Bloque #{el.constructionNumber}
-                  </h4>
+                {/* Fila superior del bloque: Número de bloque + Uso + Eliminar */}
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 pb-3">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h4 className="text-sm font-bold text-gray-900">
+                      Construcción / Bloque #{el.constructionNumber}
+                    </h4>
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs font-bold tracking-wide text-brand-primary uppercase">
+                        USO:
+                      </label>
+                      <select
+                        value={el.usageType ?? ''}
+                        onChange={(e) => handleElementChange(index, 'usageType', e.target.value)}
+                        disabled={!canEdit || isSubmitting}
+                        className="rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-gray-800 shadow-2xs focus:border-brand-primary focus:ring-1 focus:ring-brand-primary focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
+                      >
+                        {USAGE_TYPE_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
                   {canEdit && elements.length > 1 && (
                     <button
                       type="button"
@@ -734,169 +897,167 @@ export const TechnicalDiagnosisForm = ({
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  <div className="sm:col-span-2 lg:col-span-3">
-                    <Input
-                      label="Uso / Destino del Bloque"
-                      value={el.usageType ?? ''}
-                      onChange={(e) => handleElementChange(index, 'usageType', e.target.value)}
-                      disabled={!canEdit || isSubmitting}
-                      placeholder="Ej. Dormitorio principal, Cocina, Cuarto multiuso"
-                    />
-                  </div>
+                {/* Fila 1: Los 10 componentes constructivos en una sola fila con recuadro propio */}
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-5 lg:grid-cols-10">
+                  {CONSTRUCTION_COMPONENT_CONFIGS.map((comp, compIdx) => {
+                    const materialVal = String(el[comp.materialField] ?? '');
+                    const stateVal = String(el[comp.stateField] ?? '');
+                    const isNoTiene = comp.hasNoTiene && materialVal === 'NO TIENE';
+                    const isEven = compIdx % 2 === 0;
 
-                  {/* Cimientos */}
-                  <Input
-                    label="Material Cimientos"
-                    value={el.foundationMaterial ?? ''}
-                    onChange={(e) =>
-                      handleElementChange(index, 'foundationMaterial', e.target.value)
-                    }
-                    disabled={!canEdit || isSubmitting}
-                    placeholder="Piedra, HºCº, Sin cimiento"
-                  />
-                  <Select
-                    label="Estado Cimientos"
-                    value={el.foundationState ?? 'Regular'}
-                    onChange={(e) => handleElementChange(index, 'foundationState', e.target.value)}
-                    options={MATERIAL_STATE_OPTIONS}
-                    disabled={!canEdit || isSubmitting}
-                  />
+                    return (
+                      <div
+                        key={comp.title}
+                        className={`flex flex-col justify-between rounded-lg border p-2 shadow-2xs ${
+                          isEven
+                            ? 'border-purple-200 bg-purple-100/70'
+                            : 'border-sky-200 bg-sky-100/70'
+                        }`}
+                      >
+                        <div
+                          className={`mb-1.5 border-b pb-1 text-[10px] font-bold tracking-wider uppercase ${
+                            isEven
+                              ? 'border-purple-200/80 text-purple-900'
+                              : 'border-sky-200/80 text-sky-900'
+                          }`}
+                        >
+                          {comp.title}
+                        </div>
 
-                  {/* Muros */}
-                  <Input
-                    label="Material Muros"
-                    value={el.wallsMaterial ?? ''}
-                    onChange={(e) => handleElementChange(index, 'wallsMaterial', e.target.value)}
-                    disabled={!canEdit || isSubmitting}
-                    placeholder="Adobe, Ladrillo, Madera, Tapial"
-                  />
-                  <Select
-                    label="Estado Muros"
-                    value={el.wallsState ?? 'Regular'}
-                    onChange={(e) => handleElementChange(index, 'wallsState', e.target.value)}
-                    options={MATERIAL_STATE_OPTIONS}
-                    disabled={!canEdit || isSubmitting}
-                  />
+                        <div className="space-y-1.5">
+                          <div>
+                            <select
+                              value={materialVal}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                handleElementChange(index, comp.materialField, val);
+                                if (comp.hasNoTiene && val === 'NO TIENE') {
+                                  handleElementChange(index, comp.stateField, '');
+                                }
+                              }}
+                              disabled={!canEdit || isSubmitting}
+                              className="w-full rounded border border-gray-300 bg-white/90 px-1.5 py-1 text-[11px] font-medium text-gray-800 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
+                            >
+                              <option value="">-- Seleccione --</option>
+                              {comp.options.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                  {opt.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
 
-                  {/* Techo */}
-                  <Input
-                    label="Material Techo"
-                    value={el.roofMaterial ?? ''}
-                    onChange={(e) => handleElementChange(index, 'roofMaterial', e.target.value)}
-                    disabled={!canEdit || isSubmitting}
-                    placeholder="Calamina, Teja, Paja, Dolo"
-                  />
-                  <Select
-                    label="Estado Techo"
-                    value={el.roofState ?? 'Regular'}
-                    onChange={(e) => handleElementChange(index, 'roofState', e.target.value)}
-                    options={MATERIAL_STATE_OPTIONS}
-                    disabled={!canEdit || isSubmitting}
-                  />
-
-                  {/* Pisos */}
-                  <Input
-                    label="Material Pisos"
-                    value={el.floorsMaterial ?? ''}
-                    onChange={(e) => handleElementChange(index, 'floorsMaterial', e.target.value)}
-                    disabled={!canEdit || isSubmitting}
-                    placeholder="Tierra, Cemento, Cerámica, Machihembre"
-                  />
-                  <Select
-                    label="Estado Pisos"
-                    value={el.floorsState ?? 'Regular'}
-                    onChange={(e) => handleElementChange(index, 'floorsState', e.target.value)}
-                    options={MATERIAL_STATE_OPTIONS}
-                    disabled={!canEdit || isSubmitting}
-                  />
-
-                  {/* Puertas y Ventanas */}
-                  <Input
-                    label="Material Puertas"
-                    value={el.doorsMaterial ?? ''}
-                    onChange={(e) => handleElementChange(index, 'doorsMaterial', e.target.value)}
-                    disabled={!canEdit || isSubmitting}
-                    placeholder="Madera, Placa, Calamina"
-                  />
-                  <Input
-                    label="Material Ventanas"
-                    value={el.windowsMaterial ?? ''}
-                    onChange={(e) => handleElementChange(index, 'windowsMaterial', e.target.value)}
-                    disabled={!canEdit || isSubmitting}
-                    placeholder="Madera con vidrio, Fierro, Sin vidrio"
-                  />
-
-                  {/* Instalación Eléctrica */}
-                  <Input
-                    label="Instalación Eléctrica"
-                    value={el.electricalInstallation ?? ''}
-                    onChange={(e) =>
-                      handleElementChange(index, 'electricalInstallation', e.target.value)
-                    }
-                    disabled={!canEdit || isSubmitting}
-                    placeholder="Empotrada, Sobrepuesta, Precaria"
-                  />
-                  <Select
-                    label="Estado Inst. Eléctrica"
-                    value={el.electricalInstallationState ?? 'Regular'}
-                    onChange={(e) =>
-                      handleElementChange(index, 'electricalInstallationState', e.target.value)
-                    }
-                    options={MATERIAL_STATE_OPTIONS}
-                    disabled={!canEdit || isSubmitting}
-                  />
+                          <div>
+                            <label
+                              className={`mb-0.5 block text-[10px] font-bold uppercase ${
+                                isEven ? 'text-purple-800' : 'text-sky-800'
+                              }`}
+                            >
+                              Estado
+                            </label>
+                            <select
+                              value={isNoTiene ? '' : stateVal}
+                              onChange={(e) =>
+                                handleElementChange(index, comp.stateField, e.target.value)
+                              }
+                              disabled={!canEdit || isSubmitting || isNoTiene}
+                              className="w-full rounded border border-gray-300 bg-white/90 px-1.5 py-1 text-[11px] font-medium text-gray-800 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100/80 disabled:text-gray-400"
+                            >
+                              <option value="">
+                                {isNoTiene ? '— No aplica —' : '-- Seleccione --'}
+                              </option>
+                              {MATERIAL_STATE_OPTIONS.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                  {opt.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
-                <div className="mt-4 flex flex-wrap items-center gap-6 border-t border-gray-200 pt-3">
-                  <span className="text-xs font-semibold text-gray-700 uppercase">
-                    Diagnóstico Constructivo:
-                  </span>
-                  <label className="flex cursor-pointer items-center gap-2 text-xs text-gray-800">
+                {/* Fila 2: Recomendación Técnica (puntajes 0 a 10) y Observaciones en una sola fila */}
+                <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-12">
+                  <div className="rounded-lg border border-purple-200 bg-purple-100/70 p-3 shadow-2xs lg:col-span-7">
+                    <div className="mb-2 border-b border-purple-200/80 pb-1 text-xs font-bold tracking-wide text-purple-900 uppercase">
+                      Recomendación Técnica (Valoración 0 al 10)
+                    </div>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                      <div className="flex items-center justify-between gap-2 rounded-md border border-purple-200/80 bg-white/85 px-2.5 py-1.5">
+                        <label className="text-[11px] font-semibold text-purple-950">
+                          NO SE PUEDE MEJORAR
+                        </label>
+                        <input
+                          type="number"
+                          min={0}
+                          max={10}
+                          value={el.cannotBeImproved ?? 0}
+                          onChange={(e) => {
+                            const raw = e.target.value;
+                            const num = raw === '' ? 0 : Math.max(0, Math.min(10, Number(raw)));
+                            handleElementChange(index, 'cannotBeImproved', num);
+                          }}
+                          disabled={!canEdit || isSubmitting}
+                          className="w-14 rounded border border-gray-300 bg-white px-2 py-1 text-center text-xs font-bold text-gray-900 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary focus:outline-none disabled:bg-gray-100"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 rounded-md border border-purple-200/80 bg-white/85 px-2.5 py-1.5">
+                        <label className="text-[11px] font-semibold text-purple-950">
+                          SE PUEDE MEJORAR
+                        </label>
+                        <input
+                          type="number"
+                          min={0}
+                          max={10}
+                          value={el.canBeImproved ?? 0}
+                          onChange={(e) => {
+                            const raw = e.target.value;
+                            const num = raw === '' ? 0 : Math.max(0, Math.min(10, Number(raw)));
+                            handleElementChange(index, 'canBeImproved', num);
+                          }}
+                          disabled={!canEdit || isSubmitting}
+                          className="w-14 rounded border border-gray-300 bg-white px-2 py-1 text-center text-xs font-bold text-gray-900 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary focus:outline-none disabled:bg-gray-100"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 rounded-md border border-purple-200/80 bg-white/85 px-2.5 py-1.5">
+                        <label className="text-[11px] font-semibold text-purple-950">
+                          NO NECESITA MEJORAR
+                        </label>
+                        <input
+                          type="number"
+                          min={0}
+                          max={10}
+                          value={el.noImprovementNeeded ?? 0}
+                          onChange={(e) => {
+                            const raw = e.target.value;
+                            const num = raw === '' ? 0 : Math.max(0, Math.min(10, Number(raw)));
+                            handleElementChange(index, 'noImprovementNeeded', num);
+                          }}
+                          disabled={!canEdit || isSubmitting}
+                          className="w-14 rounded border border-gray-300 bg-white px-2 py-1 text-center text-xs font-bold text-gray-900 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary focus:outline-none disabled:bg-gray-100"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-sky-200 bg-sky-100/70 p-3 shadow-2xs lg:col-span-5">
+                    <div className="mb-2 border-b border-sky-200/80 pb-1 text-xs font-bold tracking-wide text-sky-900 uppercase">
+                      Observaciones del Bloque
+                    </div>
                     <input
-                      type="radio"
-                      name={`interv_${index}`}
-                      checked={el.canBeImproved === 1}
-                      onChange={() => {
-                        handleElementChange(index, 'canBeImproved', 1);
-                        handleElementChange(index, 'cannotBeImproved', 0);
-                        handleElementChange(index, 'noImprovementNeeded', 0);
-                      }}
+                      type="text"
+                      value={el.observations ?? ''}
+                      onChange={(e) => handleElementChange(index, 'observations', e.target.value)}
                       disabled={!canEdit || isSubmitting}
-                      className="text-brand-primary focus:ring-brand-primary"
+                      placeholder="Observaciones constructivas de este bloque o ambiente..."
+                      className="w-full rounded-md border border-gray-300 bg-white/95 px-3 py-1.5 text-xs text-gray-800 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100"
                     />
-                    Puede Mejorarse
-                  </label>
-                  <label className="flex cursor-pointer items-center gap-2 text-xs text-gray-800">
-                    <input
-                      type="radio"
-                      name={`interv_${index}`}
-                      checked={el.cannotBeImproved === 1}
-                      onChange={() => {
-                        handleElementChange(index, 'canBeImproved', 0);
-                        handleElementChange(index, 'cannotBeImproved', 1);
-                        handleElementChange(index, 'noImprovementNeeded', 0);
-                      }}
-                      disabled={!canEdit || isSubmitting}
-                      className="text-brand-primary focus:ring-brand-primary"
-                    />
-                    No Puede Mejorarse (Demolición/Inhabitable)
-                  </label>
-                  <label className="flex cursor-pointer items-center gap-2 text-xs text-gray-800">
-                    <input
-                      type="radio"
-                      name={`interv_${index}`}
-                      checked={el.noImprovementNeeded === 1}
-                      onChange={() => {
-                        handleElementChange(index, 'canBeImproved', 0);
-                        handleElementChange(index, 'cannotBeImproved', 0);
-                        handleElementChange(index, 'noImprovementNeeded', 1);
-                      }}
-                      disabled={!canEdit || isSubmitting}
-                      className="text-brand-primary focus:ring-brand-primary"
-                    />
-                    No Requiere Mejora (En buen estado)
-                  </label>
+                  </div>
                 </div>
               </div>
             ))}
