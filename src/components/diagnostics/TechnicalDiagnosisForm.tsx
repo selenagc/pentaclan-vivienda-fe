@@ -40,35 +40,32 @@ const LAND_CONDITION_OPTIONS = [
 ];
 
 const WATER_ACCESS_OPTIONS = [
-  { value: 'Red por cañería dentro de la vivienda', label: 'Red por cañería dentro de la vivienda' },
-  { value: 'Red por cañería fuera de la vivienda', label: 'Red por cañería fuera de la vivienda' },
-  { value: 'Pila pública comunitaria', label: 'Pila pública comunitaria' },
-  { value: 'Carro cisterna', label: 'Carro cisterna' },
-  { value: 'Pozo o vertiente', label: 'Pozo o vertiente' },
-  { value: 'Sin acceso formal', label: 'Sin acceso formal' },
+  { value: 'SIN ACCESO', label: 'SIN ACCESO' },
+  { value: 'POR CAÑERIA', label: 'POR CAÑERIA' },
+  { value: 'DE POZO', label: 'DE POZO' },
+  { value: 'OTRO', label: 'OTRO' },
 ];
 
 const ELECTRICITY_OPTIONS = [
-  { value: 'Red pública con medidor propio', label: 'Red pública con medidor propio' },
-  { value: 'Red pública compartida / medidor común', label: 'Red pública compartida / medidor común' },
-  { value: 'Panel solar domiciliario', label: 'Panel solar domiciliario' },
-  { value: 'Generador / Otro', label: 'Generador / Otro' },
-  { value: 'Sin servicio eléctrico', label: 'Sin servicio eléctrico' },
+  { value: 'SIN ACCESO', label: 'SIN ACCESO' },
+  { value: 'DE RED', label: 'DE RED' },
+  { value: 'PANEL SOLAR', label: 'PANEL SOLAR' },
+  { value: 'OTRO', label: 'OTRO' },
 ];
 
 const BATHROOM_TYPE_OPTIONS = [
-  { value: 'Inodoro con arrastre de agua a alcantarillado', label: 'Inodoro con arrastre a alcantarillado' },
-  { value: 'Inodoro con arrastre a cámara séptica', label: 'Inodoro con arrastre a cámara séptica' },
-  { value: 'Letrina con pozo ciego', label: 'Letrina con pozo ciego' },
-  { value: 'Letrina seca ecológica', label: 'Letrina seca ecológica' },
-  { value: 'No tiene baño', label: 'No tiene baño' },
+  { value: 'NO TIENE', label: 'NO TIENE' },
+  { value: 'LETRINA', label: 'LETRINA' },
+  { value: 'ECOLOGICO', label: 'ECOLOGICO' },
+  { value: 'DESCARGA AGUA', label: 'DESCARGA AGUA' },
 ];
 
 const KITCHEN_TYPE_OPTIONS = [
-  { value: 'Cocina exclusiva a gas domiciliario o garrafa', label: 'Cocina exclusiva a gas' },
-  { value: 'Cocina compartida', label: 'Cocina compartida' },
-  { value: 'Cocina a leña / carbón (fogonero)', label: 'Cocina a leña / fogonero' },
-  { value: 'No cuenta con cocina (cocina en dormitorio)', label: 'Cocina dentro de dormitorio' },
+  { value: 'NO TIENE', label: 'NO TIENE' },
+  { value: 'FOGON', label: 'FOGON' },
+  { value: 'MALENA', label: 'MALENA' },
+  { value: 'A GAS', label: 'A GAS' },
+  { value: 'OTRO', label: 'OTRO' },
 ];
 
 const HOUSING_TYPOLOGY_OPTIONS = [
@@ -478,90 +475,199 @@ export const TechnicalDiagnosisForm = ({
       </div>
 
       {/* 2. Servicios Básicos */}
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
+      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs">
         <FormSection stepNumber={2} title="Servicios Básicos e Higiene">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Select
-              label="Acceso a Agua Potable"
-              value={waterAccess}
-              onChange={(e) => setWaterAccess(e.target.value)}
-              options={WATER_ACCESS_OPTIONS}
-              disabled={!canEdit || isSubmitting}
-            />
-            <Select
-              label="Servicio de Energía Eléctrica"
-              value={electricityService}
-              onChange={(e) => setElectricityService(e.target.value)}
-              options={ELECTRICITY_OPTIONS}
-              disabled={!canEdit || isSubmitting}
-            />
-            <Select
-              label="Tipo de Baño / Letrina"
-              value={bathroomType}
-              onChange={(e) => setBathroomType(e.target.value)}
-              options={BATHROOM_TYPE_OPTIONS}
-              disabled={!canEdit || isSubmitting}
-            />
-            <div className="flex items-center gap-6 pt-6">
-              <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-                <input
-                  type="checkbox"
-                  checked={privateBathroom}
-                  onChange={(e) => setPrivateBathroom(e.target.checked)}
-                  disabled={!canEdit || isSubmitting}
-                  className="rounded text-brand-primary focus:ring-brand-primary"
-                />
-                Baño Privado
-              </label>
-              <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-                <input
-                  type="checkbox"
-                  checked={sharedBathroom}
-                  onChange={(e) => setSharedBathroom(e.target.checked)}
-                  disabled={!canEdit || isSubmitting}
-                  className="rounded text-brand-primary focus:ring-brand-primary"
-                />
-                Baño Compartido
-              </label>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12">
+            {/* Agua */}
+            <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-3 lg:col-span-2">
+              <h4 className="mb-2 text-[11px] font-bold tracking-wide text-brand-primary uppercase">
+                Agua Potable
+              </h4>
+              <Select
+                label="Acceso a Agua"
+                value={waterAccess}
+                onChange={(e) => setWaterAccess(e.target.value)}
+                options={WATER_ACCESS_OPTIONS}
+                disabled={!canEdit || isSubmitting}
+              />
             </div>
-            <Select
-              label="Tipo de Cocina"
-              value={kitchenType}
-              onChange={(e) => setKitchenType(e.target.value)}
-              options={KITCHEN_TYPE_OPTIONS}
-              disabled={!canEdit || isSubmitting}
-            />
-            <div className="flex flex-wrap items-center gap-6 pt-6">
-              <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-                <input
-                  type="checkbox"
-                  checked={privateKitchen}
-                  onChange={(e) => setPrivateKitchen(e.target.checked)}
-                  disabled={!canEdit || isSubmitting}
-                  className="rounded text-brand-primary focus:ring-brand-primary"
-                />
-                Cocina Privada
-              </label>
-              <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-                <input
-                  type="checkbox"
-                  checked={sharedKitchen}
-                  onChange={(e) => setSharedKitchen(e.target.checked)}
-                  disabled={!canEdit || isSubmitting}
-                  className="rounded text-brand-primary focus:ring-brand-primary"
-                />
-                Cocina Compartida
-              </label>
-              <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-                <input
-                  type="checkbox"
-                  checked={adequateKitchen}
-                  onChange={(e) => setAdequateKitchen(e.target.checked)}
-                  disabled={!canEdit || isSubmitting}
-                  className="rounded text-brand-primary focus:ring-brand-primary"
-                />
-                Ambiente Adecuado
-              </label>
+
+            {/* Electricidad */}
+            <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-3 lg:col-span-2">
+              <h4 className="mb-2 text-[11px] font-bold tracking-wide text-brand-primary uppercase">
+                Energía Eléctrica
+              </h4>
+              <Select
+                label="Servicio Eléctrico"
+                value={electricityService}
+                onChange={(e) => setElectricityService(e.target.value)}
+                options={ELECTRICITY_OPTIONS}
+                disabled={!canEdit || isSubmitting}
+              />
+            </div>
+
+            {/* Recuadro de Baño */}
+            <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-3 lg:col-span-4">
+              <h4 className="mb-2 text-[11px] font-bold tracking-wide text-brand-primary uppercase">
+                Baño / Servicio Sanitario
+              </h4>
+              <Select
+                label="Tipo de Baño / Letrina"
+                value={bathroomType}
+                onChange={(e) => {
+                  const nextType = e.target.value;
+                  setBathroomType(nextType);
+                  if (!nextType || nextType === 'NO TIENE') {
+                    setPrivateBathroom(false);
+                    setSharedBathroom(false);
+                  }
+                }}
+                options={BATHROOM_TYPE_OPTIONS}
+                disabled={!canEdit || isSubmitting}
+              />
+              <div className="mt-2.5 flex flex-wrap items-center gap-4 rounded-lg border border-gray-200 bg-white px-3 py-2">
+                {(() => {
+                  const canChooseBathroomUsage =
+                    Boolean(bathroomType) && bathroomType !== 'NO TIENE';
+                  return (
+                    <>
+                      <label
+                        className={`flex items-center gap-1.5 text-xs font-medium ${
+                          canEdit && canChooseBathroomUsage
+                            ? 'cursor-pointer text-gray-800'
+                            : 'cursor-not-allowed text-gray-400'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={sharedBathroom}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setSharedBathroom(checked);
+                            if (checked) setPrivateBathroom(false);
+                          }}
+                          disabled={!canEdit || isSubmitting || !canChooseBathroomUsage}
+                          className="rounded text-brand-primary focus:ring-brand-primary disabled:opacity-50"
+                        />
+                        DE USO COMPARTIDO
+                      </label>
+                      <label
+                        className={`flex items-center gap-1.5 text-xs font-medium ${
+                          canEdit && canChooseBathroomUsage
+                            ? 'cursor-pointer text-gray-800'
+                            : 'cursor-not-allowed text-gray-400'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={privateBathroom}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setPrivateBathroom(checked);
+                            if (checked) setSharedBathroom(false);
+                          }}
+                          disabled={!canEdit || isSubmitting || !canChooseBathroomUsage}
+                          className="rounded text-brand-primary focus:ring-brand-primary disabled:opacity-50"
+                        />
+                        DE USO PRIVADO
+                      </label>
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+
+            {/* Recuadro de Cocina */}
+            <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-3 lg:col-span-4">
+              <h4 className="mb-2 text-[11px] font-bold tracking-wide text-brand-primary uppercase">
+                Cocina
+              </h4>
+              <Select
+                label="Tipo de Cocina"
+                value={kitchenType}
+                onChange={(e) => {
+                  const nextType = e.target.value;
+                  setKitchenType(nextType);
+                  if (nextType === 'NO TIENE') {
+                    setPrivateKitchen(false);
+                    setSharedKitchen(false);
+                  } else if (nextType) {
+                    setAdequateKitchen(false);
+                  } else {
+                    setPrivateKitchen(false);
+                    setSharedKitchen(false);
+                    setAdequateKitchen(false);
+                  }
+                }}
+                options={KITCHEN_TYPE_OPTIONS}
+                disabled={!canEdit || isSubmitting}
+              />
+              <div className="mt-2.5 flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2">
+                {(() => {
+                  const hasKitchen = Boolean(kitchenType) && kitchenType !== 'NO TIENE';
+                  const hasNoKitchen = kitchenType === 'NO TIENE';
+                  return (
+                    <>
+                      <label
+                        className={`flex items-center gap-1.5 text-xs font-medium ${
+                          canEdit && hasKitchen
+                            ? 'cursor-pointer text-gray-800'
+                            : 'cursor-not-allowed text-gray-400'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={privateKitchen}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setPrivateKitchen(checked);
+                            if (checked) setSharedKitchen(false);
+                          }}
+                          disabled={!canEdit || isSubmitting || !hasKitchen}
+                          className="rounded text-brand-primary focus:ring-brand-primary disabled:opacity-50"
+                        />
+                        Cocina Privada
+                      </label>
+                      <label
+                        className={`flex items-center gap-1.5 text-xs font-medium ${
+                          canEdit && hasKitchen
+                            ? 'cursor-pointer text-gray-800'
+                            : 'cursor-not-allowed text-gray-400'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={sharedKitchen}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setSharedKitchen(checked);
+                            if (checked) setPrivateKitchen(false);
+                          }}
+                          disabled={!canEdit || isSubmitting || !hasKitchen}
+                          className="rounded text-brand-primary focus:ring-brand-primary disabled:opacity-50"
+                        />
+                        Cocina Compartida
+                      </label>
+                      <label
+                        className={`flex items-center gap-1.5 text-xs font-medium ${
+                          canEdit && hasNoKitchen
+                            ? 'cursor-pointer text-gray-800'
+                            : 'cursor-not-allowed text-gray-400'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={adequateKitchen}
+                          onChange={(e) => setAdequateKitchen(e.target.checked)}
+                          disabled={!canEdit || isSubmitting || !hasNoKitchen}
+                          className="rounded text-brand-primary focus:ring-brand-primary disabled:opacity-50"
+                        />
+                        Ambiente Adecuado
+                      </label>
+                    </>
+                  );
+                })()}
+              </div>
             </div>
           </div>
         </FormSection>
