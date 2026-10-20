@@ -69,18 +69,16 @@ const KITCHEN_TYPE_OPTIONS = [
 ];
 
 const HOUSING_TYPOLOGY_OPTIONS = [
-  { value: 'Casa unifamiliar independiente', label: 'Casa unifamiliar independiente' },
-  { value: 'Cuarto(s) sueltos / dispersos', label: 'Cuarto(s) sueltos / dispersos' },
-  { value: 'Vivienda precaria / Choza', label: 'Vivienda precaria / Choza' },
-  { value: 'Vivienda compartida en lote familiar', label: 'Vivienda compartida en lote familiar' },
+  { value: 'UNIFAMILIAR', label: 'UNIFAMILIAR' },
+  { value: 'COLECTIVA', label: 'COLECTIVA' },
 ];
 
 const TENURE_STATUS_OPTIONS = [
-  { value: 'Propietario(a) con Folio Real', label: 'Propietario(a) con Folio Real' },
-  { value: 'Minuta de compra-venta protocolizada', label: 'Minuta de compra-venta protocolizada' },
-  { value: 'Certificación comunal / Título ejecutorial INRA', label: 'Certificación comunal / Título INRA' },
-  { value: 'Declaratoria de herederos en trámite', label: 'Declaratoria de herederos en trámite' },
-  { value: 'Posesión pacífica con aval comunal', label: 'Posesión pacífica con aval comunal' },
+  { value: 'PROPIA', label: 'PROPIA' },
+  { value: 'ALQUILADA', label: 'ALQUILADA' },
+  { value: 'CEDIDA', label: 'CEDIDA' },
+  { value: 'PRESTADA', label: 'PRESTADA' },
+  { value: 'OTRO', label: 'OTRO' },
 ];
 
 const MATERIAL_STATE_OPTIONS = [
@@ -674,24 +672,28 @@ export const TechnicalDiagnosisForm = ({
       </div>
 
       {/* 3. Características y Tenencia */}
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
+      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs">
         <FormSection stepNumber={3} title="Tipología y Régimen de Tenencia">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Select
-              label="Tipología de Vivienda"
-              value={housingTypology}
-              onChange={(e) => setHousingTypology(e.target.value)}
-              options={HOUSING_TYPOLOGY_OPTIONS}
-              disabled={!canEdit || isSubmitting}
-            />
-            <Select
-              label="Régimen de Tenencia del Inmueble"
-              value={tenureStatus}
-              onChange={(e) => setTenureStatus(e.target.value)}
-              options={TENURE_STATUS_OPTIONS}
-              disabled={!canEdit || isSubmitting}
-            />
-            <div className="sm:col-span-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12">
+            <div className="lg:col-span-3">
+              <Select
+                label="Tipología de Habitabilidad"
+                value={housingTypology}
+                onChange={(e) => setHousingTypology(e.target.value)}
+                options={HOUSING_TYPOLOGY_OPTIONS}
+                disabled={!canEdit || isSubmitting}
+              />
+            </div>
+            <div className="lg:col-span-4">
+              <Select
+                label="Característica de Ocupación de la Vivienda"
+                value={tenureStatus}
+                onChange={(e) => setTenureStatus(e.target.value)}
+                options={TENURE_STATUS_OPTIONS}
+                disabled={!canEdit || isSubmitting}
+              />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-5">
               <Input
                 label="Observaciones sobre la Tenencia y Vivienda"
                 value={housingObs}
