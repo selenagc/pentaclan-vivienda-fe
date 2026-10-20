@@ -14,6 +14,7 @@ import type {
 
 interface TechnicalDiagnosisFormProps {
   applicationId: string;
+  defaultFormNo?: string | null;
   initialRecord: DiagnosticRecord | null;
   canEdit: boolean;
   onSaveSuccess: (record: DiagnosticRecord) => void;
@@ -108,13 +109,14 @@ const PHOTO_TYPE_OPTIONS = [
 
 export const TechnicalDiagnosisForm = ({
   applicationId,
+  defaultFormNo,
   initialRecord,
   canEdit,
   onSaveSuccess,
 }: TechnicalDiagnosisFormProps) => {
   const today = new Date().toISOString().split('T')[0];
 
-  const [formNo, setFormNo] = useState(initialRecord?.formNo ?? '');
+  const formNo = initialRecord?.formNo ?? defaultFormNo ?? '';
   const [evaluationDate, setEvaluationDate] = useState(initialRecord?.evaluationDate ?? today);
 
   // 1. Terreno y Accesibilidad
@@ -417,23 +419,6 @@ export const TechnicalDiagnosisForm = ({
             <Alert severity="success">{successMessage}</Alert>
           </div>
         )}
-
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Input
-            label="Nº Formulario Técnico"
-            value={formNo}
-            onChange={(e) => setFormNo(e.target.value)}
-            disabled={!canEdit || isSubmitting}
-            placeholder="Ej. TEC-001"
-          />
-          <Input
-            label="Fecha de Evaluación"
-            type="date"
-            value={evaluationDate}
-            onChange={(e) => setEvaluationDate(e.target.value)}
-            disabled={!canEdit || isSubmitting}
-          />
-        </div>
       </div>
 
       {/* 1. Terreno y Accesibilidad */}
@@ -964,6 +949,19 @@ export const TechnicalDiagnosisForm = ({
             )}
           </div>
         </FormSection>
+      </div>
+
+      {/* Fecha de Evaluación */}
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
+        <div className="sm:max-w-xs">
+          <Input
+            label="Fecha de Evaluación Técnica"
+            type="date"
+            value={evaluationDate}
+            onChange={(e) => setEvaluationDate(e.target.value)}
+            disabled={!canEdit || isSubmitting}
+          />
+        </div>
       </div>
 
       {/* Actions */}

@@ -14,6 +14,7 @@ import type {
 
 interface SocialDiagnosisFormProps {
   applicationId: string;
+  defaultFormNo?: string | null;
   initialRecord: DiagnosticRecord | null;
   canEdit: boolean;
   onSaveSuccess: (record: DiagnosticRecord) => void;
@@ -86,13 +87,14 @@ const HEALTH_CARE_OPTIONS = [
 
 export const SocialDiagnosisForm = ({
   applicationId,
+  defaultFormNo,
   initialRecord,
   canEdit,
   onSaveSuccess,
 }: SocialDiagnosisFormProps) => {
   const today = new Date().toISOString().split('T')[0];
 
-  const [formNo, setFormNo] = useState(initialRecord?.formNo ?? '');
+  const formNo = initialRecord?.formNo ?? defaultFormNo ?? '';
   const [evaluationDate, setEvaluationDate] = useState(initialRecord?.evaluationDate ?? today);
 
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>(
@@ -319,23 +321,6 @@ export const SocialDiagnosisForm = ({
             <Alert severity="success">{successMessage}</Alert>
           </div>
         )}
-
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Input
-            label="Nº Formulario Social"
-            value={formNo}
-            onChange={(e) => setFormNo(e.target.value)}
-            disabled={!canEdit || isSubmitting}
-            placeholder="Ej. SOC-001"
-          />
-          <Input
-            label="Fecha de Evaluación"
-            type="date"
-            value={evaluationDate}
-            onChange={(e) => setEvaluationDate(e.target.value)}
-            disabled={!canEdit || isSubmitting}
-          />
-        </div>
       </div>
 
       {/* 1. Composición Familiar */}
@@ -614,6 +599,19 @@ export const SocialDiagnosisForm = ({
             </div>
           </div>
         </FormSection>
+      </div>
+
+      {/* Fecha de Evaluación */}
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
+        <div className="sm:max-w-xs">
+          <Input
+            label="Fecha de Evaluación Social"
+            type="date"
+            value={evaluationDate}
+            onChange={(e) => setEvaluationDate(e.target.value)}
+            disabled={!canEdit || isSubmitting}
+          />
+        </div>
       </div>
 
       {/* Actions */}

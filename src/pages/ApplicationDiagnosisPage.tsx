@@ -79,6 +79,7 @@ export const ApplicationDiagnosisPage = ({ kind }: ApplicationDiagnosisPageProps
       {kind === 'social' ? (
         <SocialDiagnosisForm
           applicationId={application.id}
+          defaultFormNo={diagnosticRecord?.formNo ?? application.formNo ?? null}
           initialRecord={diagnosticRecord}
           canEdit={canEdit}
           onSaveSuccess={(updated) => setDiagnosticRecord(updated)}
@@ -86,6 +87,7 @@ export const ApplicationDiagnosisPage = ({ kind }: ApplicationDiagnosisPageProps
       ) : (
         <TechnicalDiagnosisForm
           applicationId={application.id}
+          defaultFormNo={diagnosticRecord?.formNo ?? application.formNo ?? null}
           initialRecord={diagnosticRecord}
           canEdit={canEdit}
           onSaveSuccess={(updated) => setDiagnosticRecord(updated)}
