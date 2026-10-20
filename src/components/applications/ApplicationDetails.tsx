@@ -3,7 +3,6 @@ import {
   SEX_LABELS,
 } from '../../constants/applications';
 import { fullLocation } from '../../types/geography.types';
-import { propertyLabel } from '../../types/property.types';
 import {
   fullDocument,
   personDisplayName,
@@ -98,7 +97,12 @@ export const ApplicationDetails = ({ application }: ApplicationDetailsProps) => 
       )}
 
       <SectionTitle>Vivienda</SectionTitle>
-      <DetailRow label="Ubicación" value={propertyLabel(property)} />
+      {property.community && <DetailRow label="Comunidad" value={property.community} />}
+      <DetailRow label="Urbanización" value={property.zone ?? 'No registrada'} />
+      <DetailRow
+        label="Dirección"
+        value={property.address ?? property.community ?? 'No registrada'}
+      />
       <DetailRow label="Municipio" value={fullLocation(property.municipality)} />
       <DetailRow label="Coordenadas" value={`${property.latitude}, ${property.longitude}`} />
 

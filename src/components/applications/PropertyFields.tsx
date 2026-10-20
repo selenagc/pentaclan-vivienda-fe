@@ -110,11 +110,11 @@ export const PropertyFields = ({
           />
 
           <Input
-            label="Zona"
+            label="Urbanización / Zona"
             name="zone"
             value={values.zone}
             onChange={(event) => onChange('zone', event.target.value)}
-            placeholder="Opcional"
+            placeholder="Ej. Urb. Villa Esperanza (opcional)"
             error={errors.zone}
             maxLength={150}
             disabled={disabled}
