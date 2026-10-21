@@ -1,7 +1,12 @@
 export interface FamilyMember {
   id?: number;
+  personId?: string | null;
   fullName: string;
   relationship: string;
+  documentNo?: string | null;
+  documentIssuedIn?: string | null;
+  sex?: string | null;
+  birthDate?: string | null;
   age?: number | null;
   occupation?: string | null;
   hasDisability: boolean;

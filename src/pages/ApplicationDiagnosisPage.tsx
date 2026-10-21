@@ -80,6 +80,7 @@ export const ApplicationDiagnosisPage = ({ kind }: ApplicationDiagnosisPageProps
         <SocialDiagnosisForm
           applicationId={application.id}
           defaultFormNo={diagnosticRecord?.formNo ?? application.formNo ?? null}
+          applicant={application.person}
           initialRecord={diagnosticRecord}
           canEdit={canEdit}
           onSaveSuccess={(updated) => setDiagnosticRecord(updated)}

@@ -11,18 +11,18 @@ import type {
   FamilyMember,
   SocialDiagnosticInput,
 } from '../../types/diagnostic.types';
+import type { Person, PersonData } from '../../types/application.types';
 
 interface SocialDiagnosisFormProps {
   applicationId: string;
   defaultFormNo?: string | null;
+  applicant?: Person | null;
   initialRecord: DiagnosticRecord | null;
   canEdit: boolean;
   onSaveSuccess: (record: DiagnosticRecord) => void;
 }
 
 const RELATIONSHIP_OPTIONS = [
-  { value: 'Jefe(a) de Hogar', label: 'Jefe(a) de Hogar' },
-  { value: 'Cónyuge / Conviviente', label: 'Cónyuge / Conviviente' },
   { value: 'Hijo(a)', label: 'Hijo(a)' },
   { value: 'Padre / Madre', label: 'Padre / Madre' },
   { value: 'Hermano(a)', label: 'Hermano(a)' },
@@ -31,6 +31,132 @@ const RELATIONSHIP_OPTIONS = [
   { value: 'Suegro(a)', label: 'Suegro(a)' },
   { value: 'Otro familiar', label: 'Otro familiar' },
 ];
+
+const DOCUMENT_ISSUED_IN_OPTIONS = [
+  { value: 'LP', label: 'LP - La Paz' },
+  { value: 'CB', label: 'CB - Cochabamba' },
+  { value: 'SC', label: 'SC - Santa Cruz' },
+  { value: 'OR', label: 'OR - Oruro' },
+  { value: 'PT', label: 'PT - Potosí' },
+  { value: 'TJ', label: 'TJ - Tarija' },
+  { value: 'CH', label: 'CH - Chuquisaca' },
+  { value: 'BE', label: 'BE - Beni' },
+  { value: 'PD', label: 'PD - Pando' },
+  { value: 'CERTIFICADO DE NACIMIENTO', label: 'CERTIFICADO DE NACIMIENTO' },
+];
+
+const SEX_OPTIONS = [
+  { value: 'M', label: 'M - Masculino' },
+  { value: 'F', label: 'F - Femenino' },
+];
+
+function calculateAgeFromBirthDate(birthDate?: string | null): number | null {
+  if (!birthDate) return null;
+  const parts = birthDate.split('-').map(Number);
+  if (parts.length !== 3 || !parts[0] || !parts[1] || !parts[2]) return null;
+  const [y, m, d] = parts;
+  const now = new Date();
+  let age = now.getFullYear() - y;
+  const monthDiff = now.getMonth() + 1 - m;
+  if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < d)) {
+    age -= 1;
+  }
+  return Math.max(0, age);
+}
+
+function buildPersonFullName(p: PersonData): string {
+  return [p.givenNames, p.paternalSurname, p.maternalSurname].filter(Boolean).join(' ').trim();
+}
+
+function buildInitialFamilyMembers(
+  initialRecord: DiagnosticRecord | null,
+  applicant?: Person | null,
+): FamilyMember[] {
+  const fixedMembers: FamilyMember[] = [];
+
+  if (applicant) {
+    const savedHead = initialRecord?.familyMembers?.find(
+      (fm) =>
+        fm.personId === applicant.id ||
+        fm.relationship === 'Solicitante' ||
+        fm.relationship === 'Jefe(a) de Hogar',
+    );
+    fixedMembers.push({
+      id: savedHead?.id,
+      personId: applicant.id,
+      relationship: 'Solicitante',
+      fullName: buildPersonFullName(applicant),
+      documentNo: applicant.documentNo,
+      documentIssuedIn: applicant.documentIssuedIn,
+      sex: applicant.sex,
+      birthDate: applicant.birthDate,
+      age: calculateAgeFromBirthDate(applicant.birthDate),
+      occupation: applicant.occupation ?? savedHead?.occupation ?? '',
+      hasDisability: savedHead?.hasDisability ?? false,
+      disabilityType: savedHead?.disabilityType ?? '',
+      disabilityDocument: savedHead?.disabilityDocument ?? '',
+    });
+
+    if (applicant.spouse) {
+      const savedSpouse = initialRecord?.familyMembers?.find(
+        (fm) =>
+          fm.personId === applicant.spouse?.id || fm.relationship === 'Cónyuge / Conviviente',
+      );
+      fixedMembers.push({
+        id: savedSpouse?.id,
+        personId: applicant.spouse.id,
+        relationship: 'Cónyuge / Conviviente',
+        fullName: buildPersonFullName(applicant.spouse),
+        documentNo: applicant.spouse.documentNo,
+        documentIssuedIn: applicant.spouse.documentIssuedIn,
+        sex: applicant.spouse.sex,
+        birthDate: applicant.spouse.birthDate,
+        age: calculateAgeFromBirthDate(applicant.spouse.birthDate),
+        occupation: applicant.spouse.occupation ?? savedSpouse?.occupation ?? '',
+        hasDisability: savedSpouse?.hasDisability ?? false,
+        disabilityType: savedSpouse?.disabilityType ?? '',
+        disabilityDocument: savedSpouse?.disabilityDocument ?? '',
+      });
+    }
+  }
+
+  const extraMembers: FamilyMember[] = (initialRecord?.familyMembers ?? [])
+    .filter((fm) => {
+      if (
+        applicant &&
+        (fm.personId === applicant.id ||
+          fm.relationship === 'Solicitante' ||
+          fm.relationship === 'Jefe(a) de Hogar')
+      ) {
+        return false;
+      }
+      if (fm.relationship === 'Cónyuge / Conviviente') {
+        return false;
+      }
+      return true;
+    })
+    .map((fm) => {
+      const birthDate = fm.birthDate || '';
+      const computedAge = calculateAgeFromBirthDate(birthDate) ?? fm.age ?? null;
+      return {
+        ...fm,
+        personId: null,
+        documentNo:
+          fm.documentIssuedIn === 'CERTIFICADO DE NACIMIENTO' ? '' : (fm.documentNo ?? ''),
+        documentIssuedIn: fm.documentIssuedIn ?? 'LP',
+        sex: fm.sex ?? '',
+        birthDate,
+        age: computedAge,
+        occupation: fm.occupation ?? '',
+      };
+    });
+
+  if (fixedMembers.length > 0 || extraMembers.length > 0) {
+    return [...fixedMembers, ...extraMembers];
+  }
+
+  return [];
+}
 
 const WATER_SOURCE_OPTIONS = [
   { value: 'Red pública dentro de la vivienda', label: 'Red pública dentro de la vivienda' },
@@ -88,28 +214,35 @@ const HEALTH_CARE_OPTIONS = [
 export const SocialDiagnosisForm = ({
   applicationId,
   defaultFormNo,
+  applicant,
   initialRecord,
   canEdit,
   onSaveSuccess,
 }: SocialDiagnosisFormProps) => {
   const formNo = initialRecord?.formNo ?? defaultFormNo ?? '';
 
-
-  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>(
-    initialRecord?.familyMembers?.length
-      ? initialRecord.familyMembers
-      : [
-          {
-            fullName: '',
-            relationship: 'Jefe(a) de Hogar',
-            age: null,
-            occupation: '',
-            hasDisability: false,
-            disabilityType: '',
-            disabilityDocument: '',
-          },
-        ],
+  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>(() =>
+    buildInitialFamilyMembers(initialRecord, applicant),
   );
+
+  const createEmptyDraftMember = (): FamilyMember => ({
+    personId: null,
+    fullName: '',
+    relationship: 'Hijo(a)',
+    documentNo: '',
+    documentIssuedIn: 'LP',
+    sex: '',
+    birthDate: '',
+    age: null,
+    occupation: '',
+    hasDisability: false,
+    disabilityType: '',
+    disabilityDocument: '',
+  });
+
+  const [draftMember, setDraftMember] = useState<FamilyMember>(createEmptyDraftMember);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [memberFormError, setMemberFormError] = useState<string | null>(null);
 
   const [questions, setQuestions] = useState<EvaluationQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<number, { answerBoolean: boolean | null; score: string }>>(
@@ -164,35 +297,81 @@ export const SocialDiagnosisForm = ({
     };
   }, []);
 
-  const handleAddMember = () => {
-    setFamilyMembers((prev) => [
-      ...prev,
-      {
-        fullName: '',
-        relationship: 'Hijo(a)',
-        age: null,
-        occupation: '',
-        hasDisability: false,
-        disabilityType: '',
-        disabilityDocument: '',
-      },
-    ]);
+  const handleDraftChange = <K extends keyof FamilyMember>(
+    field: K,
+    value: FamilyMember[K],
+  ) => {
+    setMemberFormError(null);
+    setDraftMember((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveDraftMember = () => {
+    if (!draftMember.fullName.trim()) {
+      setMemberFormError('Ingrese el nombre completo del integrante antes de agregarlo a la lista.');
+      return;
+    }
+    setMemberFormError(null);
+
+    const normalizedMember: FamilyMember = {
+      ...draftMember,
+      fullName: draftMember.fullName.trim(),
+      documentNo:
+        draftMember.documentIssuedIn === 'CERTIFICADO DE NACIMIENTO'
+          ? ''
+          : (draftMember.documentNo?.trim() ?? ''),
+      age: calculateAgeFromBirthDate(draftMember.birthDate) ?? draftMember.age ?? null,
+      occupation: draftMember.occupation?.trim() ?? '',
+      disabilityType: draftMember.hasDisability ? (draftMember.disabilityType?.trim() ?? '') : '',
+      disabilityDocument: draftMember.hasDisability
+        ? (draftMember.disabilityDocument?.trim() ?? '')
+        : '',
+    };
+
+    if (editingIndex !== null) {
+      setFamilyMembers((prev) => {
+        const copy = [...prev];
+        copy[editingIndex] = normalizedMember;
+        return copy;
+      });
+      setEditingIndex(null);
+    } else {
+      setFamilyMembers((prev) => [...prev, normalizedMember]);
+    }
+
+    setDraftMember(createEmptyDraftMember());
+  };
+
+  const handleEditMember = (index: number) => {
+    const target = familyMembers[index];
+    if (!target) return;
+    setMemberFormError(null);
+    setEditingIndex(index);
+    setDraftMember({
+      ...target,
+      documentIssuedIn: target.documentIssuedIn ?? 'LP',
+      documentNo: target.documentNo ?? '',
+      sex: target.sex ?? '',
+      birthDate: target.birthDate ?? '',
+      occupation: target.occupation ?? '',
+      disabilityType: target.disabilityType ?? '',
+      disabilityDocument: target.disabilityDocument ?? '',
+    });
+  };
+
+  const handleCancelEditMember = () => {
+    setMemberFormError(null);
+    setEditingIndex(null);
+    setDraftMember(createEmptyDraftMember());
   };
 
   const handleRemoveMember = (index: number) => {
     setFamilyMembers((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleMemberChange = <K extends keyof FamilyMember>(
-    index: number,
-    field: K,
-    value: FamilyMember[K],
-  ) => {
-    setFamilyMembers((prev) => {
-      const copy = [...prev];
-      copy[index] = { ...copy[index], [field]: value };
-      return copy;
-    });
+    if (editingIndex === index) {
+      setEditingIndex(null);
+      setDraftMember(createEmptyDraftMember());
+    } else if (editingIndex !== null && editingIndex > index) {
+      setEditingIndex(editingIndex - 1);
+    }
   };
 
   const handleAnswerChange = (questionId: number, answerBoolean: boolean | null) => {
@@ -227,11 +406,39 @@ export const SocialDiagnosisForm = ({
         score: val.score || null,
       }));
 
+      let membersToSave = [...familyMembers];
+      if (draftMember.fullName.trim() !== '') {
+        const pendingMember: FamilyMember = {
+          ...draftMember,
+          fullName: draftMember.fullName.trim(),
+          documentNo:
+            draftMember.documentIssuedIn === 'CERTIFICADO DE NACIMIENTO'
+              ? ''
+              : (draftMember.documentNo?.trim() ?? ''),
+          age: calculateAgeFromBirthDate(draftMember.birthDate) ?? draftMember.age ?? null,
+          occupation: draftMember.occupation?.trim() ?? '',
+          disabilityType: draftMember.hasDisability
+            ? (draftMember.disabilityType?.trim() ?? '')
+            : '',
+          disabilityDocument: draftMember.hasDisability
+            ? (draftMember.disabilityDocument?.trim() ?? '')
+            : '',
+        };
+        if (editingIndex !== null) {
+          membersToSave[editingIndex] = pendingMember;
+        } else {
+          membersToSave.push(pendingMember);
+        }
+        setFamilyMembers(membersToSave);
+        setEditingIndex(null);
+        setDraftMember(createEmptyDraftMember());
+      }
+
       const payload: SocialDiagnosticInput = {
         formNo: formNo.trim() || null,
         evaluationDate: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`,
         isCompleted,
-        familyMembers: familyMembers.filter((m) => m.fullName.trim() !== ''),
+        familyMembers: membersToSave.filter((m) => m.fullName.trim() !== ''),
         answers: answersPayload,
         waterHabits: {
           waterSource: waterSource || null,
@@ -322,113 +529,345 @@ export const SocialDiagnosisForm = ({
       </div>
 
       {/* 1. Composición Familiar */}
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
+      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs">
         <FormSection stepNumber={1} title="Composición del Grupo Familiar" withDivider={false}>
           <p className="mb-4 text-sm text-gray-500">
-            Registre a todas las personas que residen de forma habitual en la vivienda evaluada.
+            Lista del grupo familiar que reside en la vivienda. El Solicitante y Cónyuge (si corresponde) se muestran precargados en la tabla.
           </p>
 
-          <div className="space-y-4">
-            {familyMembers.map((member, index) => (
-              <div
-                key={index}
-                className="relative rounded-lg border border-gray-200 bg-gray-50/50 p-4 transition-colors hover:border-gray-300"
-              >
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
-                  <div className="md:col-span-2">
-                    <Input
-                      label="Nombres y Apellidos"
-                      value={member.fullName}
-                      onChange={(e) => handleMemberChange(index, 'fullName', e.target.value)}
-                      disabled={!canEdit || isSubmitting}
-                      placeholder="Nombre completo"
-                    />
-                  </div>
-                  <div>
-                    <Select
-                      label="Parentesco"
-                      value={member.relationship}
-                      onChange={(e) => handleMemberChange(index, 'relationship', e.target.value)}
-                      options={RELATIONSHIP_OPTIONS}
-                      disabled={!canEdit || isSubmitting}
-                    />
-                  </div>
-                  <div>
-                    <Input
-                      label="Edad"
-                      type="number"
-                      value={member.age ?? ''}
-                      onChange={(e) =>
-                        handleMemberChange(
-                          index,
-                          'age',
-                          e.target.value === '' ? null : Number(e.target.value),
-                        )
-                      }
-                      disabled={!canEdit || isSubmitting}
-                      placeholder="Años"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <Input
-                      label="Ocupación / Oficio"
-                      value={member.occupation ?? ''}
-                      onChange={(e) => handleMemberChange(index, 'occupation', e.target.value)}
-                      disabled={!canEdit || isSubmitting}
-                      placeholder="Ej. Albañil, Comerciante, Estudiante"
-                    />
-                  </div>
-                  <div>
-                    <Select
-                      label="¿Tiene Discapacidad?"
-                      value={member.hasDisability ? 'true' : 'false'}
-                      onChange={(e) =>
-                        handleMemberChange(index, 'hasDisability', e.target.value === 'true')
-                      }
-                      options={[
-                        { value: 'false', label: 'No' },
-                        { value: 'true', label: 'Sí' },
-                      ]}
-                      disabled={!canEdit || isSubmitting}
-                    />
-                  </div>
-                  {member.hasDisability && (
-                    <div>
-                      <Input
-                        label="Tipo de Discapacidad"
-                        value={member.disabilityType ?? ''}
-                        onChange={(e) =>
-                          handleMemberChange(index, 'disabilityType', e.target.value)
-                        }
-                        disabled={!canEdit || isSubmitting}
-                        placeholder="Física, Auditiva, etc."
-                      />
-                    </div>
+          {/* Tabla tipo Excel con los miembros registrados */}
+          <div className="overflow-x-auto rounded-xl border border-gray-300 shadow-2xs">
+            <table className="min-w-full border-collapse text-left text-xs">
+              <thead>
+                <tr className="bg-slate-800 text-[11px] font-bold tracking-wider text-white uppercase">
+                  <th className="border border-slate-700 px-2.5 py-2 text-center">#</th>
+                  <th className="border border-slate-700 px-3 py-2">Parentesco</th>
+                  <th className="border border-slate-700 px-3 py-2">Nombre Completo</th>
+                  <th className="border border-slate-700 px-3 py-2">Doc. Registro</th>
+                  <th className="border border-slate-700 px-2.5 py-2 text-center">Sexo</th>
+                  <th className="border border-slate-700 px-3 py-2 text-center">Fecha Nac.</th>
+                  <th className="border border-slate-700 px-2.5 py-2 text-center">Edad</th>
+                  <th className="border border-slate-700 px-3 py-2">Ocupación</th>
+                  <th className="border border-slate-700 px-3 py-2">Discapacidad</th>
+                  {canEdit && (
+                    <th className="border border-slate-700 px-3 py-2 text-center">Acciones</th>
                   )}
-                </div>
-
-                {canEdit && familyMembers.length > 1 && (
-                  <div className="mt-3 flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveMember(index)}
-                      className="text-xs font-semibold text-rose-600 hover:text-rose-700"
+                </tr>
+              </thead>
+              <tbody>
+                {familyMembers.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={canEdit ? 10 : 9}
+                      className="border border-gray-200 bg-gray-50 px-4 py-6 text-center text-xs text-gray-500"
                     >
-                      Eliminar integrante
-                    </button>
-                  </div>
+                      No hay integrantes registrados en la lista.
+                    </td>
+                  </tr>
+                ) : (
+                  familyMembers.map((member, index) => {
+                    const isFixedFromGeneralData =
+                      Boolean(member.personId) ||
+                      member.relationship === 'Solicitante' ||
+                      member.relationship === 'Jefe(a) de Hogar' ||
+                      member.relationship === 'Cónyuge / Conviviente';
+                    const memberAge =
+                      calculateAgeFromBirthDate(member.birthDate) ?? member.age ?? null;
+                    const isCertNac =
+                      member.documentIssuedIn === 'CERTIFICADO DE NACIMIENTO';
+                    const docDisplay = isCertNac
+                      ? 'CERTIFICADO DE NACIMIENTO'
+                      : [member.documentNo, member.documentIssuedIn].filter(Boolean).join(' ');
+                    const isBeingEdited = editingIndex === index;
+
+                    return (
+                      <tr
+                        key={index}
+                        className={
+                          isFixedFromGeneralData
+                            ? 'bg-purple-100/80'
+                            : isBeingEdited
+                              ? 'bg-amber-100/80 font-medium'
+                              : 'bg-white hover:bg-sky-50/60'
+                        }
+                      >
+                        <td className="border border-gray-300 px-2.5 py-2 text-center font-bold text-gray-800">
+                          {index + 1}
+                        </td>
+                        <td className="border border-gray-300 px-3 py-2 font-semibold text-gray-900">
+                          {member.relationship || '—'}
+                        </td>
+                        <td className="border border-gray-300 px-3 py-2 font-medium text-gray-900">
+                          {member.fullName || '—'}
+                        </td>
+                        <td className="border border-gray-300 px-3 py-2 font-mono text-gray-800">
+                          {docDisplay || '—'}
+                        </td>
+                        <td className="border border-gray-300 px-2.5 py-2 text-center font-bold text-gray-800">
+                          {member.sex || '—'}
+                        </td>
+                        <td className="border border-gray-300 px-3 py-2 text-center text-gray-800">
+                          {member.birthDate || '—'}
+                        </td>
+                        <td className="border border-gray-300 px-2.5 py-2 text-center font-bold text-purple-950">
+                          {memberAge !== null ? `${memberAge} años` : '—'}
+                        </td>
+                        <td className="border border-gray-300 px-3 py-2 text-gray-800">
+                          {member.occupation || '—'}
+                        </td>
+                        <td className="border border-gray-300 px-3 py-2 text-gray-800">
+                          {member.hasDisability ? (
+                            <span className="inline-flex flex-col">
+                              <span className="font-bold text-rose-700">
+                                Sí{member.disabilityType ? `: ${member.disabilityType}` : ''}
+                              </span>
+                              {member.disabilityDocument && (
+                                <span className="text-[10px] text-gray-600">
+                                  Doc: {member.disabilityDocument}
+                                </span>
+                              )}
+                            </span>
+                          ) : (
+                            <span className="text-gray-500">No</span>
+                          )}
+                        </td>
+                        {canEdit && (
+                          <td className="border border-gray-300 px-2.5 py-2 text-center whitespace-nowrap">
+                            {isFixedFromGeneralData ? (
+                              <span className="text-[11px] font-medium text-purple-800/80 italic">
+                                Datos Generales
+                              </span>
+                            ) : (
+                              <div className="inline-flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleEditMember(index)}
+                                  disabled={isSubmitting}
+                                  className="rounded bg-indigo-50 px-2 py-1 text-[11px] font-semibold text-indigo-700 hover:bg-indigo-100"
+                                >
+                                  Editar
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveMember(index)}
+                                  disabled={isSubmitting}
+                                  className="rounded bg-rose-50 px-2 py-1 text-[11px] font-semibold text-rose-700 hover:bg-rose-100"
+                                >
+                                  Quitar
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Formulario limpio para agregar (o editar) un miembro familiar */}
+          {canEdit && (
+            <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50/70 p-4">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 pb-2">
+                <h4 className="text-xs font-bold tracking-wide text-gray-800 uppercase">
+                  {editingIndex !== null
+                    ? `Editando Integrante #${editingIndex + 1} de la Tabla`
+                    : 'Agregar Nuevo Miembro a la Lista Familiar'}
+                </h4>
+                {editingIndex !== null && (
+                  <button
+                    type="button"
+                    onClick={handleCancelEditMember}
+                    className="text-xs font-semibold text-gray-600 hover:text-gray-900"
+                  >
+                    Cancelar edición
+                  </button>
                 )}
               </div>
-            ))}
 
-            {canEdit && (
-              <div className="pt-2">
-                <Button variant="outline" fullWidth={false} onClick={handleAddMember} disabled={isSubmitting}>
-                  + Agregar Familiar
+              {memberFormError && (
+                <div className="mb-3">
+                  <Alert severity="warning">{memberFormError}</Alert>
+                </div>
+              )}
+
+              {(() => {
+                const isCertificadoNacimiento =
+                  draftMember.documentIssuedIn === 'CERTIFICADO DE NACIMIENTO';
+                const draftCalculatedAge =
+                  calculateAgeFromBirthDate(draftMember.birthDate) ?? draftMember.age ?? null;
+
+                return (
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12">
+                    {/* 1. PARENTESCO */}
+                    <div className="rounded-xl border border-purple-200 bg-purple-100/70 p-2.5 shadow-2xs lg:col-span-2 [&_.MuiOutlinedInput-root]:bg-white/90">
+                      <Select
+                        label="Parentesco"
+                        value={draftMember.relationship}
+                        onChange={(e) => handleDraftChange('relationship', e.target.value)}
+                        options={RELATIONSHIP_OPTIONS}
+                        disabled={isSubmitting}
+                      />
+                    </div>
+
+                    {/* 2. NOMBRE COMPLETO */}
+                    <div className="rounded-xl border border-sky-200 bg-sky-100/70 p-2.5 shadow-2xs lg:col-span-3 [&_.MuiOutlinedInput-root]:bg-white/90">
+                      <Input
+                        label="Nombre Completo"
+                        value={draftMember.fullName}
+                        onChange={(e) => handleDraftChange('fullName', e.target.value)}
+                        disabled={isSubmitting}
+                        placeholder="Nombres y apellidos"
+                      />
+                    </div>
+
+                    {/* 3. DOC. REGISTRO */}
+                    <div className="rounded-xl border border-purple-200 bg-purple-100/70 p-2.5 shadow-2xs lg:col-span-3 [&_.MuiOutlinedInput-root]:bg-white/90">
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <Select
+                          label="Expedido / Tipo Doc."
+                          value={draftMember.documentIssuedIn ?? 'LP'}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            handleDraftChange('documentIssuedIn', val);
+                            if (val === 'CERTIFICADO DE NACIMIENTO') {
+                              handleDraftChange('documentNo', '');
+                            }
+                          }}
+                          options={DOCUMENT_ISSUED_IN_OPTIONS}
+                          disabled={isSubmitting}
+                        />
+                        <Input
+                          label="Doc. Registro (C.I.)"
+                          value={isCertificadoNacimiento ? '' : (draftMember.documentNo ?? '')}
+                          onChange={(e) => handleDraftChange('documentNo', e.target.value)}
+                          disabled={isSubmitting || isCertificadoNacimiento}
+                          placeholder={isCertificadoNacimiento ? 'Sin C.I. (Cert. Nac.)' : 'Ej. 10086482'}
+                        />
+                      </div>
+                    </div>
+
+                    {/* 4. SEXO */}
+                    <div className="rounded-xl border border-sky-200 bg-sky-100/70 p-2.5 shadow-2xs lg:col-span-1 [&_.MuiOutlinedInput-root]:bg-white/90">
+                      <Select
+                        label="Sexo"
+                        value={draftMember.sex ?? ''}
+                        onChange={(e) => handleDraftChange('sex', e.target.value)}
+                        options={SEX_OPTIONS}
+                        disabled={isSubmitting}
+                      />
+                    </div>
+
+                    {/* 5. FECHA DE NACIMIENTO + EDAD AUTOMÁTICA */}
+                    <div className="rounded-xl border border-purple-200 bg-purple-100/70 p-2.5 shadow-2xs lg:col-span-3 [&_.MuiOutlinedInput-root]:bg-white/90">
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="col-span-2">
+                          <Input
+                            label="Fecha de Nacimiento"
+                            type="date"
+                            value={draftMember.birthDate ?? ''}
+                            onChange={(e) => {
+                              const newBirth = e.target.value;
+                              handleDraftChange('birthDate', newBirth);
+                              handleDraftChange('age', calculateAgeFromBirthDate(newBirth));
+                            }}
+                            disabled={isSubmitting}
+                          />
+                        </div>
+                        <div className="col-span-1 flex flex-col justify-center rounded-lg border border-purple-200 bg-white/90 px-2 py-1 text-center">
+                          <span className="text-[10px] font-bold tracking-wider text-purple-900 uppercase">
+                            Edad
+                          </span>
+                          <span className="text-sm font-extrabold text-gray-900">
+                            {draftCalculatedAge !== null ? `${draftCalculatedAge} años` : '—'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 6. OCUPACIÓN + DISCAPACIDAD */}
+                    <div className="rounded-xl border border-sky-200 bg-sky-100/70 p-2.5 shadow-2xs lg:col-span-4 [&_.MuiOutlinedInput-root]:bg-white/90">
+                      <Input
+                        label="Ocupación / Oficio"
+                        value={draftMember.occupation ?? ''}
+                        onChange={(e) => handleDraftChange('occupation', e.target.value)}
+                        disabled={isSubmitting}
+                        placeholder="Ej. Albañil, Comerciante, Estudiante"
+                      />
+                    </div>
+
+                    <div className="rounded-xl border border-purple-200 bg-purple-100/70 p-2.5 shadow-2xs lg:col-span-3 [&_.MuiOutlinedInput-root]:bg-white/90">
+                      <Select
+                        label="¿Tiene Discapacidad?"
+                        value={draftMember.hasDisability ? 'true' : 'false'}
+                        onChange={(e) => {
+                          const hasDis = e.target.value === 'true';
+                          handleDraftChange('hasDisability', hasDis);
+                          if (!hasDis) {
+                            handleDraftChange('disabilityType', '');
+                            handleDraftChange('disabilityDocument', '');
+                          }
+                        }}
+                        options={[
+                          { value: 'false', label: 'No' },
+                          { value: 'true', label: 'Sí' },
+                        ]}
+                        disabled={isSubmitting}
+                      />
+                    </div>
+
+                    {draftMember.hasDisability && (
+                      <>
+                        <div className="rounded-xl border border-sky-200 bg-sky-100/70 p-2.5 shadow-2xs lg:col-span-3 [&_.MuiOutlinedInput-root]:bg-white/90">
+                          <Input
+                            label="Tipo de Discapacidad"
+                            value={draftMember.disabilityType ?? ''}
+                            onChange={(e) => handleDraftChange('disabilityType', e.target.value)}
+                            disabled={isSubmitting}
+                            placeholder="Física, Auditiva, etc."
+                          />
+                        </div>
+                        <div className="rounded-xl border border-purple-200 bg-purple-100/70 p-2.5 shadow-2xs lg:col-span-2 [&_.MuiOutlinedInput-root]:bg-white/90">
+                          <Input
+                            label="Doc. Discapacidad"
+                            value={draftMember.disabilityDocument ?? ''}
+                            onChange={(e) =>
+                              handleDraftChange('disabilityDocument', e.target.value)
+                            }
+                            disabled={isSubmitting}
+                            placeholder="N° Carnet CONALPEDIS"
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
+
+              <div className="mt-3 flex justify-end gap-2">
+                {editingIndex !== null && (
+                  <Button
+                    variant="outline"
+                    fullWidth={false}
+                    onClick={handleCancelEditMember}
+                    disabled={isSubmitting}
+                  >
+                    Cancelar
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  fullWidth={false}
+                  onClick={handleSaveDraftMember}
+                  disabled={isSubmitting}
+                >
+                  {editingIndex !== null ? 'Actualizar Miembro en la Lista' : '+ Agregar Miembro'}
                 </Button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </FormSection>
       </div>
 
