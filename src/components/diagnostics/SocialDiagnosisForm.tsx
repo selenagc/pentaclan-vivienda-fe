@@ -92,10 +92,8 @@ export const SocialDiagnosisForm = ({
   canEdit,
   onSaveSuccess,
 }: SocialDiagnosisFormProps) => {
-  const today = new Date().toISOString().split('T')[0];
-
   const formNo = initialRecord?.formNo ?? defaultFormNo ?? '';
-  const [evaluationDate, setEvaluationDate] = useState(initialRecord?.evaluationDate ?? today);
+
 
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>(
     initialRecord?.familyMembers?.length
@@ -231,7 +229,7 @@ export const SocialDiagnosisForm = ({
 
       const payload: SocialDiagnosticInput = {
         formNo: formNo.trim() || null,
-        evaluationDate,
+        evaluationDate: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`,
         isCompleted,
         familyMembers: familyMembers.filter((m) => m.fullName.trim() !== ''),
         answers: answersPayload,
@@ -599,19 +597,6 @@ export const SocialDiagnosisForm = ({
             </div>
           </div>
         </FormSection>
-      </div>
-
-      {/* Fecha de Evaluación */}
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
-        <div className="sm:max-w-xs">
-          <Input
-            label="Fecha de Evaluación Social"
-            type="date"
-            value={evaluationDate}
-            onChange={(e) => setEvaluationDate(e.target.value)}
-            disabled={!canEdit || isSubmitting}
-          />
-        </div>
       </div>
 
       {/* Actions */}

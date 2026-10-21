@@ -253,10 +253,7 @@ export const TechnicalDiagnosisForm = ({
   canEdit,
   onSaveSuccess,
 }: TechnicalDiagnosisFormProps) => {
-  const today = new Date().toISOString().split('T')[0];
-
   const formNo = initialRecord?.formNo ?? defaultFormNo ?? '';
-  const [evaluationDate, setEvaluationDate] = useState(initialRecord?.evaluationDate ?? today);
 
   // 1. Terreno y Accesibilidad
   const [slopePercentage, setSlopePercentage] = useState<number | null>(
@@ -458,9 +455,12 @@ export const TechnicalDiagnosisForm = ({
     setIsSubmitting(true);
 
     try {
+      const now = new Date();
+      const deviceDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
       const payload: TechnicalDiagnosticInput = {
         formNo: formNo.trim() || null,
-        evaluationDate,
+        evaluationDate: deviceDate,
         isCompleted,
         requiresImprovement,
         requiresExpansion,
@@ -1225,19 +1225,6 @@ export const TechnicalDiagnosisForm = ({
             )}
           </div>
         </FormSection>
-      </div>
-
-      {/* Fecha de Evaluación */}
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
-        <div className="sm:max-w-xs">
-          <Input
-            label="Fecha de Evaluación Técnica"
-            type="date"
-            value={evaluationDate}
-            onChange={(e) => setEvaluationDate(e.target.value)}
-            disabled={!canEdit || isSubmitting}
-          />
-        </div>
       </div>
 
       {/* Actions */}
