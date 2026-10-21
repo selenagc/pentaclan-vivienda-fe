@@ -11,10 +11,11 @@ import type {
   FamilyMember,
   SocialDiagnosticInput,
 } from '../../types/diagnostic.types';
-import type { Person, PersonData } from '../../types/application.types';
+import type { ApplicationStatus, Person, PersonData } from '../../types/application.types';
 
 interface SocialDiagnosisFormProps {
   applicationId: string;
+  applicationStatus?: ApplicationStatus;
   defaultFormNo?: string | null;
   applicant?: Person | null;
   initialRecord: DiagnosticRecord | null;
@@ -68,23 +69,31 @@ function buildPersonFullName(p: PersonData): string {
   return [p.givenNames, p.paternalSurname, p.maternalSurname].filter(Boolean).join(' ').trim();
 }
 
+function isHeadRelationship(rel?: string | null): boolean {
+  return (
+    rel === 'Solicitante' ||
+    rel === 'Beneficiario' ||
+    rel === 'Beneficiario(a)' ||
+    rel === 'Jefe(a) de Hogar'
+  );
+}
+
 function buildInitialFamilyMembers(
   initialRecord: DiagnosticRecord | null,
   applicant?: Person | null,
+  applicationStatus?: ApplicationStatus,
 ): FamilyMember[] {
+  const headLabel = applicationStatus === 'approved' ? 'Beneficiario' : 'Solicitante';
   const fixedMembers: FamilyMember[] = [];
 
   if (applicant) {
     const savedHead = initialRecord?.familyMembers?.find(
-      (fm) =>
-        fm.personId === applicant.id ||
-        fm.relationship === 'Solicitante' ||
-        fm.relationship === 'Jefe(a) de Hogar',
+      (fm) => fm.personId === applicant.id || isHeadRelationship(fm.relationship),
     );
     fixedMembers.push({
       id: savedHead?.id,
       personId: applicant.id,
-      relationship: 'Solicitante',
+      relationship: headLabel,
       fullName: buildPersonFullName(applicant),
       documentNo: applicant.documentNo,
       documentIssuedIn: applicant.documentIssuedIn,
@@ -122,12 +131,7 @@ function buildInitialFamilyMembers(
 
   const extraMembers: FamilyMember[] = (initialRecord?.familyMembers ?? [])
     .filter((fm) => {
-      if (
-        applicant &&
-        (fm.personId === applicant.id ||
-          fm.relationship === 'Solicitante' ||
-          fm.relationship === 'Jefe(a) de Hogar')
-      ) {
+      if (applicant && (fm.personId === applicant.id || isHeadRelationship(fm.relationship))) {
         return false;
       }
       if (fm.relationship === 'Cónyuge / Conviviente') {
@@ -213,6 +217,7 @@ const HEALTH_CARE_OPTIONS = [
 
 export const SocialDiagnosisForm = ({
   applicationId,
+  applicationStatus,
   defaultFormNo,
   applicant,
   initialRecord,
@@ -220,10 +225,21 @@ export const SocialDiagnosisForm = ({
   onSaveSuccess,
 }: SocialDiagnosisFormProps) => {
   const formNo = initialRecord?.formNo ?? defaultFormNo ?? '';
+  const headRoleLabel = applicationStatus === 'approved' ? 'Beneficiario' : 'Solicitante';
 
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>(() =>
-    buildInitialFamilyMembers(initialRecord, applicant),
+    buildInitialFamilyMembers(initialRecord, applicant, applicationStatus),
   );
+
+  useEffect(() => {
+    setFamilyMembers((prev) =>
+      prev.map((fm, idx) =>
+        idx === 0 && (fm.personId === applicant?.id || isHeadRelationship(fm.relationship))
+          ? { ...fm, relationship: headRoleLabel }
+          : fm,
+      ),
+    );
+  }, [headRoleLabel, applicant?.id]);
 
   const createEmptyDraftMember = (): FamilyMember => ({
     personId: null,
@@ -532,7 +548,7 @@ export const SocialDiagnosisForm = ({
       <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs">
         <FormSection stepNumber={1} title="Composición del Grupo Familiar" withDivider={false}>
           <p className="mb-4 text-sm text-gray-500">
-            Lista del grupo familiar que reside en la vivienda. El Solicitante y Cónyuge (si corresponde) se muestran precargados en la tabla.
+            Lista del grupo familiar que reside en la vivienda. El {headRoleLabel} y Cónyuge (si corresponde) se muestran precargados en la tabla.
           </p>
 
           {/* Tabla tipo Excel con los miembros registrados */}
@@ -568,8 +584,7 @@ export const SocialDiagnosisForm = ({
                   familyMembers.map((member, index) => {
                     const isFixedFromGeneralData =
                       Boolean(member.personId) ||
-                      member.relationship === 'Solicitante' ||
-                      member.relationship === 'Jefe(a) de Hogar' ||
+                      isHeadRelationship(member.relationship) ||
                       member.relationship === 'Cónyuge / Conviviente';
                     const memberAge =
                       calculateAgeFromBirthDate(member.birthDate) ?? member.age ?? null;

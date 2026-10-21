@@ -79,6 +79,7 @@ export const ApplicationDiagnosisPage = ({ kind }: ApplicationDiagnosisPageProps
       {kind === 'social' ? (
         <SocialDiagnosisForm
           applicationId={application.id}
+          applicationStatus={application.status}
           defaultFormNo={diagnosticRecord?.formNo ?? application.formNo ?? null}
           applicant={application.person}
           initialRecord={diagnosticRecord}
