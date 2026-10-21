@@ -603,20 +603,12 @@ export const SocialDiagnosisForm = ({
       {canEdit && (
         <div className="flex flex-wrap items-center justify-end gap-3 rounded-xl border border-gray-200 bg-white p-5 shadow-xs">
           <Button
-            variant="outline"
-            fullWidth={false}
-            onClick={() => handleSubmit(false)}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Guardando...' : 'Guardar Borrador'}
-          </Button>
-          <Button
             variant="primary"
             fullWidth={false}
             onClick={() => handleSubmit(true)}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Guardando...' : 'Completar y Guardar Diagnóstico Social'}
+            {isSubmitting ? 'Guardando...' : 'Guardar Diagnóstico Social'}
           </Button>
         </div>
       )}
