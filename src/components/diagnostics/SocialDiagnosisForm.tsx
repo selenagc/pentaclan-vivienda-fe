@@ -283,6 +283,10 @@ export const SocialDiagnosisForm = ({
     },
   );
 
+  const [constructionKnowledgeObservations, setConstructionKnowledgeObservations] = useState(
+    initialRecord?.constructionKnowledgeObservations ?? '',
+  );
+
   const [waterSource, setWaterSource] = useState(initialRecord?.waterHabits?.waterSource ?? '');
   const [containerClean, setContainerClean] = useState(initialRecord?.waterHabits?.containerClean ?? false);
   const [containerStatus, setContainerStatus] = useState(initialRecord?.waterHabits?.containerStatus ?? '');
@@ -482,6 +486,7 @@ export const SocialDiagnosisForm = ({
         isCompleted,
         familyMembers: membersToSave.filter((m) => m.fullName.trim() !== ''),
         answers: answersPayload,
+        constructionKnowledgeObservations: constructionKnowledgeObservations.trim() || null,
         waterHabits: {
           waterSource: waterSource || null,
           containerClean,
@@ -904,10 +909,119 @@ export const SocialDiagnosisForm = ({
         </FormSection>
       </div>
 
-      {/* 2. Nivel de Conocimiento acerca de Construcción de Viviendas */}
+      {/* 2. Hábitos y Consumo de Agua */}
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
+        <FormSection stepNumber={2} title="Uso y Consumo de Agua">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+              <Select
+                label="Fuente Principal de Agua"
+                value={waterSource}
+                onChange={(e) => setWaterSource(e.target.value)}
+                options={WATER_SOURCE_OPTIONS}
+                disabled={!canEdit || isSubmitting}
+              />
+            </div>
+            <div className="rounded-xl border border-sky-200 bg-sky-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+              <Select
+                label="Estado de Recipientes de Almacenamiento"
+                value={containerStatus}
+                onChange={(e) => setContainerStatus(e.target.value)}
+                options={CONTAINER_STATUS_OPTIONS}
+                disabled={!canEdit || isSubmitting}
+              />
+            </div>
+            <div className="rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+              <Select
+                label="¿Mantiene los Recipientes Limpios?"
+                value={containerClean ? 'true' : 'false'}
+                onChange={(e) => setContainerClean(e.target.value === 'true')}
+                options={[
+                  { value: 'true', label: 'Sí, limpios y desinfectados' },
+                  { value: 'false', label: 'No' },
+                ]}
+                disabled={!canEdit || isSubmitting}
+              />
+            </div>
+            <div className="rounded-xl border border-sky-200 bg-sky-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+              <Select
+                label="Tratamiento del Agua de Consumo"
+                value={waterTreatment}
+                onChange={(e) => setWaterTreatment(e.target.value)}
+                options={WATER_TREATMENT_OPTIONS}
+                disabled={!canEdit || isSubmitting}
+              />
+            </div>
+            <div className="sm:col-span-2 rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+              <Input
+                label="Otros Detalles del Consumo de Agua"
+                value={waterDetails}
+                onChange={(e) => setWaterDetails(e.target.value)}
+                disabled={!canEdit || isSubmitting}
+                placeholder="Observaciones sobre almacenamiento, frecuencia o calidad"
+              />
+            </div>
+          </div>
+        </FormSection>
+      </div>
+
+      {/* 3. Higiene y Salud */}
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
+        <FormSection stepNumber={3} title="Higiene y Salud Familiar">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+              <Select
+                label="Eliminación de Aguas Servidas"
+                value={greywaterDisposal}
+                onChange={(e) => setGreywaterDisposal(e.target.value)}
+                options={GREYWATER_OPTIONS}
+                disabled={!canEdit || isSubmitting}
+              />
+            </div>
+            <div className="rounded-xl border border-sky-200 bg-sky-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+              <Select
+                label="Eliminación de Basura"
+                value={garbageDisposal}
+                onChange={(e) => setGarbageDisposal(e.target.value)}
+                options={GARBAGE_OPTIONS}
+                disabled={!canEdit || isSubmitting}
+              />
+            </div>
+            <div className="rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+              <Select
+                label="Estado de Higiene y Limpieza General"
+                value={cleanlinessStatus}
+                onChange={(e) => setCleanlinessStatus(e.target.value)}
+                options={CLEANLINESS_OPTIONS}
+                disabled={!canEdit || isSubmitting}
+              />
+            </div>
+            <div className="rounded-xl border border-sky-200 bg-sky-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+              <Select
+                label="Acción ante Problemas de Salud"
+                value={healthCareAction}
+                onChange={(e) => setHealthCareAction(e.target.value)}
+                options={HEALTH_CARE_OPTIONS}
+                disabled={!canEdit || isSubmitting}
+              />
+            </div>
+            <div className="sm:col-span-2 rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+              <Input
+                label="Enfermedades Frecuentes en el Hogar"
+                value={prevalentDiseases}
+                onChange={(e) => setPrevalentDiseases(e.target.value)}
+                disabled={!canEdit || isSubmitting}
+                placeholder="Ej. Infecciones respiratorias agudas, diarreas en niños, parasitosis"
+              />
+            </div>
+          </div>
+        </FormSection>
+      </div>
+
+      {/* 4. Nivel de Conocimiento acerca de Construcción de Viviendas */}
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
         <FormSection
-          stepNumber={2}
+          stepNumber={4}
           title={`Nivel de Conocimiento del ${headRoleLabel} acerca de Construcción de Viviendas`}
         >
           <p className="mb-4 text-sm text-gray-500">
@@ -1015,98 +1129,15 @@ export const SocialDiagnosisForm = ({
               </table>
             </div>
           )}
-        </FormSection>
-      </div>
 
-      {/* 3. Hábitos y Consumo de Agua */}
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
-        <FormSection stepNumber={3} title="Uso y Consumo de Agua">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Select
-              label="Fuente Principal de Agua"
-              value={waterSource}
-              onChange={(e) => setWaterSource(e.target.value)}
-              options={WATER_SOURCE_OPTIONS}
+          <div className="mt-4 rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+            <Input
+              label="Observaciones"
+              value={constructionKnowledgeObservations}
+              onChange={(e) => setConstructionKnowledgeObservations(e.target.value)}
               disabled={!canEdit || isSubmitting}
+              placeholder="Observaciones generales sobre el conocimiento en construcción del solicitante..."
             />
-            <Select
-              label="Estado de Recipientes de Almacenamiento"
-              value={containerStatus}
-              onChange={(e) => setContainerStatus(e.target.value)}
-              options={CONTAINER_STATUS_OPTIONS}
-              disabled={!canEdit || isSubmitting}
-            />
-            <Select
-              label="¿Mantiene los Recipientes Limpios?"
-              value={containerClean ? 'true' : 'false'}
-              onChange={(e) => setContainerClean(e.target.value === 'true')}
-              options={[
-                { value: 'true', label: 'Sí, limpios y desinfectados' },
-                { value: 'false', label: 'No' },
-              ]}
-              disabled={!canEdit || isSubmitting}
-            />
-            <Select
-              label="Tratamiento del Agua de Consumo"
-              value={waterTreatment}
-              onChange={(e) => setWaterTreatment(e.target.value)}
-              options={WATER_TREATMENT_OPTIONS}
-              disabled={!canEdit || isSubmitting}
-            />
-            <div className="sm:col-span-2">
-              <Input
-                label="Otros Detalles del Consumo de Agua"
-                value={waterDetails}
-                onChange={(e) => setWaterDetails(e.target.value)}
-                disabled={!canEdit || isSubmitting}
-                placeholder="Observaciones sobre almacenamiento, frecuencia o calidad"
-              />
-            </div>
-          </div>
-        </FormSection>
-      </div>
-
-      {/* 4. Higiene y Salud */}
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
-        <FormSection stepNumber={4} title="Higiene y Salud Familiar">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Select
-              label="Eliminación de Aguas Servidas"
-              value={greywaterDisposal}
-              onChange={(e) => setGreywaterDisposal(e.target.value)}
-              options={GREYWATER_OPTIONS}
-              disabled={!canEdit || isSubmitting}
-            />
-            <Select
-              label="Eliminación de Basura"
-              value={garbageDisposal}
-              onChange={(e) => setGarbageDisposal(e.target.value)}
-              options={GARBAGE_OPTIONS}
-              disabled={!canEdit || isSubmitting}
-            />
-            <Select
-              label="Estado de Higiene y Limpieza General"
-              value={cleanlinessStatus}
-              onChange={(e) => setCleanlinessStatus(e.target.value)}
-              options={CLEANLINESS_OPTIONS}
-              disabled={!canEdit || isSubmitting}
-            />
-            <Select
-              label="Acción ante Problemas de Salud"
-              value={healthCareAction}
-              onChange={(e) => setHealthCareAction(e.target.value)}
-              options={HEALTH_CARE_OPTIONS}
-              disabled={!canEdit || isSubmitting}
-            />
-            <div className="sm:col-span-2">
-              <Input
-                label="Enfermedades Frecuentes en el Hogar"
-                value={prevalentDiseases}
-                onChange={(e) => setPrevalentDiseases(e.target.value)}
-                disabled={!canEdit || isSubmitting}
-                placeholder="Ej. Infecciones respiratorias agudas, diarreas en niños, parasitosis"
-              />
-            </div>
           </div>
         </FormSection>
       </div>

@@ -136,6 +136,7 @@ export interface DiagnosticRecord {
   // Sección Social
   familyMembers: FamilyMember[];
   answers: DiagnosticAnswer[];
+  constructionKnowledgeObservations?: string | null;
   waterHabits?: WaterConsumptionHabit | null;
   hygiene?: HousingHygiene | null;
   health?: HealthCondition | null;
@@ -180,6 +181,7 @@ export interface SocialDiagnosticInput {
     answerBoolean?: boolean | null;
     score?: string | null;
   }[];
+  constructionKnowledgeObservations?: string | null;
   waterHabits?: WaterConsumptionHabit | null;
   hygiene?: HousingHygiene | null;
   health?: HealthCondition | null;
