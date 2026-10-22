@@ -1135,7 +1135,7 @@ export const TechnicalDiagnosisForm = ({
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
         <FormSection stepNumber={6} title="Evidencia Fotográfica de Campo">
           <p className="mb-4 text-sm text-gray-500">
-            Fotografías del diagnóstico técnico de la vivienda almacenadas directamente en AWS S3.
+            Fotografías del diagnóstico técnico de la vivienda.
           </p>
 
           <DiagnosticPhotosManager

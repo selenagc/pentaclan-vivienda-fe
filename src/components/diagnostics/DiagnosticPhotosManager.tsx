@@ -83,12 +83,12 @@ export const DiagnosticPhotosManager = ({
       setPhotos(updatedPhotos);
       onPhotosChange?.(updatedPhotos);
 
-      setUploadSuccess(`Fotografía "${selectedPhotoType}" subida exitosamente a AWS S3.`);
+      setUploadSuccess(`Fotografía "${selectedPhotoType}" subida exitosamente.`);
       setDescription('');
       setIsCameraModalOpen(false);
     } catch (err: unknown) {
       const errMsg =
-        err instanceof Error ? err.message : 'Fallo al subir la fotografía a AWS S3. Inténtalo nuevamente.';
+        err instanceof Error ? err.message : 'Fallo al subir la fotografía. Inténtalo nuevamente.';
       setUploadError(errMsg);
     } finally {
       setIsUploading(false);
@@ -97,7 +97,7 @@ export const DiagnosticPhotosManager = ({
 
   // Eliminar fotografía de PostgreSQL y AWS S3
   const handleDeletePhoto = async (photoId: number) => {
-    if (!window.confirm('¿Estás seguro de que deseas eliminar esta fotografía de AWS S3?')) return;
+    if (!window.confirm('¿Estás seguro de que deseas eliminar esta fotografía?')) return;
 
     setDeletingPhotoId(photoId);
     setUploadError(null);
@@ -108,7 +108,7 @@ export const DiagnosticPhotosManager = ({
       onPhotosChange?.(updatedPhotos);
     } catch (err: unknown) {
       const errMsg =
-        err instanceof Error ? err.message : 'No se pudo eliminar la fotografía de AWS S3.';
+        err instanceof Error ? err.message : 'No se pudo eliminar la fotografía.';
       setUploadError(errMsg);
     } finally {
       setDeletingPhotoId(null);
@@ -135,7 +135,7 @@ export const DiagnosticPhotosManager = ({
           <div>
             <h4 className="text-sm font-semibold text-gray-800">Captura de Fotografía en Vivo</h4>
             <p className="text-xs text-gray-500">
-              Toma fotografías directas con la cámara del dispositivo y súbelas al almacenamiento seguro en AWS S3.
+              Toma fotografías directas con la cámara del dispositivo y súbelas al almacenamiento seguro.
             </p>
           </div>
 
@@ -285,7 +285,7 @@ export const DiagnosticPhotosManager = ({
             {isUploading && (
               <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/85 p-6 text-center text-white backdrop-blur-xs">
                 <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-primary border-t-transparent" />
-                <p className="mt-4 text-sm font-semibold">Subiendo fotografía a AWS S3...</p>
+                <p className="mt-4 text-sm font-semibold">Subiendo fotografía...</p>
                 <p className="mt-1 text-xs text-neutral-400">
                   Transfiriendo archivo y vinculando a la postulación.
                 </p>
@@ -337,7 +337,7 @@ export const DiagnosticPhotosManager = ({
               )}
               {expandedPhoto.s3Key && (
                 <p className="truncate font-mono text-[11px] text-gray-500">
-                  <strong>S3 Key:</strong> {expandedPhoto.s3Key}
+                  <strong>Archivo:</strong> {expandedPhoto.s3Key}
                 </p>
               )}
             </div>
