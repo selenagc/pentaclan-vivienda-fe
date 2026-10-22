@@ -8,8 +8,20 @@ import type { ApiErrorResponse } from '../types/api.types';
  * - El interceptor de petición adjunta el accessToken (Authorization: Bearer ...).
  * - El interceptor de respuesta limpia la sesión ante un 401.
  */
+const resolveBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (
+    typeof window !== 'undefined' &&
+    window.location.hostname !== 'localhost' &&
+    window.location.hostname !== '127.0.0.1'
+  ) {
+    return `${window.location.protocol}//${window.location.hostname}:3000`;
+  }
+  return envUrl ?? 'http://localhost:3000';
+};
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:3000',
+  baseURL: resolveBaseUrl(),
   headers: { 'Content-Type': 'application/json' },
 });
 

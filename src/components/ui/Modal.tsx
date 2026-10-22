@@ -15,7 +15,7 @@ interface ModalProps {
   /** Zona de acciones (botones) al pie del modal. */
   footer?: ReactNode;
   /** Ancho máximo del panel. */
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
 /**
@@ -27,6 +27,7 @@ const sizeMap = {
   sm: 384,
   md: 448,
   lg: 512,
+  xl: 672,
 } as const;
 
 const CloseIcon = (

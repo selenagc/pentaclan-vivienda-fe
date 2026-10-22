@@ -4,6 +4,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { FormSection } from '../ui/FormSection';
+import { DiagnosticPhotosManager } from './DiagnosticPhotosManager';
 import { diagnosticService } from '../../services/diagnosticService';
 import type {
   ConstructionElement,
@@ -235,17 +236,6 @@ const CONSTRUCTION_COMPONENT_CONFIGS: ComponentConfig[] = [
   },
 ];
 
-const PHOTO_TYPE_OPTIONS = [
-  { value: 'Fachada Principal', label: 'Fachada Principal' },
-  { value: 'Dormitorio(s)', label: 'Dormitorio(s)' },
-  { value: 'Cocina', label: 'Cocina' },
-  { value: 'Baño / Sanitarios', label: 'Baño / Sanitarios' },
-  { value: 'Muros y Estructura', label: 'Muros y Estructura' },
-  { value: 'Cubierta y Techos', label: 'Cubierta y Techos' },
-  { value: 'Pisos', label: 'Pisos' },
-  { value: 'Entorno / Terreno', label: 'Entorno / Terreno' },
-];
-
 export const TechnicalDiagnosisForm = ({
   applicationId,
   defaultFormNo,
@@ -422,33 +412,6 @@ export const TechnicalDiagnosisForm = ({
     });
   };
 
-  const handleAddPhoto = () => {
-    setPhotos((prev) => [
-      ...prev,
-      {
-        photoType: 'Fachada Principal',
-        url: '',
-        description: '',
-      },
-    ]);
-  };
-
-  const handleRemovePhoto = (index: number) => {
-    setPhotos((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handlePhotoChange = <K extends keyof DiagnosticPhoto>(
-    index: number,
-    field: K,
-    value: DiagnosticPhoto[K],
-  ) => {
-    setPhotos((prev) => {
-      const copy = [...prev];
-      copy[index] = { ...copy[index], [field]: value };
-      return copy;
-    });
-  };
-
   const handleSubmit = async (isCompleted: boolean) => {
     setErrorMessage(null);
     setSuccessMessage(null);
@@ -495,7 +458,6 @@ export const TechnicalDiagnosisForm = ({
           observations: housingObs.trim() || null,
         },
         constructionElements: elements,
-        photos: photos.filter((p) => p.url.trim() !== ''),
       };
 
       const updated = await diagnosticService.saveTechnical(applicationId, payload);
@@ -505,10 +467,14 @@ export const TechnicalDiagnosisForm = ({
           : 'Borrador del diagnóstico técnico guardado correctamente.',
       );
       onSaveSuccess(updated);
-    } catch (err: any) {
-      setErrorMessage(
-        err?.response?.data?.message || err?.message || 'Error al guardar el diagnóstico técnico.',
-      );
+    } catch (err: unknown) {
+      let msg = 'Error al guardar el diagnóstico técnico.';
+      if (err instanceof Error) msg = err.message;
+      if (typeof err === 'object' && err !== null && 'response' in err) {
+        const resp = (err as { response?: { data?: { message?: string } } }).response;
+        if (resp?.data?.message) msg = resp.data.message;
+      }
+      setErrorMessage(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -1164,66 +1130,20 @@ export const TechnicalDiagnosisForm = ({
         </FormSection>
       </div>
 
-      {/* 6. Ficha Fotográfica */}
+      {/* 6. Ficha Fotográfica con Captura en Vivo y AWS S3 */}
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
         <FormSection stepNumber={6} title="Evidencia Fotográfica de Campo">
           <p className="mb-4 text-sm text-gray-500">
-            Adjunte las fotografías del diagnóstico técnico de la vivienda.
+            Fotografías del diagnóstico técnico de la vivienda.
           </p>
 
-          <div className="space-y-4">
-            {photos.map((photo, index) => (
-              <div
-                key={index}
-                className="grid grid-cols-1 gap-3 rounded-lg border border-gray-200 bg-gray-50/50 p-4 sm:grid-cols-3"
-              >
-                <div>
-                  <Select
-                    label="Tipo de Fotografía"
-                    value={photo.photoType}
-                    onChange={(e) => handlePhotoChange(index, 'photoType', e.target.value)}
-                    options={PHOTO_TYPE_OPTIONS}
-                    disabled={!canEdit || isSubmitting}
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <Input
-                    label="URL de la Fotografía"
-                    value={photo.url}
-                    onChange={(e) => handlePhotoChange(index, 'url', e.target.value)}
-                    disabled={!canEdit || isSubmitting}
-                    placeholder="https://..."
-                  />
-                </div>
-                <div className="sm:col-span-3">
-                  <Input
-                    label="Descripción / Observación de la Foto"
-                    value={photo.description ?? ''}
-                    onChange={(e) => handlePhotoChange(index, 'description', e.target.value)}
-                    disabled={!canEdit || isSubmitting}
-                    placeholder="Detalle visual de la falla o ambiente"
-                  />
-                </div>
-                {canEdit && (
-                  <div className="sm:col-span-3 flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => handleRemovePhoto(index)}
-                      className="text-xs font-semibold text-rose-600 hover:text-rose-700"
-                    >
-                      Eliminar fotografía
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {canEdit && (
-              <Button variant="outline" fullWidth={false} onClick={handleAddPhoto} disabled={isSubmitting}>
-                + Agregar Fotografía
-              </Button>
-            )}
-          </div>
+          <DiagnosticPhotosManager
+            applicationId={applicationId}
+            category="technical"
+            initialPhotos={photos}
+            canEdit={canEdit}
+            onPhotosChange={setPhotos}
+          />
         </FormSection>
       </div>
 
