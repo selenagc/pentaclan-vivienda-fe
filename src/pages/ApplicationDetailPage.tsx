@@ -106,6 +106,7 @@ export const ApplicationDetailPage = ({ section }: ApplicationDetailPageProps) =
       { label: 'Datos generales', to: basePath },
       { label: 'Diagnóstico social', to: `${basePath}/diagnostico-social` },
       { label: 'Diagnóstico técnico', to: `${basePath}/diagnostico-tecnico` },
+      { label: 'Historial de modificaciones', to: `${basePath}/historial-cambios` },
     ],
     [basePath],
   );

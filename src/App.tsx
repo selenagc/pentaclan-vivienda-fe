@@ -20,10 +20,11 @@ import { ProtectedRoute } from './components/routing/ProtectedRoute';
 import { AppLayout } from './layouts/AppLayout';
 import type { ProjectSection } from './components/applications/applicationOutlet';
 
-/** Las dos direcciones de diagnóstico, para montarlas o redirigirlas. */
+/** Las direcciones de diagnóstico, para montarlas o redirigirlas. */
 const DIAGNOSIS_PATHS = {
   social: 'diagnostico-social',
   technical: 'diagnostico-tecnico',
+  history: 'historial-cambios',
 } as const;
 
 /**
@@ -55,6 +56,10 @@ const applicationRoutes = (section: ProjectSection) => (
       <Route
         path={DIAGNOSIS_PATHS.technical}
         element={<ApplicationDiagnosisPage kind="technical" />}
+      />
+      <Route
+        path={DIAGNOSIS_PATHS.history}
+        element={<ApplicationDiagnosisPage kind="history" />}
       />
     </Route>
     <Route
