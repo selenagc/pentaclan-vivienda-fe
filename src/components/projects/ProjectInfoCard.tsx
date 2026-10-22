@@ -117,7 +117,21 @@ interface ProjectInfoCardProps {
   project: Project;
   /** Abre la edición. Si se omite, no se ofrece el botón (solo es de admin). */
   onEdit?: () => void;
+  /** Descarga la presentación PowerPoint del proyecto (disponible para cualquier usuario con acceso). */
+  onDownloadPresentation?: () => void;
+  /** Indica si se está generando la presentación PowerPoint. */
+  isDownloadingPresentation?: boolean;
 }
+
+const PresentationIcon = (
+  <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"
+    />
+  </svg>
+);
 
 /**
  * Cabecera del detalle de un proyecto: quién es y dónde se ejecuta.
@@ -134,7 +148,12 @@ interface ProjectInfoCardProps {
  *
  * No pide nada: lo carga la página, que ya necesita el proyecto para el título.
  */
-export const ProjectInfoCard = ({ project, onEdit }: ProjectInfoCardProps) => (
+export const ProjectInfoCard = ({
+  project,
+  onEdit,
+  onDownloadPresentation,
+  isDownloadingPresentation = false,
+}: ProjectInfoCardProps) => (
   <Card>
     <Banner>
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -143,25 +162,52 @@ export const ProjectInfoCard = ({ project, onEdit }: ProjectInfoCardProps) => (
           <h2 className="mt-0.5 text-xl font-semibold break-words text-white">{project.name}</h2>
           <p className="mt-1 text-sm text-white/70">Nº de contrato {project.contractNo}</p>
         </div>
-        {onEdit && (
-          // Contra el degradado, el botón se dibuja en blanco: la variante de
-          // marca desaparecería sobre su propio color.
-          <MuiButton
-            variant="outlined"
-            size="small"
-            startIcon={EditIcon}
-            onClick={onEdit}
-            sx={{
-              color: 'common.white',
-              borderColor: 'rgba(255,255,255,0.5)',
-              '&:hover': {
-                borderColor: 'common.white',
-                backgroundColor: 'rgba(255,255,255,0.12)',
-              },
-            }}
-          >
-            Editar
-          </MuiButton>
+        {(onDownloadPresentation || onEdit) && (
+          <div className="flex flex-wrap items-center gap-2">
+            {onDownloadPresentation && (
+              <MuiButton
+                variant="outlined"
+                size="small"
+                startIcon={PresentationIcon}
+                onClick={onDownloadPresentation}
+                disabled={isDownloadingPresentation}
+                sx={{
+                  color: 'common.white',
+                  borderColor: 'rgba(255,255,255,0.5)',
+                  '&:hover': {
+                    borderColor: 'common.white',
+                    backgroundColor: 'rgba(255,255,255,0.12)',
+                  },
+                  '&.Mui-disabled': {
+                    color: 'rgba(255,255,255,0.6)',
+                    borderColor: 'rgba(255,255,255,0.25)',
+                  },
+                }}
+              >
+                {isDownloadingPresentation ? 'Generando PPTX...' : 'Descargar PowerPoint'}
+              </MuiButton>
+            )}
+            {onEdit && (
+              // Contra el degradado, el botón se dibuja en blanco: la variante de
+              // marca desaparecería sobre su propio color.
+              <MuiButton
+                variant="outlined"
+                size="small"
+                startIcon={EditIcon}
+                onClick={onEdit}
+                sx={{
+                  color: 'common.white',
+                  borderColor: 'rgba(255,255,255,0.5)',
+                  '&:hover': {
+                    borderColor: 'common.white',
+                    backgroundColor: 'rgba(255,255,255,0.12)',
+                  },
+                }}
+              >
+                Editar
+              </MuiButton>
+            )}
+          </div>
         )}
       </div>
     </Banner>

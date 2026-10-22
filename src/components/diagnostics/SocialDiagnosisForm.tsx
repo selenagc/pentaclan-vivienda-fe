@@ -137,7 +137,9 @@ function buildInitialFamilyMembers(
       if (applicant && (fm.personId === applicant.id || isHeadRelationship(fm.relationship))) {
         return false;
       }
-      if (fm.relationship === 'Cónyuge / Conviviente') {
+      // Solo se omite si ya se precargó desde datos generales; si no, se muestra
+      // para que no se pierda en silencio al guardar.
+      if (applicant?.spouse && fm.relationship === 'Cónyuge / Conviviente') {
         return false;
       }
       return true;
@@ -647,7 +649,7 @@ export const SocialDiagnosisForm = ({
                     const isFixedFromGeneralData =
                       Boolean(member.personId) ||
                       isHeadRelationship(member.relationship) ||
-                      member.relationship === 'Cónyuge / Conviviente';
+                      (Boolean(applicant?.spouse) && member.relationship === 'Cónyuge / Conviviente');
                     const memberAge =
                       calculateAgeFromBirthDate(member.birthDate) ?? member.age ?? null;
                     const isCertNac =
