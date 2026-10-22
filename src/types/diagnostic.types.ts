@@ -209,7 +209,6 @@ export interface TechnicalDiagnosticInput {
   basicUtilities?: BasicUtility | null;
   housingCharacteristics?: HousingCharacteristic | null;
   constructionElements?: ConstructionElement[];
-  photos?: DiagnosticPhoto[];
   isCompleted?: boolean;
 }
 

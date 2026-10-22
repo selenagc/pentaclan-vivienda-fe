@@ -458,7 +458,6 @@ export const TechnicalDiagnosisForm = ({
           observations: housingObs.trim() || null,
         },
         constructionElements: elements,
-        photos: photos.filter((p) => p.url.trim() !== ''),
       };
 
       const updated = await diagnosticService.saveTechnical(applicationId, payload);
