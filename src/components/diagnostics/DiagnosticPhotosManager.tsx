@@ -9,7 +9,7 @@ import { diagnosticService } from '../../services/diagnosticService';
 import type { CapturedPhoto } from '../../types/camera.types';
 import type { DiagnosticPhoto } from '../../types/diagnostic.types';
 
-import { DIAGNOSTIC_PHOTO_TYPE_OPTIONS } from '../../constants/diagnosticPhotos';
+import { DIAGNOSTIC_PHOTO_TYPE_OPTIONS, SOCIAL_PHOTO_TYPE_OPTIONS } from '../../constants/diagnosticPhotos';
 
 interface DiagnosticPhotosManagerProps {
   applicationId: string;
@@ -30,9 +30,14 @@ export const DiagnosticPhotosManager = ({
   canEdit = true,
   onPhotosChange,
 }: DiagnosticPhotosManagerProps) => {
-  const [photos, setPhotos] = useState<DiagnosticPhoto[]>(initialPhotos);
+  const photoTypeOptions = category === 'social' ? SOCIAL_PHOTO_TYPE_OPTIONS : DIAGNOSTIC_PHOTO_TYPE_OPTIONS;
+
+  // La ficha trae las fotos de ambos módulos: cada gestor muestra solo las de su categoría.
+  const [photos, setPhotos] = useState<DiagnosticPhoto[]>(() =>
+    initialPhotos.filter((p) => (p.category ?? 'technical') === category),
+  );
   const [isCameraModalOpen, setIsCameraModalOpen] = useState<boolean>(false);
-  const [selectedPhotoType, setSelectedPhotoType] = useState<string>('Fachada Principal');
+  const [selectedPhotoType, setSelectedPhotoType] = useState<string>(photoTypeOptions[0].value);
   const [description, setDescription] = useState<string>('');
 
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -267,7 +272,7 @@ export const DiagnosticPhotosManager = ({
               label="Tipo de Fotografía"
               value={selectedPhotoType}
               onChange={(e) => setSelectedPhotoType(e.target.value)}
-              options={DIAGNOSTIC_PHOTO_TYPE_OPTIONS}
+              options={photoTypeOptions}
               disabled={isUploading}
             />
 
@@ -275,7 +280,11 @@ export const DiagnosticPhotosManager = ({
               label="Descripción u Observación (Opcional)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Ej. Falla en muro norte o ambiente a intervenir"
+              placeholder={
+                category === 'social'
+                  ? 'Ej. Grupo familiar completo frente a la vivienda'
+                  : 'Ej. Falla en muro norte o ambiente a intervenir'
+              }
               disabled={isUploading}
             />
           </div>
