@@ -144,38 +144,51 @@ export const ApplicantInfoCard = ({
           </div>
         </div>
 
-        {hasActions && (
-          <div className="flex flex-wrap items-center gap-2">
-            {onPreselect && (
-              <Button variant="outline" fullWidth={false} icon={PreselectIcon} onClick={onPreselect}>
-                Preseleccionar
-              </Button>
-            )}
-            {onApprove && (
-              <Button fullWidth={false} icon={CheckIcon} onClick={onApprove}>
-                Aprobar
-              </Button>
-            )}
-            {onReject && (
-              <Button variant="outline" fullWidth={false} icon={XIcon} onClick={onReject}>
-                Rechazar
-              </Button>
-            )}
-            {(canDecide || onPreselect) && (onEdit || onDelete) && (
-              <span aria-hidden="true" className="mx-1 hidden h-6 w-px bg-gray-200 sm:block" />
-            )}
-            {onEdit && (
-              <Button variant="outline" fullWidth={false} icon={EditIcon} onClick={onEdit}>
-                Editar
-              </Button>
-            )}
-            {onDelete && (
-              <Button variant="danger" fullWidth={false} onClick={onDelete}>
-                Dar de baja
-              </Button>
-            )}
-          </div>
-        )}
+        <div className="flex flex-wrap items-center gap-3">
+          {hasActions && (
+            <div className="flex flex-wrap items-center gap-2">
+              {onPreselect && (
+                <Button variant="outline" fullWidth={false} icon={PreselectIcon} onClick={onPreselect}>
+                  Preseleccionar
+                </Button>
+              )}
+              {onApprove && (
+                <Button fullWidth={false} icon={CheckIcon} onClick={onApprove}>
+                  Aprobar
+                </Button>
+              )}
+              {onReject && (
+                <Button variant="outline" fullWidth={false} icon={XIcon} onClick={onReject}>
+                  Rechazar
+                </Button>
+              )}
+              {(canDecide || onPreselect) && (onEdit || onDelete) && (
+                <span aria-hidden="true" className="mx-1 hidden h-6 w-px bg-gray-200 sm:block" />
+              )}
+              {onEdit && (
+                <Button variant="outline" fullWidth={false} icon={EditIcon} onClick={onEdit}>
+                  Editar
+                </Button>
+              )}
+              {onDelete && (
+                <Button variant="danger" fullWidth={false} icon={onDelete ? undefined : undefined} onClick={onDelete}>
+                  Dar de baja
+                </Button>
+              )}
+            </div>
+          )}
+
+          {application.formNo && (
+            <div className="flex flex-col items-center justify-center rounded-xl bg-gradient-to-br from-brand-primary to-brand-primary-light px-4 py-1.5 text-white shadow-sm">
+              <span className="text-[10px] font-semibold tracking-wider text-purple-100 uppercase leading-tight">
+                Formulario
+              </span>
+              <span className="text-base font-extrabold leading-tight">
+                N° {application.formNo}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </Card>
   );

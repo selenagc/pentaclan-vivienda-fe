@@ -88,8 +88,6 @@ export const ApplicationDetailPage = ({ section }: ApplicationDetailPageProps) =
   const [isApproving, setIsApproving] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
 
-  const isBeneficiary = application?.status === 'approved';
-
   // Preseleccionar necesita el rol y que la ficha siga en estado 'pending'.
   const canPreselect =
     CAN_PRESELECT_APPLICATIONS.includes(
@@ -104,15 +102,12 @@ export const ApplicationDetailPage = ({ section }: ApplicationDetailPageProps) =
     Boolean(application && DECIDABLE_STATUSES.includes(application.status));
 
   const tabs = useMemo<RouteTab[]>(
-    () =>
-      isBeneficiary
-        ? [
-            { label: 'Datos generales', to: basePath },
-            { label: 'Diagnóstico social', to: `${basePath}/diagnostico-social` },
-            { label: 'Diagnóstico técnico', to: `${basePath}/diagnostico-tecnico` },
-          ]
-        : [],
-    [basePath, isBeneficiary],
+    () => [
+      { label: 'Datos generales', to: basePath },
+      { label: 'Diagnóstico social', to: `${basePath}/diagnostico-social` },
+      { label: 'Diagnóstico técnico', to: `${basePath}/diagnostico-tecnico` },
+    ],
+    [basePath],
   );
 
   return (
