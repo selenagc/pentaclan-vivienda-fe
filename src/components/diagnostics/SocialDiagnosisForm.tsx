@@ -164,28 +164,35 @@ function buildInitialFamilyMembers(
   return [];
 }
 
+const WATER_SOURCE_OTHER = 'OTROS';
+
 const WATER_SOURCE_OPTIONS = [
-  { value: 'Red pública dentro de la vivienda', label: 'Red pública dentro de la vivienda' },
-  { value: 'Red pública fuera de la vivienda', label: 'Red pública fuera de la vivienda' },
-  { value: 'Pila o grifo público', label: 'Pila o grifo público' },
-  { value: 'Carro cisterna', label: 'Carro cisterna' },
-  { value: 'Pozo protegido', label: 'Pozo protegido' },
-  { value: 'Pozo no protegido / Río / Vertiente', label: 'Pozo no protegido / Río / Vertiente' },
-  { value: 'Cosecha de agua de lluvia', label: 'Cosecha de agua de lluvia' },
+  { value: 'VERTIENTE', label: 'VERTIENTE' },
+  { value: 'ARROYO/QUEBRADA', label: 'ARROYO/QUEBRADA' },
+  { value: 'COSECHA DE LLUVIA', label: 'COSECHA DE LLUVIA' },
+  { value: 'PILETA PUBLICA', label: 'PILETA PÚBLICA' },
+  { value: 'RIOS', label: 'RÍOS' },
+  { value: 'RED PUBLICA', label: 'RED PÚBLICA' },
+  { value: WATER_SOURCE_OTHER, label: 'OTROS' },
 ];
 
 const CONTAINER_STATUS_OPTIONS = [
-  { value: 'Bueno (Limpio y con tapa)', label: 'Bueno (Limpio y con tapa)' },
-  { value: 'Regular (Con tapa pero desgastado)', label: 'Regular (Con tapa pero desgastado)' },
-  { value: 'Malo (Sin tapa o contaminado)', label: 'Malo (Sin tapa o contaminado)' },
+  { value: 'ESTAN CUBIERTOS', label: 'ESTÁN CUBIERTOS' },
+  { value: 'ESTAN TAPADOS', label: 'ESTÁN TAPADOS' },
+  { value: 'ESTAN LIMPIOS', label: 'ESTÁN LIMPIOS' },
+  { value: 'MAS/MENOS LIMPIOS', label: 'MÁS/MENOS LIMPIOS' },
+  { value: 'SUCIOS', label: 'SUCIOS' },
 ];
 
 const WATER_TREATMENT_OPTIONS = [
-  { value: 'Hierve el agua', label: 'Hierve el agua' },
-  { value: 'Aplica cloro / lavandina', label: 'Aplica cloro / lavandina' },
-  { value: 'Filtra el agua', label: 'Filtra el agua' },
-  { value: 'No realiza ningún tratamiento', label: 'No realiza ningún tratamiento' },
+  { value: 'FILTRAN EL AGUA', label: 'FILTRAN EL AGUA' },
+  { value: 'HIERVEN EL AGUA', label: 'HIERVEN EL AGUA' },
+  { value: 'CLORAN', label: 'CLORAN' },
 ];
+
+/** Descarta valores guardados con el catálogo anterior para no reenviarlos. */
+const optionOrEmpty = (options: { value: string }[], value?: string | null) =>
+  value && options.some((o) => o.value === value) ? value : '';
 
 const GREYWATER_OPTIONS = [
   { value: 'Red de alcantarillado', label: 'Red de alcantarillado' },
@@ -287,10 +294,19 @@ export const SocialDiagnosisForm = ({
     initialRecord?.constructionKnowledgeObservations ?? '',
   );
 
-  const [waterSource, setWaterSource] = useState(initialRecord?.waterHabits?.waterSource ?? '');
-  const [containerClean, setContainerClean] = useState(initialRecord?.waterHabits?.containerClean ?? false);
-  const [containerStatus, setContainerStatus] = useState(initialRecord?.waterHabits?.containerStatus ?? '');
-  const [waterTreatment, setWaterTreatment] = useState(initialRecord?.waterHabits?.waterTreatment ?? '');
+  const [waterSource, setWaterSource] = useState(
+    optionOrEmpty(WATER_SOURCE_OPTIONS, initialRecord?.waterHabits?.waterSource),
+  );
+  const [waterSourceOther, setWaterSourceOther] = useState(initialRecord?.waterHabits?.waterSourceOther ?? '');
+  const [containerClean, setContainerClean] = useState<boolean | null>(
+    initialRecord?.waterHabits?.containerClean ?? null,
+  );
+  const [containerStatus, setContainerStatus] = useState(
+    optionOrEmpty(CONTAINER_STATUS_OPTIONS, initialRecord?.waterHabits?.containerStatus),
+  );
+  const [waterTreatment, setWaterTreatment] = useState(
+    optionOrEmpty(WATER_TREATMENT_OPTIONS, initialRecord?.waterHabits?.waterTreatment),
+  );
   const [waterDetails, setWaterDetails] = useState(initialRecord?.waterHabits?.otherDetails ?? '');
 
   const [greywaterDisposal, setGreywaterDisposal] = useState(initialRecord?.hygiene?.greywaterDisposal ?? '');
@@ -489,6 +505,7 @@ export const SocialDiagnosisForm = ({
         constructionKnowledgeObservations: constructionKnowledgeObservations.trim() || null,
         waterHabits: {
           waterSource: waterSource || null,
+          waterSourceOther: waterSource === WATER_SOURCE_OTHER ? waterSourceOther.trim() || null : null,
           containerClean,
           containerStatus: containerStatus || null,
           waterTreatment: waterTreatment || null,
@@ -912,53 +929,90 @@ export const SocialDiagnosisForm = ({
       {/* 2. Hábitos y Consumo de Agua */}
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
         <FormSection stepNumber={2} title="Uso y Consumo de Agua">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+            <div className="space-y-3 rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+              <p className="text-sm font-medium text-gray-800">
+                ¿Cuál es la fuente de procedencia principal de abastecimiento de agua?
+              </p>
               <Select
-                label="Fuente Principal de Agua"
+                label="Fuente de agua"
                 value={waterSource}
                 onChange={(e) => setWaterSource(e.target.value)}
                 options={WATER_SOURCE_OPTIONS}
+                placeholder="Seleccione una opción"
                 disabled={!canEdit || isSubmitting}
               />
+              {waterSource === WATER_SOURCE_OTHER && (
+                <Input
+                  label="Especifique la otra fuente"
+                  value={waterSourceOther}
+                  onChange={(e) => setWaterSourceOther(e.target.value)}
+                  disabled={!canEdit || isSubmitting}
+                  maxLength={150}
+                  placeholder="Ej. Pozo, carro cisterna..."
+                />
+              )}
             </div>
-            <div className="rounded-xl border border-sky-200 bg-sky-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+            <div className="space-y-3 rounded-xl border border-sky-200 bg-sky-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+              <p className="text-sm font-medium text-gray-800">
+                ¿El o los recipientes de agua están ubicados en lugar limpio?{' '}
+                <span className="text-xs font-semibold text-gray-500">(OBSERVAR)</span>
+              </p>
+              <div className="inline-flex items-center gap-1.5">
+                {[
+                  { value: true, label: 'SI' },
+                  { value: false, label: 'NO' },
+                ].map((opt) => {
+                  const isSelected = containerClean === opt.value;
+                  return (
+                    <button
+                      key={opt.label}
+                      type="button"
+                      disabled={!canEdit || isSubmitting}
+                      onClick={() => setContainerClean(opt.value)}
+                      className={`min-w-[44px] rounded-full border px-3 py-1 text-xs font-bold transition ${
+                        isSelected
+                          ? opt.value
+                            ? 'border-sky-700 bg-sky-600 text-white shadow-2xs ring-2 ring-sky-200'
+                            : 'border-slate-700 bg-slate-700 text-white shadow-2xs ring-2 ring-slate-200'
+                          : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
+                      } disabled:cursor-not-allowed disabled:opacity-60`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
               <Select
-                label="Estado de Recipientes de Almacenamiento"
+                label="Estado de los recipientes"
                 value={containerStatus}
                 onChange={(e) => setContainerStatus(e.target.value)}
                 options={CONTAINER_STATUS_OPTIONS}
+                placeholder="Seleccione una opción"
                 disabled={!canEdit || isSubmitting}
               />
             </div>
-            <div className="rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+            <div className="space-y-3 rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+              <p className="text-sm font-medium text-gray-800">
+                ¿Su familia antes de tomar agua realiza alguna forma de tratamiento o desinfección?
+              </p>
               <Select
-                label="¿Mantiene los Recipientes Limpios?"
-                value={containerClean ? 'true' : 'false'}
-                onChange={(e) => setContainerClean(e.target.value === 'true')}
-                options={[
-                  { value: 'true', label: 'Sí, limpios y desinfectados' },
-                  { value: 'false', label: 'No' },
-                ]}
-                disabled={!canEdit || isSubmitting}
-              />
-            </div>
-            <div className="rounded-xl border border-sky-200 bg-sky-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
-              <Select
-                label="Tratamiento del Agua de Consumo"
+                label="Tratamiento o desinfección"
                 value={waterTreatment}
                 onChange={(e) => setWaterTreatment(e.target.value)}
                 options={WATER_TREATMENT_OPTIONS}
+                placeholder="Seleccione una opción"
                 disabled={!canEdit || isSubmitting}
               />
             </div>
-            <div className="sm:col-span-2 rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+            <div className="lg:col-span-3 rounded-xl border border-sky-200 bg-sky-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
               <Input
-                label="Otros Detalles del Consumo de Agua"
+                label="Observaciones"
                 value={waterDetails}
                 onChange={(e) => setWaterDetails(e.target.value)}
                 disabled={!canEdit || isSubmitting}
-                placeholder="Observaciones sobre almacenamiento, frecuencia o calidad"
+                maxLength={255}
+                placeholder="Observaciones sobre el uso y consumo de agua..."
               />
             </div>
           </div>

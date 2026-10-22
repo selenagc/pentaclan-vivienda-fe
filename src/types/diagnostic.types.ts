@@ -30,6 +30,7 @@ export interface DiagnosticAnswer {
 
 export interface WaterConsumptionHabit {
   waterSource?: string | null;
+  waterSourceOther?: string | null;
   containerClean?: boolean | null;
   containerStatus?: string | null;
   waterTreatment?: string | null;
