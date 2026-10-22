@@ -75,7 +75,7 @@ export const projectService = {
 
   /** Genera y descarga la presentación PowerPoint (.pptx) del proyecto con todos sus solicitantes y fotografías. */
   async downloadPresentation(id: string, fallbackName = 'presentacion_proyecto.pptx'): Promise<void> {
-    const response = await api.get<Blob>(`/projects/${id}/presentation`, {
+    const response = await api.get<Blob>(`/api/projects/${id}/presentation`, {
       responseType: 'blob',
     });
 
