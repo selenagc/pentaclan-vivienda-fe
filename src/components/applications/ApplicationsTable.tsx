@@ -7,7 +7,6 @@ import { Table, type Column } from '../ui/Table';
 import { Pagination } from '../ui/Pagination';
 import { useApplications } from '../../hooks/useApplications';
 import { APPLICATION_STATUS_COLORS, APPLICATION_STATUS_LABELS } from '../../constants/applications';
-import { propertyLabel } from '../../types/property.types';
 import {
   applicantFullName,
   fullDocument,
@@ -62,14 +61,49 @@ export const ApplicationsTable = ({
 }: ApplicationsTableProps) => {
   const navigate = useNavigate();
   const { applications, meta, page, limit, isLoading, error, goToPage, changeLimit } =
-    useApplications({ projectId, status: statuses });
+    useApplications({
+      projectId,
+      status: statuses,
+      sortBy: 'applicantName',
+      sortOrder: 'asc',
+    });
 
   // La ficha se abre bajo la pestaña desde la que se entró, para que al volver
   // se caiga en la lista correcta y no siempre en solicitantes.
   const openDetail = (application: Application) =>
     navigate(`/proyectos/${projectId}/${section}/${application.id}`);
 
+  // Alterna el color de fondo cada vez que cambia la Urbanización / Zona
+  // (comparando sin importar mayúsculas/minúsculas ni espacios extra)
+  const normalizeZone = (app: Application): string =>
+    (app.property.zone || app.property.community || '').trim().toUpperCase();
+
+  const isAlternateZoneGroup = applications.reduce<boolean[]>((acc, app, index) => {
+    if (index === 0) {
+      acc.push(false);
+      return acc;
+    }
+    const prevZone = normalizeZone(applications[index - 1]);
+    const currZone = normalizeZone(app);
+    const prevFlag = acc[index - 1];
+    acc.push(currZone === prevZone ? prevFlag : !prevFlag);
+    return acc;
+  }, []);
+
   const columns: Column<Application>[] = [
+    {
+      key: 'rowNumber',
+      header: 'N°',
+      align: 'center',
+      className: 'w-12 font-semibold text-gray-600',
+      render: (_application, index) => (page - 1) * limit + index + 1,
+    },
+    {
+      key: 'property',
+      header: 'Urbanización / Zona',
+      render: (application) =>
+        application.property.zone || application.property.community || '—',
+    },
     {
       key: 'applicant',
       header: 'Solicitante',
@@ -83,11 +117,6 @@ export const ApplicationsTable = ({
       key: 'document',
       header: 'Documento',
       render: (application) => fullDocument(application.person),
-    },
-    {
-      key: 'property',
-      header: 'Vivienda',
-      render: (application) => propertyLabel(application.property),
     },
     ...(showStatus
       ? [
@@ -138,6 +167,11 @@ export const ApplicationsTable = ({
         isLoading={isLoading}
         emptyMessage={emptyMessage}
         onRowClick={openDetail}
+        rowClassName={(_row, index) =>
+          isAlternateZoneGroup[index]
+            ? '!bg-purple-100/80 hover:!bg-purple-200/65'
+            : '!bg-white hover:!bg-gray-50'
+        }
       />
 
       {meta && (

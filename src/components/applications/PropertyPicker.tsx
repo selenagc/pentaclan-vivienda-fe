@@ -71,7 +71,7 @@ export const PropertyPicker = ({
         name="propertySearch"
         value={search}
         onChange={(event) => setSearch(event.target.value)}
-        placeholder="Comunidad, zona o dirección"
+        placeholder="Comunidad, urbanización/zona o dirección"
         icon={SearchIcon}
         error={error}
         disabled={disabled}

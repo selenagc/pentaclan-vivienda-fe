@@ -51,21 +51,11 @@ const applicationRoutes = (section: ProjectSection) => (
       element={<ApplicationDetailPage section={section} />}
     >
       <Route index element={<ApplicationDataPage />} />
-      {section === 'beneficiarios' ? (
-        <Fragment key="diagnosticos">
-          <Route path={DIAGNOSIS_PATHS.social} element={<ApplicationDiagnosisPage kind="social" />} />
-          <Route
-            path={DIAGNOSIS_PATHS.technical}
-            element={<ApplicationDiagnosisPage kind="technical" />}
-          />
-        </Fragment>
-      ) : (
-        Object.values(DIAGNOSIS_PATHS).map((path) => (
-          // `relative="path"` para que `..` quite un segmento de la URL y no
-          // suba por el árbol de rutas, que llevaría al listado del proyecto.
-          <Route key={path} path={path} element={<Navigate to=".." relative="path" replace />} />
-        ))
-      )}
+      <Route path={DIAGNOSIS_PATHS.social} element={<ApplicationDiagnosisPage kind="social" />} />
+      <Route
+        path={DIAGNOSIS_PATHS.technical}
+        element={<ApplicationDiagnosisPage kind="technical" />}
+      />
     </Route>
     <Route
       path={`${section}/:applicationId/editar`}
