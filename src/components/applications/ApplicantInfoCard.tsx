@@ -171,7 +171,7 @@ export const ApplicantInfoCard = ({
                 </Button>
               )}
               {onDelete && (
-                <Button variant="danger" fullWidth={false} icon={onDelete ? undefined : undefined} onClick={onDelete}>
+                <Button variant="danger" fullWidth={false} onClick={onDelete}>
                   Dar de baja
                 </Button>
               )}
