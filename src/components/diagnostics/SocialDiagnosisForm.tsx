@@ -195,33 +195,40 @@ const optionOrEmpty = (options: { value: string }[], value?: string | null) =>
   value && options.some((o) => o.value === value) ? value : '';
 
 const GREYWATER_OPTIONS = [
-  { value: 'Red de alcantarillado', label: 'Red de alcantarillado' },
-  { value: 'Cámara séptica con pozo de absorción', label: 'Cámara séptica con pozo de absorción' },
-  { value: 'Pozo ciego o letrina', label: 'Pozo ciego o letrina' },
-  { value: 'A la calle / acequia / río', label: 'A la calle / acequia / río' },
-  { value: 'Al patio o huerto', label: 'Al patio o huerto' },
+  { value: 'PATIO DE CASA', label: 'PATIO DE CASA' },
+  { value: 'CAMPO ABIERTO', label: 'CAMPO ABIERTO' },
+  { value: 'RIO O ACEQUIA', label: 'RÍO O ACEQUIA' },
 ];
 
 const GARBAGE_OPTIONS = [
-  { value: 'Servicio público de recojo', label: 'Servicio público de recojo' },
-  { value: 'La quema', label: 'La quema' },
-  { value: 'La entierra', label: 'La entierra' },
-  { value: 'La bota al río / quebrada / baldío', label: 'La bota al río / quebrada / baldío' },
+  { value: 'PATIO DE LA CASA', label: 'PATIO DE LA CASA' },
+  { value: 'CAMPO ABIERTO', label: 'CAMPO ABIERTO' },
+  { value: 'EN EL RIO', label: 'EN EL RÍO' },
+  { value: 'CARRO BASURERO', label: 'CARRO BASURERO' },
+  { value: 'LA ENTIERRAN', label: 'LA ENTIERRAN' },
 ];
 
+/** Mismas opciones para los ambientes (dormitorios y cocina) y para el patio. */
 const CLEANLINESS_OPTIONS = [
-  { value: 'Excelente', label: 'Excelente' },
-  { value: 'Bueno', label: 'Bueno' },
-  { value: 'Regular', label: 'Regular' },
-  { value: 'Deficiente', label: 'Deficiente' },
+  { value: 'LIMPIO', label: 'LIMPIO' },
+  { value: 'SUCIO CON BASURA', label: 'SUCIO CON BASURA' },
+  { value: 'SUCIO CON HECES Y BASURA', label: 'SUCIO CON HECES Y BASURA' },
+];
+
+const PREVALENT_DISEASE_OPTIONS = [
+  { value: 'DOLOR DE BARRIGA', label: 'DOLOR DE BARRIGA' },
+  { value: 'DIARREA O VOMITOS', label: 'DIARREA O VÓMITOS' },
+  { value: 'PARASITOS INTESTINALES', label: 'PARÁSITOS INTESTINALES' },
+  { value: 'RASCA O SARNA', label: 'RASCA O SARNA' },
+  { value: 'ENFERMEDADES RESPIRATORIAS', label: 'ENFERMEDADES RESPIRATORIAS' },
+  { value: 'ENFERMEDADES OCULARES', label: 'ENFERMEDADES OCULARES' },
 ];
 
 const HEALTH_CARE_OPTIONS = [
-  { value: 'Centro de Salud / Hospital público', label: 'Centro de Salud / Hospital público' },
-  { value: 'Posta Sanitaria / Puesto de salud', label: 'Posta Sanitaria / Puesto de salud' },
-  { value: 'Clínica / Consulta privada', label: 'Clínica / Consulta privada' },
-  { value: 'Medicina tradicional / Naturista', label: 'Medicina tradicional / Naturista' },
-  { value: 'Se automedica / Compra en farmacia', label: 'Se automedica / Compra en farmacia' },
+  { value: 'NADA HASTA QUE SE LE PASE', label: 'NADA HASTA QUE SE LE PASE' },
+  { value: 'PREPARAN REMEDIO CASERO', label: 'PREPARAN REMEDIO CASERO' },
+  { value: 'ACUDEN A LA MEDICINA TRADICIONAL', label: 'ACUDEN A LA MEDICINA TRADICIONAL' },
+  { value: 'LO(S) LLEVAN AL MEDICO DEL CENTRO DE SALUD', label: 'LO(S) LLEVAN AL MÉDICO DEL CENTRO DE SALUD' },
 ];
 
 export const SocialDiagnosisForm = ({
@@ -309,12 +316,25 @@ export const SocialDiagnosisForm = ({
   );
   const [waterDetails, setWaterDetails] = useState(initialRecord?.waterHabits?.otherDetails ?? '');
 
-  const [greywaterDisposal, setGreywaterDisposal] = useState(initialRecord?.hygiene?.greywaterDisposal ?? '');
-  const [garbageDisposal, setGarbageDisposal] = useState(initialRecord?.hygiene?.garbageDisposal ?? '');
-  const [cleanlinessStatus, setCleanlinessStatus] = useState(initialRecord?.hygiene?.cleanlinessStatus ?? '');
+  const [greywaterDisposal, setGreywaterDisposal] = useState(
+    optionOrEmpty(GREYWATER_OPTIONS, initialRecord?.hygiene?.greywaterDisposal),
+  );
+  const [garbageDisposal, setGarbageDisposal] = useState(
+    optionOrEmpty(GARBAGE_OPTIONS, initialRecord?.hygiene?.garbageDisposal),
+  );
+  const [roomsCleanlinessStatus, setRoomsCleanlinessStatus] = useState(
+    optionOrEmpty(CLEANLINESS_OPTIONS, initialRecord?.hygiene?.roomsCleanlinessStatus),
+  );
+  const [yardCleanlinessStatus, setYardCleanlinessStatus] = useState(
+    optionOrEmpty(CLEANLINESS_OPTIONS, initialRecord?.hygiene?.yardCleanlinessStatus),
+  );
 
-  const [prevalentDiseases, setPrevalentDiseases] = useState(initialRecord?.health?.prevalentDiseases ?? '');
-  const [healthCareAction, setHealthCareAction] = useState(initialRecord?.health?.healthCareAction ?? '');
+  const [prevalentDiseases, setPrevalentDiseases] = useState(
+    optionOrEmpty(PREVALENT_DISEASE_OPTIONS, initialRecord?.health?.prevalentDiseases),
+  );
+  const [healthCareAction, setHealthCareAction] = useState(
+    optionOrEmpty(HEALTH_CARE_OPTIONS, initialRecord?.health?.healthCareAction),
+  );
 
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -514,10 +534,11 @@ export const SocialDiagnosisForm = ({
         hygiene: {
           greywaterDisposal: greywaterDisposal || null,
           garbageDisposal: garbageDisposal || null,
-          cleanlinessStatus: cleanlinessStatus || null,
+          roomsCleanlinessStatus: roomsCleanlinessStatus || null,
+          yardCleanlinessStatus: yardCleanlinessStatus || null,
         },
         health: {
-          prevalentDiseases: prevalentDiseases.trim() || null,
+          prevalentDiseases: prevalentDiseases || null,
           healthCareAction: healthCareAction || null,
         },
       };
@@ -1022,50 +1043,91 @@ export const SocialDiagnosisForm = ({
       {/* 3. Higiene y Salud */}
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
         <FormSection stepNumber={3} title="Higiene y Salud Familiar">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+          <h4 className="mb-3 text-xs font-bold uppercase tracking-wide text-gray-600">Higiene de la vivienda</h4>
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <div className="space-y-3 rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+              <p className="text-sm font-medium text-gray-800">
+                ¿Dónde echan las aguas grises?{' '}
+                <span className="text-xs font-semibold text-gray-500">(Agua del lavado de ropa y utensilios)</span>
+              </p>
               <Select
-                label="Eliminación de Aguas Servidas"
+                label="Aguas grises"
                 value={greywaterDisposal}
                 onChange={(e) => setGreywaterDisposal(e.target.value)}
                 options={GREYWATER_OPTIONS}
+                placeholder="Seleccione una opción"
                 disabled={!canEdit || isSubmitting}
               />
             </div>
-            <div className="rounded-xl border border-sky-200 bg-sky-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+            <div className="space-y-3 rounded-xl border border-sky-200 bg-sky-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+              <p className="text-sm font-medium text-gray-800">
+                ¿Cómo se elimina la basura de su vivienda habitualmente?
+              </p>
               <Select
-                label="Eliminación de Basura"
+                label="Eliminación de basura"
                 value={garbageDisposal}
                 onChange={(e) => setGarbageDisposal(e.target.value)}
                 options={GARBAGE_OPTIONS}
+                placeholder="Seleccione una opción"
                 disabled={!canEdit || isSubmitting}
               />
             </div>
-            <div className="rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+            <div className="space-y-3 rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+              <p className="text-sm font-medium text-gray-800">
+                ¿En qué estado se encuentran los ambientes de la vivienda (dormitorios y cocina)?{' '}
+                <span className="text-xs font-semibold text-gray-500">(OBSERVE Y REGISTRE)</span>
+              </p>
               <Select
-                label="Estado de Higiene y Limpieza General"
-                value={cleanlinessStatus}
-                onChange={(e) => setCleanlinessStatus(e.target.value)}
+                label="Estado de los ambientes"
+                value={roomsCleanlinessStatus}
+                onChange={(e) => setRoomsCleanlinessStatus(e.target.value)}
                 options={CLEANLINESS_OPTIONS}
+                placeholder="Seleccione una opción"
                 disabled={!canEdit || isSubmitting}
               />
             </div>
-            <div className="rounded-xl border border-sky-200 bg-sky-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+            <div className="space-y-3 rounded-xl border border-sky-200 bg-sky-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+              <p className="text-sm font-medium text-gray-800">
+                ¿En qué estado se encuentra el patio de la casa?{' '}
+                <span className="text-xs font-semibold text-gray-500">(OBSERVE Y REGISTRE)</span>
+              </p>
               <Select
-                label="Acción ante Problemas de Salud"
+                label="Estado del patio"
+                value={yardCleanlinessStatus}
+                onChange={(e) => setYardCleanlinessStatus(e.target.value)}
+                options={CLEANLINESS_OPTIONS}
+                placeholder="Seleccione una opción"
+                disabled={!canEdit || isSubmitting}
+              />
+            </div>
+          </div>
+
+          <h4 className="mt-6 mb-3 text-xs font-bold uppercase tracking-wide text-gray-600">Aspecto salud</h4>
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <div className="space-y-3 rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+              <p className="text-sm font-medium text-gray-800">
+                ¿Cuál de estas enfermedades se manifiestan más en sus hijos?
+              </p>
+              <Select
+                label="Enfermedad más frecuente"
+                value={prevalentDiseases}
+                onChange={(e) => setPrevalentDiseases(e.target.value)}
+                options={PREVALENT_DISEASE_OPTIONS}
+                placeholder="Seleccione una opción"
+                disabled={!canEdit || isSubmitting}
+              />
+            </div>
+            <div className="space-y-3 rounded-xl border border-sky-200 bg-sky-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
+              <p className="text-sm font-medium text-gray-800">
+                ¿Cuándo alguno de los niños(as) se enferman, qué hacen?
+              </p>
+              <Select
+                label="Acción ante la enfermedad"
                 value={healthCareAction}
                 onChange={(e) => setHealthCareAction(e.target.value)}
                 options={HEALTH_CARE_OPTIONS}
+                placeholder="Seleccione una opción"
                 disabled={!canEdit || isSubmitting}
-              />
-            </div>
-            <div className="sm:col-span-2 rounded-xl border border-purple-200 bg-purple-100/70 p-3 shadow-2xs [&_.MuiOutlinedInput-root]:bg-white/90">
-              <Input
-                label="Enfermedades Frecuentes en el Hogar"
-                value={prevalentDiseases}
-                onChange={(e) => setPrevalentDiseases(e.target.value)}
-                disabled={!canEdit || isSubmitting}
-                placeholder="Ej. Infecciones respiratorias agudas, diarreas en niños, parasitosis"
               />
             </div>
           </div>

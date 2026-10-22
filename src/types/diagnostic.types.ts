@@ -40,7 +40,8 @@ export interface WaterConsumptionHabit {
 export interface HousingHygiene {
   greywaterDisposal?: string | null;
   garbageDisposal?: string | null;
-  cleanlinessStatus?: string | null;
+  roomsCleanlinessStatus?: string | null;
+  yardCleanlinessStatus?: string | null;
 }
 
 export interface HealthCondition {
