@@ -51,6 +51,8 @@ const SEX_OPTIONS = [
   { value: 'F', label: 'F - Femenino' },
 ];
 
+const KNOWLEDGE_LEVEL_OPTIONS = ['MUY BIEN', 'BIEN', 'REGULAR'] as const;
+
 function calculateAgeFromBirthDate(birthDate?: string | null): number | null {
   if (!birthDate) return null;
   const parts = birthDate.split('-').map(Number);
@@ -266,9 +268,14 @@ export const SocialDiagnosisForm = ({
       const initialMap: Record<number, { answerBoolean: boolean | null; score: string }> = {};
       if (initialRecord?.answers) {
         for (const ans of initialRecord.answers) {
+          const validScore =
+            ans.answerBoolean === true &&
+            KNOWLEDGE_LEVEL_OPTIONS.includes(ans.score as (typeof KNOWLEDGE_LEVEL_OPTIONS)[number])
+              ? (ans.score ?? '')
+              : '';
           initialMap[ans.evaluationQuestionId] = {
             answerBoolean: ans.answerBoolean ?? null,
-            score: ans.score ?? '',
+            score: validScore,
           };
         }
       }
@@ -391,20 +398,23 @@ export const SocialDiagnosisForm = ({
   };
 
   const handleAnswerChange = (questionId: number, answerBoolean: boolean | null) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [questionId]: {
-        ...(prev[questionId] ?? { score: '' }),
-        answerBoolean,
-      },
-    }));
+    setAnswers((prev) => {
+      const currentScore = prev[questionId]?.score ?? '';
+      return {
+        ...prev,
+        [questionId]: {
+          answerBoolean,
+          score: answerBoolean === true ? currentScore : '',
+        },
+      };
+    });
   };
 
   const handleScoreChange = (questionId: number, score: string) => {
     setAnswers((prev) => ({
       ...prev,
       [questionId]: {
-        ...(prev[questionId] ?? { answerBoolean: null }),
+        answerBoolean: true,
         score,
       },
     }));
@@ -413,13 +423,29 @@ export const SocialDiagnosisForm = ({
   const handleSubmit = async (isCompleted: boolean) => {
     setErrorMessage(null);
     setSuccessMessage(null);
+
+    const missingGradeQuestion = questions.find((q) => {
+      const ans = answers[q.id];
+      return (
+        ans?.answerBoolean === true &&
+        !KNOWLEDGE_LEVEL_OPTIONS.includes(ans.score as (typeof KNOWLEDGE_LEVEL_OPTIONS)[number])
+      );
+    });
+
+    if (missingGradeQuestion) {
+      setErrorMessage(
+        `Debe seleccionar el grado de conocimiento (MUY BIEN, BIEN o REGULAR) para: "${missingGradeQuestion.questionText}".`,
+      );
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const answersPayload = Object.entries(answers).map(([qId, val]) => ({
         evaluationQuestionId: Number(qId),
         answerBoolean: val.answerBoolean,
-        score: val.score || null,
+        score: val.answerBoolean === true ? val.score || null : null,
       }));
 
       let membersToSave = [...familyMembers];
@@ -489,14 +515,6 @@ export const SocialDiagnosisForm = ({
       setIsSubmitting(false);
     }
   };
-
-  // Group questions by category
-  const groupedQuestions = questions.reduce<Record<string, EvaluationQuestion[]>>((acc, q) => {
-    const cat = q.category || 'General';
-    if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(q);
-    return acc;
-  }, {});
 
   return (
     <div className="space-y-6">
@@ -886,75 +904,115 @@ export const SocialDiagnosisForm = ({
         </FormSection>
       </div>
 
-      {/* 2. Preguntas de Diagnóstico y Evaluación */}
+      {/* 2. Nivel de Conocimiento acerca de Construcción de Viviendas */}
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
-        <FormSection stepNumber={2} title="Cuestionario Socioeconómico">
+        <FormSection
+          stepNumber={2}
+          title={`Nivel de Conocimiento del ${headRoleLabel} acerca de Construcción de Viviendas`}
+        >
           <p className="mb-4 text-sm text-gray-500">
-            Responda las preguntas de verificación y evaluación del hogar.
+            ¿Conoce de construcción? Seleccione <strong>SÍ</strong> o <strong>NO</strong>. En caso que la respuesta sea{' '}
+            <strong>SÍ</strong>, indique el grado de conocimiento (<strong>MUY BIEN</strong>, <strong>BIEN</strong> o{' '}
+            <strong>REGULAR</strong>).
           </p>
 
           {isLoadingQuestions ? (
             <p className="py-4 text-sm text-gray-400">Cargando cuestionario...</p>
           ) : (
-            <div className="space-y-6">
-              {Object.entries(groupedQuestions).map(([category, catQuestions]) => (
-                <div key={category} className="space-y-3">
-                  <h4 className="border-b border-gray-200 pb-1 text-xs font-bold uppercase tracking-wider text-brand-primary">
-                    {category}
-                  </h4>
-                  <div className="divide-y divide-gray-100 rounded-lg border border-gray-100 bg-gray-50/30">
-                    {catQuestions.map((q) => {
-                      const ans = answers[q.id];
-                      return (
-                        <div
-                          key={q.id}
-                          className="flex flex-col gap-3 p-3.5 sm:flex-row sm:items-center sm:justify-between"
-                        >
-                          <span className="text-sm font-medium text-gray-800">
-                            {q.questionText}
-                          </span>
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2">
-                              <label className="flex cursor-pointer items-center gap-1.5 text-xs text-gray-700">
-                                <input
-                                  type="radio"
-                                  name={`q_${q.id}`}
-                                  checked={ans?.answerBoolean === true}
-                                  onChange={() => handleAnswerChange(q.id, true)}
-                                  disabled={!canEdit || isSubmitting}
-                                  className="text-brand-primary focus:ring-brand-primary"
-                                />
-                                Sí
-                              </label>
-                              <label className="flex cursor-pointer items-center gap-1.5 text-xs text-gray-700">
-                                <input
-                                  type="radio"
-                                  name={`q_${q.id}`}
-                                  checked={ans?.answerBoolean === false}
-                                  onChange={() => handleAnswerChange(q.id, false)}
-                                  disabled={!canEdit || isSubmitting}
-                                  className="text-brand-primary focus:ring-brand-primary"
-                                />
-                                No
-                              </label>
-                            </div>
-                            <div className="w-24">
-                              <input
-                                type="text"
-                                placeholder="Puntaje"
-                                value={ans?.score ?? ''}
-                                onChange={(e) => handleScoreChange(q.id, e.target.value)}
-                                disabled={!canEdit || isSubmitting}
-                                className="w-full rounded border border-gray-200 bg-white px-2 py-1 text-xs text-gray-900 focus:border-brand-primary focus:outline-none"
-                              />
-                            </div>
+            <div className="overflow-x-auto rounded-xl border border-gray-300 shadow-2xs">
+              <table className="min-w-full border-collapse text-left text-xs">
+                <thead>
+                  <tr className="bg-slate-800 text-[11px] font-bold tracking-wider text-white uppercase">
+                    <th className="border border-slate-700 px-3.5 py-2.5">
+                      Ítem de Construcción
+                    </th>
+                    <th className="w-36 border border-slate-700 px-3 py-2.5 text-center">
+                      ¿Conoce? (SÍ / NO)
+                    </th>
+                    <th className="border border-slate-700 px-3 py-2.5 text-center">
+                      Grado de Conocimiento (Si responde SÍ)
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {questions.map((q) => {
+                    const ans = answers[q.id];
+                    const isYes = ans?.answerBoolean === true;
+                    const isNo = ans?.answerBoolean === false;
+
+                    return (
+                      <tr
+                        key={q.id}
+                        className={
+                          isYes
+                            ? 'bg-sky-50/70'
+                            : 'bg-white hover:bg-gray-50/70'
+                        }
+                      >
+                        <td className="border border-gray-300 px-3.5 py-2 font-semibold text-gray-900">
+                          {q.questionText}
+                        </td>
+
+                        {/* Columna SI / NO */}
+                        <td className="border border-gray-300 px-3 py-2 text-center">
+                          <div className="inline-flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              disabled={!canEdit || isSubmitting}
+                              onClick={() => handleAnswerChange(q.id, true)}
+                              className={`min-w-[44px] rounded-full border px-3 py-1 text-xs font-bold transition ${
+                                isYes
+                                  ? 'border-sky-700 bg-sky-600 text-white shadow-2xs ring-2 ring-sky-200'
+                                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
+                              } disabled:cursor-not-allowed disabled:opacity-60`}
+                            >
+                              SI
+                            </button>
+                            <button
+                              type="button"
+                              disabled={!canEdit || isSubmitting}
+                              onClick={() => handleAnswerChange(q.id, false)}
+                              className={`min-w-[44px] rounded-full border px-3 py-1 text-xs font-bold transition ${
+                                isNo
+                                  ? 'border-slate-700 bg-slate-700 text-white shadow-2xs ring-2 ring-slate-200'
+                                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
+                              } disabled:cursor-not-allowed disabled:opacity-60`}
+                            >
+                              NO
+                            </button>
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+                        </td>
+
+                        {/* Columna MUY BIEN | BIEN | REGULAR */}
+                        <td className="border border-gray-300 px-3 py-2">
+                          <div className="grid grid-cols-3 gap-2">
+                            {KNOWLEDGE_LEVEL_OPTIONS.map((level) => {
+                              const isSelected = isYes && ans?.score === level;
+                              return (
+                                <button
+                                  key={level}
+                                  type="button"
+                                  disabled={!canEdit || isSubmitting || !isYes}
+                                  onClick={() => handleScoreChange(q.id, level)}
+                                  className={`rounded-full border px-2.5 py-1 text-center text-[11px] font-bold transition ${
+                                    isSelected
+                                      ? 'border-purple-700 bg-purple-600 text-white shadow-2xs ring-2 ring-purple-200'
+                                      : isYes
+                                        ? 'border-purple-200 bg-white text-gray-800 hover:bg-purple-50'
+                                        : 'border-gray-200 bg-gray-100 text-gray-400'
+                                  } disabled:cursor-not-allowed`}
+                                >
+                                  {level}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </FormSection>
