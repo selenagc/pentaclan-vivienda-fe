@@ -4,6 +4,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { FormSection } from '../ui/FormSection';
+import { DiagnosticPhotosManager } from './DiagnosticPhotosManager';
 import { diagnosticService } from '../../services/diagnosticService';
 import type {
   DiagnosticRecord,
@@ -1255,6 +1256,23 @@ export const SocialDiagnosisForm = ({
               placeholder="Observaciones generales sobre el conocimiento en construcción del solicitante..."
             />
           </div>
+        </FormSection>
+      </div>
+
+      {/* 5. Fotografías */}
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
+        <FormSection stepNumber={5} title="Fotografías">
+          <p className="mb-4 text-sm text-gray-500">
+            Registre la <strong>FOTOGRAFÍA DEL CONJUNTO</strong> y la{' '}
+            <strong>FOTOGRAFÍA DEL {headRoleLabel.toUpperCase()}</strong>.
+          </p>
+
+          <DiagnosticPhotosManager
+            applicationId={applicationId}
+            category="social"
+            initialPhotos={initialRecord?.photos ?? []}
+            canEdit={canEdit}
+          />
         </FormSection>
       </div>
 
