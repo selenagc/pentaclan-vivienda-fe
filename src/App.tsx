@@ -15,7 +15,6 @@ import ApplicationDataPage from './pages/ApplicationDataPage';
 import ApplicationDiagnosisPage from './pages/ApplicationDiagnosisPage';
 import ApplicationFormPage from './pages/ApplicationFormPage';
 import GeographyDemoPage from './pages/GeographyDemoPage';
-import CameraDemoPage from './pages/CameraDemoPage';
 import ModulePlaceholder from './pages/ModulePlaceholder';
 import { ProtectedRoute } from './components/routing/ProtectedRoute';
 import { AppLayout } from './layouts/AppLayout';
@@ -74,14 +73,12 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/dev/camara" element={<div className="p-4 md:p-8 bg-gray-100 min-h-screen"><CameraDemoPage /></div>} />
 
       {/* Rutas protegidas: requieren sesión y se renderizan dentro de la plantilla. */}
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/inicio" element={<HomePage />} />
           <Route path="/mis-proyectos" element={<MyProjectsPage />} />
-          <Route path="/camara-demo" element={<CameraDemoPage />} />
 
           {/* Rutas exclusivas para Administradores */}
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
