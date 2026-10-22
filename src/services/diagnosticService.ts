@@ -12,7 +12,7 @@ import type {
 export const diagnosticService = {
   async getByApplicationId(applicationId: string): Promise<DiagnosticRecord | null> {
     const { data } = await api.get<DataEnvelope<DiagnosticRecord | null>>(
-      `/applications/${applicationId}/diagnostic`,
+      `/api/applications/${applicationId}/diagnostic`,
     );
     return data.data;
   },
@@ -22,7 +22,7 @@ export const diagnosticService = {
     input: TechnicalDiagnosticInput,
   ): Promise<DiagnosticRecord> {
     const { data } = await api.put<DataEnvelope<DiagnosticRecord>>(
-      `/applications/${applicationId}/diagnostic/technical`,
+      `/api/applications/${applicationId}/diagnostic/technical`,
       input,
     );
     return data.data;
@@ -33,14 +33,14 @@ export const diagnosticService = {
     input: SocialDiagnosticInput,
   ): Promise<DiagnosticRecord> {
     const { data } = await api.put<DataEnvelope<DiagnosticRecord>>(
-      `/applications/${applicationId}/diagnostic/social`,
+      `/api/applications/${applicationId}/diagnostic/social`,
       input,
     );
     return data.data;
   },
 
   async getEvaluationQuestions(): Promise<EvaluationQuestion[]> {
-    const { data } = await api.get<DataEnvelope<EvaluationQuestion[]>>('/evaluation-questions');
+    const { data } = await api.get<DataEnvelope<EvaluationQuestion[]>>('/api/evaluation-questions');
     return data.data;
   },
 
@@ -71,7 +71,7 @@ export const diagnosticService = {
     }
 
     const { data } = await api.post<DataEnvelope<DiagnosticPhoto>>(
-      `/applications/${applicationId}/diagnostic/photos`,
+      `/api/applications/${applicationId}/diagnostic/photos`,
       formData,
       {
         headers: {
@@ -87,7 +87,7 @@ export const diagnosticService = {
    */
   async listPhotos(applicationId: string, category?: 'technical' | 'social'): Promise<DiagnosticPhoto[]> {
     const { data } = await api.get<DataEnvelope<DiagnosticPhoto[]>>(
-      `/applications/${applicationId}/diagnostic/photos`,
+      `/api/applications/${applicationId}/diagnostic/photos`,
       { params: category ? { category } : undefined },
     );
     return data.data;
@@ -97,6 +97,6 @@ export const diagnosticService = {
    * Elimina una fotografía del registro en PostgreSQL y del bucket S3.
    */
   async deletePhoto(applicationId: string, photoId: number): Promise<void> {
-    await api.delete(`/applications/${applicationId}/diagnostic/photos/${photoId}`);
+    await api.delete(`/api/applications/${applicationId}/diagnostic/photos/${photoId}`);
   },
 };

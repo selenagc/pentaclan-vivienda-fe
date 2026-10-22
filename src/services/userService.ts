@@ -14,27 +14,27 @@ import type {
 export const userService = {
   /** Listado paginado. Devuelve { data, meta } tal cual el backend. */
   async list(params: ListUsersParams = {}): Promise<PaginatedResponse<User>> {
-    const { data } = await api.get<PaginatedResponse<User>>('/users', { params });
+    const { data } = await api.get<PaginatedResponse<User>>('/api/users', { params });
     return data;
   },
 
   async getById(id: string): Promise<User> {
-    const { data } = await api.get<ApiResponse<User>>(`/users/${id}`);
+    const { data } = await api.get<ApiResponse<User>>(`/api/users/${id}`);
     return data.data;
   },
 
   async create(input: CreateUserInput): Promise<User> {
-    const { data } = await api.post<ApiResponse<User>>('/users', input);
+    const { data } = await api.post<ApiResponse<User>>('/api/users', input);
     return data.data;
   },
 
   async update(id: string, input: UpdateUserInput): Promise<User> {
-    const { data } = await api.put<ApiResponse<User>>(`/users/${id}`, input);
+    const { data } = await api.put<ApiResponse<User>>(`/api/users/${id}`, input);
     return data.data;
   },
 
   /** DELETE /users/:id responde 204 sin cuerpo. */
   async remove(id: string): Promise<void> {
-    await api.delete(`/users/${id}`);
+    await api.delete(`/api/users/${id}`);
   },
 };
