@@ -1,0 +1,17 @@
+node_modules
+dist
+.git
+.gitignore
+.claude
+.vscode
+.idea
+*.log
+
+# Variables de entorno: nunca dentro de la imagen
+.env
+.env.*
+!.env.example
+
+Dockerfile
+.dockerignore
+README.md
