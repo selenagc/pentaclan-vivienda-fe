@@ -24,24 +24,24 @@ import type {
 export const projectService = {
   /** Listado paginado. Devuelve { data, meta } tal cual el backend. */
   async list(params: ListProjectsParams = {}): Promise<PagedEnvelope<Project>> {
-    const { data } = await api.get<PagedEnvelope<Project>>('/projects', { params });
+    const { data } = await api.get<PagedEnvelope<Project>>('/api/projects', { params });
     return data;
   },
 
   async getById(id: string): Promise<Project> {
-    const { data } = await api.get<DataEnvelope<Project>>(`/projects/${id}`);
+    const { data } = await api.get<DataEnvelope<Project>>(`/api/projects/${id}`);
     return data.data;
   },
 
   /** Solo admin. 409 si el `contractNo` ya existe. */
   async create(input: CreateProjectInput): Promise<Project> {
-    const { data } = await api.post<DataEnvelope<Project>>('/projects', input);
+    const { data } = await api.post<DataEnvelope<Project>>('/api/projects', input);
     return data.data;
   },
 
   /** Solo admin. Exige al menos un campo; los de auditoría dan 400. */
   async update(id: string, input: UpdateProjectInput): Promise<Project> {
-    const { data } = await api.put<DataEnvelope<Project>>(`/projects/${id}`, input);
+    const { data } = await api.put<DataEnvelope<Project>>(`/api/projects/${id}`, input);
     return data.data;
   },
 

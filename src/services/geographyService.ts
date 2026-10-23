@@ -25,7 +25,7 @@ export const geographyService = {
   /** Los 9 departamentos. Una sola petición por sesión. */
   listDepartments(): Promise<Department[]> {
     return geographyCache.departments.get(DEPARTMENTS_KEY, async () => {
-      const { data } = await api.get<GeoResponse<Department>>('/departments');
+      const { data } = await api.get<GeoResponse<Department>>('/api/departments');
       return data.data;
     });
   },
@@ -37,7 +37,7 @@ export const geographyService = {
   listProvinces(departmentId: number): Promise<Province[]> {
     return geographyCache.provinces.get(departmentId, async () => {
       const { data } = await api.get<GeoResponse<Province>>(
-        `/departments/${departmentId}/provinces`,
+        `/api/departments/${departmentId}/provinces`,
       );
       return data.data;
     });
@@ -51,7 +51,7 @@ export const geographyService = {
   listMunicipalities(provinceId: number): Promise<Municipality[]> {
     return geographyCache.municipalities.get(provinceId, async () => {
       const { data } = await api.get<GeoResponse<Municipality>>(
-        `/provinces/${provinceId}/municipalities`,
+        `/api/provinces/${provinceId}/municipalities`,
       );
       return data.data;
     });

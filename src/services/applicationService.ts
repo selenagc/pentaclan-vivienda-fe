@@ -40,14 +40,14 @@ const serializeParams = (params: ListApplicationsParams) => ({
 export const applicationService = {
   /** Listado paginado. Devuelve { data, meta } tal cual el backend. */
   async list(params: ListApplicationsParams = {}): Promise<PagedEnvelope<Application>> {
-    const { data } = await api.get<PagedEnvelope<Application>>('/applications', {
+    const { data } = await api.get<PagedEnvelope<Application>>('/api/applications', {
       params: serializeParams(params),
     });
     return data;
   },
 
   async getById(id: string): Promise<Application> {
-    const { data } = await api.get<DataEnvelope<Application>>(`/applications/${id}`);
+    const { data } = await api.get<DataEnvelope<Application>>(`/api/applications/${id}`);
     return data.data;
   },
 
@@ -56,13 +56,13 @@ export const applicationService = {
    * el municipio donde se ejecuta la obra.
    */
   async create(input: RegisterApplicationInput): Promise<Application> {
-    const { data } = await api.post<DataEnvelope<Application>>('/applications', input);
+    const { data } = await api.post<DataEnvelope<Application>>('/api/applications', input);
     return data.data;
   },
 
   /** Exige al menos un campo; `status` y los de auditoría dan 400. */
   async update(id: string, input: UpdateApplicationInput): Promise<Application> {
-    const { data } = await api.put<DataEnvelope<Application>>(`/applications/${id}`, input);
+    const { data } = await api.put<DataEnvelope<Application>>(`/api/applications/${id}`, input);
     return data.data;
   },
 
@@ -75,7 +75,7 @@ export const applicationService = {
    * referenciadas por otras fichas.
    */
   async remove(id: string): Promise<void> {
-    await api.delete(`/applications/${id}`);
+    await api.delete(`/api/applications/${id}`);
   },
 
   /**
@@ -83,7 +83,7 @@ export const applicationService = {
    * Solo si sigue en `pending`.
    */
   async preselect(id: string): Promise<Application> {
-    const { data } = await api.post<DataEnvelope<Application>>(`/applications/${id}/preselect`);
+    const { data } = await api.post<DataEnvelope<Application>>(`/api/applications/${id}/preselect`);
     return data.data;
   },
 
@@ -100,7 +100,7 @@ export const applicationService = {
    * este proyecto, que es la regla anti doble beneficio del programa).
    */
   async approve(id: string): Promise<Application> {
-    const { data } = await api.post<DataEnvelope<Application>>(`/applications/${id}/approve`);
+    const { data } = await api.post<DataEnvelope<Application>>(`/api/applications/${id}/approve`);
     return data.data;
   },
 
@@ -112,7 +112,7 @@ export const applicationService = {
    */
   async reject(id: string, input: RejectApplicationInput): Promise<Application> {
     const { data } = await api.post<DataEnvelope<Application>>(
-      `/applications/${id}/reject`,
+      `/api/applications/${id}/reject`,
       input,
     );
     return data.data;

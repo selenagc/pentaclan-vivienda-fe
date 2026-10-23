@@ -8,7 +8,7 @@ import type { LoginCredentials, LoginResponse, User } from '../types/auth.types'
  */
 export const authService = {
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    const { data } = await api.post<ApiResponse<LoginResponse>>('/auth/login', {
+    const { data } = await api.post<ApiResponse<LoginResponse>>('/api/auth/login', {
       email: credentials.email,
       password: credentials.password,
     });
@@ -16,7 +16,7 @@ export const authService = {
   },
 
   async me(): Promise<User> {
-    const { data } = await api.get<ApiResponse<User>>('/auth/me');
+    const { data } = await api.get<ApiResponse<User>>('/api/auth/me');
     return data.data;
   },
 };

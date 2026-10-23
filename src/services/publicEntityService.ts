@@ -27,7 +27,7 @@ export const publicEntityService = {
   /** El catálogo completo. Una sola petición por sesión. */
   list(): Promise<PublicEntity[]> {
     return cache.catalogo.get(CATALOGO_KEY, async () => {
-      const { data } = await api.get<DataEnvelope<PublicEntity[]>>('/public-entities');
+      const { data } = await api.get<DataEnvelope<PublicEntity[]>>('/api/public-entities');
       return data.data;
     });
   },
@@ -35,7 +35,7 @@ export const publicEntityService = {
   /** Una entidad concreta. 404 si el id no existe. */
   getById(id: number): Promise<PublicEntity> {
     return cache.porId.get(id, async () => {
-      const { data } = await api.get<DataEnvelope<PublicEntity>>(`/public-entities/${id}`);
+      const { data } = await api.get<DataEnvelope<PublicEntity>>(`/api/public-entities/${id}`);
       return data.data;
     });
   },
