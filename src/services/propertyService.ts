@@ -13,7 +13,7 @@ import type { ListPropertiesParams, Property } from '../types/property.types';
 export const propertyService = {
   /** Listado paginado. Devuelve { data, meta } tal cual el backend. */
   async list(params: ListPropertiesParams = {}): Promise<PagedEnvelope<Property>> {
-    const { data } = await api.get<PagedEnvelope<Property>>('/properties', { params });
+    const { data } = await api.get<PagedEnvelope<Property>>('/api/properties', { params });
     return data;
   },
 };

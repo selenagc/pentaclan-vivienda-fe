@@ -14,7 +14,6 @@ import ApplicationDetailPage from './pages/ApplicationDetailPage';
 import ApplicationDataPage from './pages/ApplicationDataPage';
 import ApplicationDiagnosisPage from './pages/ApplicationDiagnosisPage';
 import ApplicationFormPage from './pages/ApplicationFormPage';
-import GeographyDemoPage from './pages/GeographyDemoPage';
 import ModulePlaceholder from './pages/ModulePlaceholder';
 import { ProtectedRoute } from './components/routing/ProtectedRoute';
 import { AppLayout } from './layouts/AppLayout';
@@ -83,7 +82,6 @@ function App() {
           {/* Rutas exclusivas para Administradores */}
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
             <Route path="/usuarios" element={<UsersPage />} />
-            <Route path="/geografia" element={<GeographyDemoPage />} />
             <Route path="/proyectos/nuevo" element={<CreateProjectPage />} />
             <Route path="/configuracion" element={<ModulePlaceholder title="Configuración" />} />
           </Route>
@@ -91,7 +89,6 @@ function App() {
           {/* Rutas para Administradores y Supervisores (catálogos y reportes globales) */}
           <Route element={<ProtectedRoute allowedRoles={['admin', 'project_supervisor']} />}>
             <Route path="/proyectos" element={<ProjectsPage />} />
-            <Route path="/beneficiarios" element={<ModulePlaceholder title="Beneficiarios" />} />
             <Route path="/reportes" element={<ModulePlaceholder title="Reportes" />} />
           </Route>
 
